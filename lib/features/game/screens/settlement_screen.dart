@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
@@ -225,8 +224,14 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     Share.share(summary, subject: 'Poker Game Settlement');
   }
 
-  void _finishGame() {
-    context.go(AppConstants.homeRoute);
+  Future<void> _finishGame() async {
+    // Reload games to ensure ended game is no longer active
+    await ref.read(gameProvider.notifier).loadGames();
+    
+    if (!mounted) return;
+    
+    // Go back to active game screen (will auto-create new game)
+    context.go('/game');
   }
 
   @override
@@ -575,7 +580,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: const Text(
-                        'Finish & Return Home',
+                        'Start New Game',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),

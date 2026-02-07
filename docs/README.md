@@ -15,19 +15,20 @@ Flutter app for tracking poker home games with buy-ins, settlements, and statist
 flutter pub get
 flutter run
 
-# Test the COMPLETE MVP flow
+# Test the STREAMLINED flow (NEW!)
 1. Splash → Auth screen
 2. Click "Continue as Guest"
-3. Click "New Game" button
-4. Add 3-4 players (search or create new)
-5. Select currency & start game
-6. Add buy-ins with quick buttons
-7. Add rebuys for some players
-8. Watch live timer & total pot
-9. Click "End Game"
-10. Enter cash-out amounts for each player
-11. View optimized settlements (who owes whom)
-12. Share results via text/messaging!
+3. **Lands directly on Active Game!**
+4. Click "Add Player" → Add 3-4 players
+5. **Click "+" next to any player** → Enter amount → Done! ⚡
+6. Add rebuys (click "+" again or use bottom "Add Buy-In" button)
+7. Watch live timer & total pot
+8. Click "End Game" (top right)
+9. Enter cash-out amounts for each player
+10. View optimized settlements (who owes whom)
+11. Share results via text/messaging!
+
+**Super Fast:** No extra screens! 2-click buy-ins with "+" buttons!
 ```
 
 ## Tech Stack
@@ -43,7 +44,8 @@ flutter run
 
 ### Working Now ✅ (MVP v0.1)
 - ✅ Guest mode with persistence
-- ✅ New Game screen (player selection, currency)
+- ✅ Streamlined UX (Auth → Active Game directly)
+- ✅ Quick buy-ins: "+" button on each player (2-click workflow!)
 - ✅ Active Game tracking (live timer, buy-ins, rebuys)
 - ✅ Settlement screen (cash-outs, profit/loss, optimized transfers)
 - ✅ Share game results
@@ -101,9 +103,11 @@ flutter test
 
 **Phase 1**: ✅ Foundation complete  
 **Guest Mode**: ✅ Working  
-**MVP Progress**: 45%  
+**Streamlined UX**: ✅ Complete  
+**Settlement**: ✅ Complete  
+**MVP Progress**: 88%  
 
-**Next**: Build New Game screen (3-4 hrs)
+**Next**: Game history & statistics (3-4 hrs)
 
 ## Need Help?
 
@@ -113,6 +117,6 @@ flutter test
 
 ---
 
-**Last Updated**: Feb 6, 2026  
-**Version**: 1.0.0  
-**Status**: Ready for feature development 🚀
+**Last Updated**: Feb 7, 2026  
+**Version**: 0.1.0  
+**Status**: 88% to MVP - Quick Buy-In Ready! ⚡

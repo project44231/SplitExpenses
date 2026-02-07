@@ -30,8 +30,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     final isAuthenticated = authService.isAuthenticated();
 
     if (isAuthenticated) {
-      // User is already authenticated (guest or Firebase), go to home
-      context.go(AppConstants.homeRoute);
+      // User is already authenticated (guest or Firebase), go directly to active game
+      context.go('/game');
     } else {
       // No authentication, show auth screen
       context.go(AppConstants.authRoute);

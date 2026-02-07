@@ -47,13 +47,14 @@ class _GameTimerState extends State<GameTimer> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const Icon(Icons.timer, size: 18),
+        const Icon(Icons.timer, size: 16, color: Colors.white),
         const SizedBox(width: 6),
         Text(
           Formatters.formatDuration(_elapsed),
           style: const TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
       ],

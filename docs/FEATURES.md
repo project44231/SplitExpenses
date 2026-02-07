@@ -16,6 +16,8 @@ A mobile app to track poker buy-ins for home cash games with support for multipl
 - Search existing players
 - Player list with avatar initials
 - Auto-generated player IDs
+- **Edit player name** (via menu)
+- **Remove player from game** (only when no buy-ins)
 
 ### Game Creation ✅
 - Multi-select players for a game
@@ -27,18 +29,29 @@ A mobile app to track poker buy-ins for home cash games with support for multipl
 ### Active Game Tracking ✅
 - **Live game timer** (HH:MM:SS format)
 - **Total pot display** with currency formatting
+- **Game settings** ⚙️:
+  - Customize quick buy-in amounts
+  - Add/remove amounts as needed
+  - Reset to defaults
+  - Per-game configuration
 - **Player buy-in cards** showing:
   - Player avatar
   - Current total buy-in
-  - Rebuy count
+  - Total buy-in count (if > 1)
+  - **Quick "+" button** for instant buy-in (pre-selects player!)
+  - **Player menu** (⋮):
+    - Edit player name
+    - Remove player (only if no buy-ins)
+  - **Expandable view**: Tap card to see all buy-in details with timestamps
+  - **Edit & delete**: Fix mistakes with edit/delete buttons on each buy-in
 - **Add buy-in dialog** with:
-  - Player selection dropdown
+  - Player selection dropdown (auto-selected if using "+" button)
   - Amount input with validation
-  - Quick amount buttons ($20/$50/$100/$200)
-  - Type selection (Initial/Rebuy)
+  - Quick amount buttons (customizable via settings!)
 - **Pull-to-refresh** to update game state
 - **End game** with confirmation dialog
 - **Buy-in counter** at bottom
+- **Quick actions**: "+" on each player for 2-click buy-ins
 
 ### Settlement & Cash-Out ✅
 - **Cash-out entry dialog** with:

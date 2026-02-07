@@ -124,6 +124,10 @@ class LocalStorageService {
     return buyIns;
   }
 
+  Future<void> deleteBuyIn(String buyInId) async {
+    await _buyInsBox.delete(buyInId);
+  }
+
   Future<void> _deleteBuyInsByGame(String gameId) async {
     final keysToDelete = <String>[];
     for (var entry in _buyInsBox.toMap().entries) {

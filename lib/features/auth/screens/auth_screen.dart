@@ -49,10 +49,10 @@ class AuthScreen extends ConsumerWidget {
               // Show loading or button
               authState.when(
                 data: (user) {
-                  // If user is already authenticated, navigate to home
+                  // If user is already authenticated, navigate to active game
                   if (user != null) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      context.go(AppConstants.homeRoute);
+                      context.go('/game');
                     });
                   }
 
@@ -61,7 +61,7 @@ class AuthScreen extends ConsumerWidget {
                     onPressed: () async {
                       await ref.read(authNotifierProvider.notifier).signInAsGuest();
                       if (context.mounted) {
-                        context.go(AppConstants.homeRoute);
+                        context.go('/game');
                       }
                     },
                     style: ElevatedButton.styleFrom(

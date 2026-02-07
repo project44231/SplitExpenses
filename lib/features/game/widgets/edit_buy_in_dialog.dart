@@ -3,37 +3,37 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
-import '../../../models/player.dart';
 import '../../../models/buy_in.dart';
 
-/// Dialog for adding a buy-in
-class AddBuyInDialog extends StatefulWidget {
-  final List<Player> players;
+/// Dialog for editing a buy-in
+class EditBuyInDialog extends StatefulWidget {
+  final BuyIn buyIn;
   final Currency currency;
-  final String? preselectedPlayerId;
+  final String playerName;
   final List<double> quickAmounts;
 
-  const AddBuyInDialog({
+  const EditBuyInDialog({
     super.key,
-    required this.players,
+    required this.buyIn,
     required this.currency,
-    this.preselectedPlayerId,
+    required this.playerName,
     this.quickAmounts = const [20, 50, 100, 200],
   });
 
   @override
-  State<AddBuyInDialog> createState() => _AddBuyInDialogState();
+  State<EditBuyInDialog> createState() => _EditBuyInDialogState();
 }
 
-class _AddBuyInDialogState extends State<AddBuyInDialog> {
-  final TextEditingController _amountController = TextEditingController();
+class _EditBuyInDialogState extends State<EditBuyInDialog> {
+  late final TextEditingController _amountController;
   final _formKey = GlobalKey<FormState>();
-  String? _selectedPlayerId;
 
   @override
   void initState() {
     super.initState();
-    _selectedPlayerId = widget.preselectedPlayerId;
+    _amountController = TextEditingController(
+      text: widget.buyIn.amount.toStringAsFixed(widget.buyIn.amount.truncateToDouble() == widget.buyIn.amount ? 0 : 2),
+    );
   }
 
   @override
@@ -49,13 +49,9 @@ class _AddBuyInDialogState extends State<AddBuyInDialog> {
   }
 
   void _submit() {
-    if (_formKey.currentState!.validate() && _selectedPlayerId != null) {
+    if (_formKey.currentState!.validate()) {
       final amount = double.parse(_amountController.text);
-      Navigator.pop(context, {
-        'playerId': _selectedPlayerId,
-        'amount': amount,
-        'type': BuyInType.initial, // All buy-ins are the same now
-      });
+      Navigator.pop(context, amount);
     }
   }
 
@@ -73,36 +69,39 @@ class _AddBuyInDialogState extends State<AddBuyInDialog> {
               children: [
                 // Title
                 const Text(
-                  'Add Buy-In',
+                  'Edit Buy-In',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 24),
-
-                // Player Selection
-                DropdownButtonFormField<String>(
-                  value: _selectedPlayerId,
-                  decoration: const InputDecoration(
-                    labelText: 'Player',
-                    prefixIcon: Icon(Icons.person),
+                const SizedBox(height: 8),
+                
+                // Player Info
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  items: widget.players.map((player) {
-                    return DropdownMenuItem(
-                      value: player.id,
-                      child: Text(player.name),
-                    );
-                  }).toList(),
-                  validator: (value) {
-                    if (value == null) return 'Please select a player';
-                    return null;
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedPlayerId = value;
-                    });
-                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.person,
+                        color: AppTheme.primaryColor,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        widget.playerName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 20),
 
@@ -159,7 +158,7 @@ class _AddBuyInDialogState extends State<AddBuyInDialog> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.accentColor,
                         ),
-                        child: const Text('Add Buy-In'),
+                        child: const Text('Update'),
                       ),
                     ),
                   ],

@@ -41,7 +41,13 @@ class AppRouter {
         builder: (context, state) => const NewGameScreen(),
       ),
 
-      // Active Game
+      // Current/Active Game (no ID - will auto-create or load current)
+      GoRoute(
+        path: '/game',
+        builder: (context, state) => const ActiveGameScreen(gameId: 'current'),
+      ),
+
+      // Active Game (with specific ID)
       GoRoute(
         path: '${AppConstants.activeGameRoute}/:gameId',
         builder: (context, state) {

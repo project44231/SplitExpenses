@@ -159,6 +159,24 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     }
   }
 
+  /// Update a buy-in
+  Future<void> updateBuyIn(BuyIn buyIn) async {
+    try {
+      await _localStorage.saveBuyIn(buyIn);
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  /// Delete a buy-in
+  Future<void> deleteBuyIn(String buyInId) async {
+    try {
+      await _localStorage.deleteBuyIn(buyInId);
+    } catch (e) {
+      // Handle error
+    }
+  }
+
   /// Add a cash-out
   Future<void> addCashOut({
     required String gameId,
@@ -198,6 +216,33 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       loading: () => [],
       error: (_, __) => [],
     );
+  }
+
+  /// Get or create current active game
+  Future<Game> getOrCreateCurrentGame() async {
+    // Check if there's an active game
+    final activeGames = getActiveGames();
+    if (activeGames.isNotEmpty) {
+      return activeGames.first;
+    }
+
+    // No active game, create a new one with no players
+    final game = await createGame(
+      playerIds: [], // Start with no players
+      notes: 'Quick game',
+    );
+
+    return game!;
+  }
+
+  /// Update an existing game
+  Future<void> updateGame(Game game) async {
+    try {
+      await _localStorage.saveGame(game);
+      await loadGames();
+    } catch (e) {
+      // Handle error
+    }
   }
 }
 

@@ -15,6 +15,10 @@ _$GameImpl _$$GameImplFromJson(Map<String, dynamic> json) => _$GameImpl(
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      customBuyInAmounts: (json['customBuyInAmounts'] as List<dynamic>?)
+              ?.map((e) => (e as num).toDouble())
+              .toList() ??
+          const [20, 50, 100, 200],
       startTime: DateTime.parse(json['startTime'] as String),
       endTime: json['endTime'] == null
           ? null
@@ -33,6 +37,7 @@ Map<String, dynamic> _$$GameImplToJson(_$GameImpl instance) =>
       'status': _$GameStatusEnumMap[instance.status]!,
       'currency': instance.currency,
       'playerIds': instance.playerIds,
+      'customBuyInAmounts': instance.customBuyInAmounts,
       'startTime': instance.startTime.toIso8601String(),
       'endTime': instance.endTime?.toIso8601String(),
       'notes': instance.notes,

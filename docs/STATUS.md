@@ -1,6 +1,6 @@
 # Project Status
 
-**Last Updated**: Feb 7, 2026 12:15 AM | **Progress**: 85% to MVP | **Status**: Settlement Ready! 💰
+**Last Updated**: Feb 7, 2026 3:00 AM | **Progress**: 96% to MVP | **Status**: Player Management Ready! 👤
 
 ## ✅ Completed
 
@@ -23,6 +23,109 @@
 - Settlement: Cash-outs, profit/loss, optimized transfers
 
 ## ✅ Latest Update (Feb 7, 2026)
+
+### Player Management - COMPLETE! 👤
+**What**: Edit and remove players from active games
+**Changes**:
+- ✅ Menu button (⋮) on each player card
+- ✅ Edit player name option
+- ✅ Remove player from game option
+- ✅ Delete validation (only when buy-ins = 0)
+- ✅ Clear error message if trying to delete with buy-ins
+- ✅ Confirmation dialog for removal
+- ✅ Success notifications
+- ✅ Players removed from game only, not deleted from player list
+
+**Why**: Flexibility during game setup
+- Fix typos in player names
+- Remove players who couldn't make it
+- Prevents data loss by blocking delete when buy-ins exist
+
+### Game Settings - COMPLETE! ⚙️
+**What**: Customize quick buy-in amounts for different stake games
+**Changes**:
+- ✅ Settings button in app bar
+- ✅ Configure quick buy-in amounts (20, 50, 100, 200 by default)
+- ✅ Add/remove custom amounts
+- ✅ Reset to default button
+- ✅ Amounts saved per game
+- ✅ Auto-sorted in ascending order
+- ✅ Used in both add and edit buy-in dialogs
+- ✅ Visual info box with helpful tip
+
+**Why**: Different games have different stakes
+- Low stakes: $5, $10, $20, $40
+- Medium stakes: $50, $100, $200, $500
+- High stakes: $500, $1000, $2000, $5000
+- Customizable for any game!
+
+### Edit & Delete Buy-Ins - COMPLETE! ✏️
+**What**: Fix mistakes by editing or deleting buy-ins
+**Changes**:
+- ✅ Edit button on each buy-in in history
+- ✅ Delete button with confirmation dialog
+- ✅ Edit dialog pre-filled with current amount
+- ✅ Quick amount buttons in edit dialog
+- ✅ Success notifications after edit/delete
+- ✅ Player name shown in dialogs
+- ✅ Full timestamp shown in delete confirmation
+
+**Why**: Everyone makes mistakes when entering amounts
+- Quick fix without starting over
+- Better accuracy and trust
+- Professional error handling
+
+### Expandable Player Cards - COMPLETE! 📊
+**What**: See detailed buy-in history for each player
+**Changes**:
+- ✅ Tap any player card to expand
+- ✅ Shows all buy-ins with timestamps
+- ✅ Each buy-in numbered (1, 2, 3...)
+- ✅ Displays exact time (e.g., "3:45 PM")
+- ✅ Shows relative time (e.g., "5m ago", "Just now")
+- ✅ Sorted chronologically
+- ✅ **Smooth 300ms expand/collapse animation** with easeInOut curve
+- ✅ **Beautiful gradient background** (light blue tint)
+- ✅ **Gradient badges** with shadows for buy-in numbers
+- ✅ **Pill-shaped time badges** with accent color
+- ✅ Transaction counter in header
+
+**Why**: Helps track when players bought in during the game
+- See exact timing of each buy-in
+- Verify amounts if needed
+- Better transparency and record-keeping
+- Professional, polished UI
+
+### Quick Buy-In Feature - COMPLETE! ⚡
+**What**: Super-fast buy-in workflow!
+**Changes**:
+- ✅ "+" button next to each player card
+- ✅ Click "+" → dialog opens with player pre-selected
+- ✅ Just enter amount and go!
+- ✅ No need to select player from dropdown
+- ✅ Removed Initial/Rebuy distinction (simplified!)
+- ✅ Shows total buy-in count per player
+
+**Why**: Streamlines the most common action during a game
+- Before: Click "Add Buy-In" → Select player → Select type → Enter amount
+- Now: Click "+" on player → Enter amount (even simpler!)
+
+### Streamlined UX - COMPLETE! 🚀
+**What**: Ultra-fast flow - no extra screens!
+**Changes**:
+- ✅ Auto-navigate to Active Game after login
+- ✅ Auto-create game if none exists
+- ✅ Add Players button on active game
+- ✅ Add Buy-Ins button on active game
+- ✅ Empty state with clear instructions
+- ✅ Hamburger menu for History/Profile access
+- ✅ Timer only shows after first buy-in
+- ✅ Settlement screen navigates back to Active Game
+
+**New Flow**: Auth → **Active Game** (done!)
+- No home screen
+- No new game screen  
+- Just: Add players → Add buy-ins → Play!
 
 ### Settlement Screen - COMPLETE! 💰
 **What**: Complete game settlement with debt optimization
@@ -66,10 +169,10 @@
 
 ## 📊 Metrics
 
-**Total**: 15 hrs invested  
-**Remaining to MVP**: 3-4 hrs  
-**Files Created**: 53  
-**Code**: ~5,400 lines  
+**Total**: 17.5 hrs invested  
+**Remaining to MVP**: 2-3 hrs  
+**Files Created**: 56  
+**Code**: ~6,100 lines  
 **Issues**: 0
 
 ## 🎯 Ready For

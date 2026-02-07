@@ -25,6 +25,7 @@ mixin _$Game {
   GameStatus get status => throw _privateConstructorUsedError;
   String get currency => throw _privateConstructorUsedError;
   List<String> get playerIds => throw _privateConstructorUsedError;
+  List<double> get customBuyInAmounts => throw _privateConstructorUsedError;
   DateTime get startTime => throw _privateConstructorUsedError;
   DateTime? get endTime => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
@@ -51,6 +52,7 @@ abstract class $GameCopyWith<$Res> {
       GameStatus status,
       String currency,
       List<String> playerIds,
+      List<double> customBuyInAmounts,
       DateTime startTime,
       DateTime? endTime,
       String? notes,
@@ -78,6 +80,7 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
     Object? status = null,
     Object? currency = null,
     Object? playerIds = null,
+    Object? customBuyInAmounts = null,
     Object? startTime = null,
     Object? endTime = freezed,
     Object? notes = freezed,
@@ -105,6 +108,10 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
           ? _value.playerIds
           : playerIds // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      customBuyInAmounts: null == customBuyInAmounts
+          ? _value.customBuyInAmounts
+          : customBuyInAmounts // ignore: cast_nullable_to_non_nullable
+              as List<double>,
       startTime: null == startTime
           ? _value.startTime
           : startTime // ignore: cast_nullable_to_non_nullable
@@ -142,6 +149,7 @@ abstract class _$$GameImplCopyWith<$Res> implements $GameCopyWith<$Res> {
       GameStatus status,
       String currency,
       List<String> playerIds,
+      List<double> customBuyInAmounts,
       DateTime startTime,
       DateTime? endTime,
       String? notes,
@@ -166,6 +174,7 @@ class __$$GameImplCopyWithImpl<$Res>
     Object? status = null,
     Object? currency = null,
     Object? playerIds = null,
+    Object? customBuyInAmounts = null,
     Object? startTime = null,
     Object? endTime = freezed,
     Object? notes = freezed,
@@ -193,6 +202,10 @@ class __$$GameImplCopyWithImpl<$Res>
           ? _value._playerIds
           : playerIds // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      customBuyInAmounts: null == customBuyInAmounts
+          ? _value._customBuyInAmounts
+          : customBuyInAmounts // ignore: cast_nullable_to_non_nullable
+              as List<double>,
       startTime: null == startTime
           ? _value.startTime
           : startTime // ignore: cast_nullable_to_non_nullable
@@ -226,12 +239,14 @@ class _$GameImpl implements _Game {
       required this.status,
       required this.currency,
       final List<String> playerIds = const [],
+      final List<double> customBuyInAmounts = const [20, 50, 100, 200],
       required this.startTime,
       this.endTime,
       this.notes,
       required this.createdAt,
       this.updatedAt})
-      : _playerIds = playerIds;
+      : _playerIds = playerIds,
+        _customBuyInAmounts = customBuyInAmounts;
 
   factory _$GameImpl.fromJson(Map<String, dynamic> json) =>
       _$$GameImplFromJson(json);
@@ -253,6 +268,16 @@ class _$GameImpl implements _Game {
     return EqualUnmodifiableListView(_playerIds);
   }
 
+  final List<double> _customBuyInAmounts;
+  @override
+  @JsonKey()
+  List<double> get customBuyInAmounts {
+    if (_customBuyInAmounts is EqualUnmodifiableListView)
+      return _customBuyInAmounts;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_customBuyInAmounts);
+  }
+
   @override
   final DateTime startTime;
   @override
@@ -266,7 +291,7 @@ class _$GameImpl implements _Game {
 
   @override
   String toString() {
-    return 'Game(id: $id, groupId: $groupId, status: $status, currency: $currency, playerIds: $playerIds, startTime: $startTime, endTime: $endTime, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Game(id: $id, groupId: $groupId, status: $status, currency: $currency, playerIds: $playerIds, customBuyInAmounts: $customBuyInAmounts, startTime: $startTime, endTime: $endTime, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -281,6 +306,8 @@ class _$GameImpl implements _Game {
                 other.currency == currency) &&
             const DeepCollectionEquality()
                 .equals(other._playerIds, _playerIds) &&
+            const DeepCollectionEquality()
+                .equals(other._customBuyInAmounts, _customBuyInAmounts) &&
             (identical(other.startTime, startTime) ||
                 other.startTime == startTime) &&
             (identical(other.endTime, endTime) || other.endTime == endTime) &&
@@ -300,6 +327,7 @@ class _$GameImpl implements _Game {
       status,
       currency,
       const DeepCollectionEquality().hash(_playerIds),
+      const DeepCollectionEquality().hash(_customBuyInAmounts),
       startTime,
       endTime,
       notes,
@@ -329,6 +357,7 @@ abstract class _Game implements Game {
       required final GameStatus status,
       required final String currency,
       final List<String> playerIds,
+      final List<double> customBuyInAmounts,
       required final DateTime startTime,
       final DateTime? endTime,
       final String? notes,
@@ -347,6 +376,8 @@ abstract class _Game implements Game {
   String get currency;
   @override
   List<String> get playerIds;
+  @override
+  List<double> get customBuyInAmounts;
   @override
   DateTime get startTime;
   @override
