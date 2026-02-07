@@ -167,6 +167,15 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
 
     final currency = AppCurrencies.fromCode(_game!.currency);
 
+    // Convert existing cash-outs to map
+    Map<String, double>? existingCashOutsMap;
+    if (_cashOuts.isNotEmpty) {
+      existingCashOutsMap = {};
+      for (final cashOut in _cashOuts) {
+        existingCashOutsMap[cashOut.playerId] = cashOut.amount;
+      }
+    }
+
     if (!mounted) return;
     final result = await showDialog<Map<String, double>>(
       context: context,
@@ -174,11 +183,17 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         players: _players,
         buyInTotals: _buyInTotals,
         currency: currency,
+        existingCashOuts: existingCashOutsMap,
       ),
     );
 
     if (result != null && mounted) {
-      // Save cash-outs
+      // If editing, clear existing cash-outs first
+      if (_cashOuts.isNotEmpty) {
+        await ref.read(gameProvider.notifier).clearCashOuts(widget.gameId);
+      }
+
+      // Save new cash-outs
       for (final entry in result.entries) {
         if (entry.value > 0) {
           await ref.read(gameProvider.notifier).addCashOut(
@@ -224,13 +239,17 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     Share.share(summary, subject: 'Poker Game Settlement');
   }
 
-  Future<void> _finishGame() async {
-    // Reload games to ensure ended game is no longer active
-    await ref.read(gameProvider.notifier).loadGames();
-    
+  Future<void> _backToGame() async {
+    // Navigate back to the specific game (to continue or review)
     if (!mounted) return;
-    
-    // Go back to active game screen (will auto-create new game)
+    context.go('/game/${widget.gameId}');
+  }
+
+  Future<void> _startNewGame() async {
+    // Start a completely new game
+    if (!mounted) return;
+    // Navigate to /game which will trigger getOrCreateCurrentGame
+    // Since current game is ended, it will create a new one
     context.go('/game');
   }
 
@@ -282,6 +301,10 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settlement'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _backToGame,
+        ),
         actions: [
           if (hasCashOuts)
             IconButton(
@@ -569,12 +592,12 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                 children: [
                   if (!hasCashOuts)
                     OutlinedButton(
-                      onPressed: () => context.pop(),
+                      onPressed: _backToGame,
                       child: const Text('Back to Game'),
                     ),
                   if (hasCashOuts) ...[
                     ElevatedButton(
-                      onPressed: _finishGame,
+                      onPressed: _startNewGame,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.accentColor,
                         padding: const EdgeInsets.symmetric(vertical: 16),

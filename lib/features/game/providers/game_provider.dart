@@ -64,7 +64,8 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
 
       return game;
     } catch (e) {
-      return null;
+      // Handle error
+      rethrow;
     }
   }
 
@@ -200,6 +201,15 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     }
   }
 
+  /// Clear all cash-outs for a game (used when editing)
+  Future<void> clearCashOuts(String gameId) async {
+    try {
+      await _localStorage.deleteCashOutsByGame(gameId);
+    } catch (e) {
+      // Handle error
+    }
+  }
+
   /// Get active games
   List<Game> getActiveGames() {
     return state.when(
@@ -220,6 +230,9 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
 
   /// Get or create current active game
   Future<Game> getOrCreateCurrentGame() async {
+    // Force reload to ensure we have the latest state
+    await loadGames();
+    
     // Check if there's an active game
     final activeGames = getActiveGames();
     if (activeGames.isNotEmpty) {
@@ -227,12 +240,21 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     }
 
     // No active game, create a new one with no players
-    final game = await createGame(
-      playerIds: [], // Start with no players
-      notes: 'Quick game',
-    );
+    try {
+      final game = await createGame(
+        playerIds: [], // Start with no players
+        notes: 'Quick game',
+      );
 
-    return game!;
+      if (game == null) {
+        throw Exception('Failed to create new game - createGame returned null');
+      }
+
+      return game;
+    } catch (e) {
+      // Handle error
+      rethrow;
+    }
   }
 
   /// Update an existing game

@@ -34,24 +34,37 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeGame();
+    // Delay provider modification until after the widget tree is built
+    Future.microtask(() => _initializeGame());
   }
 
   Future<void> _initializeGame() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     
-    // Load game and player data
-    await ref.read(gameProvider.notifier).loadGames();
-    await ref.read(playerProvider.notifier).loadPlayers();
-    
-    // Get or create current game
-    if (widget.gameId == 'current') {
-      _currentGame = await ref.read(gameProvider.notifier).getOrCreateCurrentGame();
-    } else {
-      _currentGame = await ref.read(gameProvider.notifier).getGame(widget.gameId);
+    try {
+      // Load player data
+      await ref.read(playerProvider.notifier).loadPlayers();
+      
+      // Get or create current game (this will reload games internally)
+      if (widget.gameId == 'current') {
+        _currentGame = await ref.read(gameProvider.notifier).getOrCreateCurrentGame();
+      } else {
+        await ref.read(gameProvider.notifier).loadGames();
+        _currentGame = await ref.read(gameProvider.notifier).getGame(widget.gameId);
+      }
+      
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading game: $e')),
+        );
+      }
     }
-    
-    setState(() => _isLoading = false);
   }
 
   Future<void> _showAddPlayerDialog() async {
@@ -154,7 +167,9 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
         players: players,
         currency: currency,
         preselectedPlayerId: preselectedPlayerId,
-        quickAmounts: _currentGame!.customBuyInAmounts,
+        quickAmounts: _currentGame!.customBuyInAmounts.isEmpty 
+          ? [20, 50, 100, 200]
+          : _currentGame!.customBuyInAmounts,
       ),
     );
 
@@ -180,7 +195,9 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
         buyIn: buyIn,
         currency: currency,
         playerName: playerName,
-        quickAmounts: _currentGame!.customBuyInAmounts,
+        quickAmounts: _currentGame!.customBuyInAmounts.isEmpty 
+          ? [20, 50, 100, 200]
+          : _currentGame!.customBuyInAmounts,
       ),
     );
 
@@ -213,7 +230,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
 
     if (newAmounts != null && mounted) {
       final updatedGame = _currentGame!.copyWith(
-        customBuyInAmounts: newAmounts,
+        customBuyInAmounts: newAmounts.isEmpty ? [20, 50, 100, 200] : newAmounts,
         updatedAt: DateTime.now(),
       );
       

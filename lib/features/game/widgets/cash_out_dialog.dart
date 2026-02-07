@@ -10,12 +10,14 @@ class CashOutDialog extends StatefulWidget {
   final List<Player> players;
   final Map<String, double> buyInTotals;
   final Currency currency;
+  final Map<String, double>? existingCashOuts;
 
   const CashOutDialog({
     super.key,
     required this.players,
     required this.buyInTotals,
     required this.currency,
+    this.existingCashOuts,
   });
 
   @override
@@ -36,8 +38,16 @@ class _CashOutDialogState extends State<CashOutDialog> {
     
     // Initialize controllers for each player
     for (final player in widget.players) {
-      _controllers[player.id] = TextEditingController();
+      final existingAmount = widget.existingCashOuts?[player.id];
+      _controllers[player.id] = TextEditingController(
+        text: existingAmount != null && existingAmount > 0 
+          ? existingAmount.toStringAsFixed(existingAmount.truncateToDouble() == existingAmount ? 0 : 2)
+          : '',
+      );
     }
+    
+    // Calculate initial totals
+    _calculateTotals();
   }
 
   @override
@@ -106,9 +116,11 @@ class _CashOutDialogState extends State<CashOutDialog> {
               ),
               child: Column(
                 children: [
-                  const Text(
-                    'Enter Cash-Outs',
-                    style: TextStyle(
+                  Text(
+                    widget.existingCashOuts != null && widget.existingCashOuts!.isNotEmpty
+                      ? 'Edit Cash-Outs'
+                      : 'Enter Cash-Outs',
+                    style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -295,7 +307,11 @@ class _CashOutDialogState extends State<CashOutDialog> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.accentColor,
                       ),
-                      child: const Text('Calculate Settlement'),
+                      child: Text(
+                        widget.existingCashOuts != null && widget.existingCashOuts!.isNotEmpty
+                          ? 'Update Settlement'
+                          : 'Calculate Settlement',
+                      ),
                     ),
                   ),
                 ],

@@ -160,7 +160,7 @@ class LocalStorageService {
     return cashOuts;
   }
 
-  Future<void> _deleteCashOutsByGame(String gameId) async {
+  Future<void> deleteCashOutsByGame(String gameId) async {
     final keysToDelete = <String>[];
     for (var entry in _cashOutsBox.toMap().entries) {
       final cashOut = CashOut.fromJson(Map<String, dynamic>.from(entry.value));
@@ -171,6 +171,10 @@ class LocalStorageService {
     for (var key in keysToDelete) {
       await _cashOutsBox.delete(key);
     }
+  }
+
+  Future<void> _deleteCashOutsByGame(String gameId) async {
+    await deleteCashOutsByGame(gameId);
   }
 
   // ==================== Expenses ====================
