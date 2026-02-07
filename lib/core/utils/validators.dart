@@ -75,7 +75,27 @@ class Validators {
 
   /// Validate cash-out amount
   static String? validateCashOutAmount(String? value) {
-    return validateBuyInAmount(value);
+    // Require explicit input
+    if (value == null || value.isEmpty) {
+      return 'Amount is required';
+    }
+    
+    final amount = double.tryParse(value);
+    
+    if (amount == null) {
+      return 'Please enter a valid number';
+    }
+    
+    // Allow any amount including 0
+    if (amount < 0) {
+      return 'Amount cannot be negative';
+    }
+    
+    if (amount > AppConstants.maxBuyInAmount) {
+      return 'Amount cannot exceed ${AppConstants.maxBuyInAmount}';
+    }
+    
+    return null;
   }
 
   /// Validate notes

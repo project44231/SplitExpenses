@@ -399,7 +399,8 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     if (confirm == true && mounted) {
       await ref.read(gameProvider.notifier).endGame(_currentGame!.id);
       if (mounted) {
-        context.go('${AppConstants.settlementRoute}/${_currentGame!.id}');
+        // Navigate to cash-out screen instead of settlement
+        context.go('/cash-out/${_currentGame!.id}');
       }
     }
   }
@@ -461,13 +462,19 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
 
             return Scaffold(
               appBar: AppBar(
-                title: const Text('Active Game'),
-                leading: Builder(
-                  builder: (context) => IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () => Scaffold.of(context).openDrawer(),
+                leading: Padding(
+                  padding: const EdgeInsets.all(4.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      'images/app_icon.png',
+                      width: 60,
+                      height: 60,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
+                title: const Text('Active Game'),
                 actions: [
                   IconButton(
                     icon: const Icon(Icons.settings),

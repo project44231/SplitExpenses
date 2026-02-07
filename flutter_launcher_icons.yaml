@@ -1,0 +1,29 @@
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "images/app_icon.png"
+  
+  # Android adaptive icon (optional, for Android 8.0+)
+  adaptive_icon_background: "#1E88E5"
+  adaptive_icon_foreground: "images/app_icon.png"
+  
+  # Remove old launcher icons
+  remove_alpha_ios: true
+  
+  # Web (if you add web support later)
+  web:
+    generate: true
+    image_path: "images/app_icon.png"
+    background_color: "#1E88E5"
+    theme_color: "#1E88E5"
+  
+  # Windows (if you add Windows support later)
+  windows:
+    generate: true
+    image_path: "images/app_icon.png"
+    icon_size: 48
+  
+  # macOS (if you add macOS support later)
+  macos:
+    generate: true
+    image_path: "images/app_icon.png"

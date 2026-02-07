@@ -74,13 +74,6 @@ class _CashOutDialogState extends State<CashOutDialog> {
     });
   }
 
-  void _setQuickAmount(String playerId, double amount) {
-    setState(() {
-      _controllers[playerId]?.text = amount.toStringAsFixed(0);
-      _calculateTotals();
-    });
-  }
-
   void _submit() {
     if (_formKey.currentState!.validate()) {
       final cashOuts = <String, double>{};
@@ -236,43 +229,8 @@ class _CashOutDialogState extends State<CashOutDialog> {
                                 FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
                               ],
                               validator: Validators.validateCashOutAmount,
+                              autovalidateMode: AutovalidateMode.onUserInteraction,
                               onChanged: (_) => _calculateTotals(),
-                            ),
-                            const SizedBox(height: 8),
-                            // Quick amount buttons (buy-in, double, triple)
-                            Wrap(
-                              spacing: 6,
-                              children: [
-                                if (buyInTotal > 0)
-                                  OutlinedButton(
-                                    onPressed: () => _setQuickAmount(player.id, buyInTotal),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                      minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    ),
-                                    child: Text('Break Even', style: const TextStyle(fontSize: 11)),
-                                  ),
-                                if (buyInTotal > 0)
-                                  OutlinedButton(
-                                    onPressed: () => _setQuickAmount(player.id, buyInTotal * 2),
-                                    style: OutlinedButton.styleFrom(
-                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                      minimumSize: Size.zero,
-                                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    ),
-                                    child: Text('2x', style: const TextStyle(fontSize: 11)),
-                                  ),
-                                OutlinedButton(
-                                  onPressed: () => _setQuickAmount(player.id, 0),
-                                  style: OutlinedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                    minimumSize: Size.zero,
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  child: Text('Bust', style: const TextStyle(fontSize: 11)),
-                                ),
-                              ],
                             ),
                           ],
                         ),

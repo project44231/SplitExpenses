@@ -5,6 +5,7 @@ import '../../features/auth/screens/splash_screen.dart';
 import '../../features/game/screens/home_screen.dart';
 import '../../features/game/screens/new_game_screen.dart';
 import '../../features/game/screens/active_game_screen.dart';
+import '../../features/game/screens/cash_out_screen.dart';
 import '../../features/game/screens/settlement_screen.dart';
 import '../../features/history/screens/history_screen.dart';
 import '../../features/history/screens/game_details_screen.dart';
@@ -53,6 +54,15 @@ class AppRouter {
         builder: (context, state) {
           final gameId = state.pathParameters['gameId']!;
           return ActiveGameScreen(gameId: gameId);
+        },
+      ),
+
+      // Cash-Out Screen
+      GoRoute(
+        path: '/cash-out/:gameId',
+        builder: (context, state) {
+          final gameId = state.pathParameters['gameId']!;
+          return CashOutScreen(gameId: gameId);
         },
       ),
 
