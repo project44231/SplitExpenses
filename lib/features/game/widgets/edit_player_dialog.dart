@@ -116,7 +116,7 @@ class _EditPlayerDialogState extends State<EditPlayerDialog> {
                     child: ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accentColor,
+                        backgroundColor: AppTheme.primaryColor,
                       ),
                       child: const Text('Update'),
                     ),

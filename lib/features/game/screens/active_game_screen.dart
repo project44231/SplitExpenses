@@ -102,7 +102,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentColor,
+              backgroundColor: AppTheme.primaryColor,
             ),
             child: const Text('Add'),
           ),
@@ -641,10 +641,11 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: _endGame,
-                              icon: const Icon(Icons.stop_circle, size: 18),
+                              icon: const Icon(Icons.stop_circle, size: 18, color: Colors.white),
                               label: const Text('End Game'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.errorColor,
+                                foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                               ),
                             ),
@@ -687,7 +688,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
                                   icon: const Icon(Icons.person_add),
                                   label: const Text('Add First Player'),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppTheme.accentColor,
+                                    backgroundColor: AppTheme.primaryColor,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 32,
                                       vertical: 16,

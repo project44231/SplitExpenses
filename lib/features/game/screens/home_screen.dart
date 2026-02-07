@@ -96,7 +96,7 @@ class _DashboardPage extends StatelessWidget {
                     children: [
                       const Icon(
                         Icons.waving_hand,
-                        color: AppTheme.accentColor,
+                        color: AppTheme.primaryColor,
                       ),
                       const SizedBox(width: 8),
                       Text(

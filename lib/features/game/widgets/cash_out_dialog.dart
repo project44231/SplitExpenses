@@ -305,7 +305,7 @@ class _CashOutDialogState extends State<CashOutDialog> {
                     child: ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accentColor,
+                        backgroundColor: AppTheme.primaryColor,
                       ),
                       child: Text(
                         widget.existingCashOuts != null && widget.existingCashOuts!.isNotEmpty

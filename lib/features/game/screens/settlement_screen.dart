@@ -451,7 +451,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                       icon: const Icon(Icons.add),
                       label: const Text('Enter Cash-Outs'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accentColor,
+                        backgroundColor: AppTheme.primaryColor,
                         padding: const EdgeInsets.symmetric(
                           horizontal: 32,
                           vertical: 16,
@@ -542,7 +542,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppTheme.accentColor.withValues(alpha: 0.1),
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -550,7 +550,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.accentColor,
+                          color: AppTheme.primaryColor,
                         ),
                       ),
                     ),
@@ -599,7 +599,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                     ElevatedButton(
                       onPressed: _startNewGame,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accentColor,
+                        backgroundColor: AppTheme.primaryColor,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: const Text(

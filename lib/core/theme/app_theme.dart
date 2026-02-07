@@ -2,16 +2,28 @@ import 'package:flutter/material.dart';
 
 /// App theme configuration
 class AppTheme {
-  // Colors
-  static const Color primaryColor = Color(0xFF1E3A5F); // Deep blue
-  static const Color accentColor = Color(0xFF26A69A); // Teal
-  static const Color errorColor = Color(0xFFE53935); // Red
-  static const Color successColor = Color(0xFF4CAF50); // Green
-  static const Color warningColor = Color(0xFFFFA726); // Orange
+  // Primary Color Scheme - Modern Blue Theme
+  static const Color primaryColor = Color(0xFF1E88E5); // Main bright blue #1E88E5
+  static const Color primaryDark = Color(0xFF1976D2); // Darker blue #1976D2
+  static const Color primaryLight = Color(0xFF42A5F5); // Medium light blue #42A5F5
+  
+  // Secondary/Accent Colors
+  static const Color accentColor = Color(0xFF4FC3F7); // Light blue accent (changed from teal to maintain blue theme)
+  static const Color tertiaryColor = Color(0xFF42A5F5); // Medium blue #42A5F5
+  
+  // Status Colors
+  static const Color errorColor = Color(0xFFE53935); // Red for errors/loss
+  static const Color successColor = Color(0xFF42A5F5); // Blue for success/win (changed from green to maintain blue theme)
+  static const Color warningColor = Color(0xFFFFA726); // Orange for warnings
 
-  // Light Theme Colors
-  static const Color lightBackground = Color(0xFFFAFAFA);
+  // Background Colors
+  static const Color lightBackground = Color(0xFFFAFAFA); // Light grey background
+  static const Color lightBackgroundBlue = Color(0xFFE3F2FD); // Light blue background
+  static const Color lightCardBlue = Color(0xFFBBDEFB); // Card color
   static const Color lightSurface = Colors.white;
+  static const Color inputFieldBackground = Color(0xFFEEEEEE); // Grey[200]
+  
+  // Text Colors
   static const Color lightTextPrimary = Color(0xFF212121);
   static const Color lightTextSecondary = Color(0xFF757575);
 
@@ -91,7 +103,7 @@ class AppTheme {
       // Input Decoration
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: lightSurface,
+        fillColor: inputFieldBackground,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -113,7 +125,7 @@ class AppTheme {
       
       // FAB
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: accentColor,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 4,
       ),
@@ -266,14 +278,14 @@ class AppTheme {
       
       // FAB
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: accentColor,
+        backgroundColor: primaryColor,
         foregroundColor: Colors.white,
         elevation: 4,
       ),
       
       // Bottom Navigation Bar
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        selectedItemColor: accentColor,
+        selectedItemColor: primaryColor,
         unselectedItemColor: darkTextSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 8,

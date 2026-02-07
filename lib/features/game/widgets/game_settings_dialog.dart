@@ -239,7 +239,7 @@ class _GameSettingsDialogState extends State<GameSettingsDialog> {
                         icon: const Icon(Icons.add, size: 18),
                         label: const Text('Add Amount'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: AppTheme.accentColor,
+                          foregroundColor: AppTheme.primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                       ),
@@ -250,10 +250,10 @@ class _GameSettingsDialogState extends State<GameSettingsDialog> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: AppTheme.accentColor.withValues(alpha: 0.1),
+                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: AppTheme.accentColor.withValues(alpha: 0.3),
+                            color: AppTheme.primaryColor.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -261,7 +261,7 @@ class _GameSettingsDialogState extends State<GameSettingsDialog> {
                           children: [
                             Icon(
                               Icons.info_outline,
-                              color: AppTheme.accentColor,
+                              color: AppTheme.primaryColor,
                               size: 16,
                             ),
                             const SizedBox(width: 8),
@@ -308,7 +308,7 @@ class _GameSettingsDialogState extends State<GameSettingsDialog> {
                     child: ElevatedButton(
                       onPressed: _submit,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accentColor,
+                        backgroundColor: AppTheme.primaryColor,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                       child: const Text('Save Settings'),

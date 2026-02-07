@@ -157,7 +157,7 @@ class _AddBuyInDialogState extends State<AddBuyInDialog> {
                       child: ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.accentColor,
+                          backgroundColor: AppTheme.primaryColor,
                         ),
                         child: const Text('Add Buy-In'),
                       ),

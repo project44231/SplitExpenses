@@ -156,7 +156,7 @@ class _EditBuyInDialogState extends State<EditBuyInDialog> {
                       child: ElevatedButton(
                         onPressed: _submit,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.accentColor,
+                          backgroundColor: AppTheme.primaryColor,
                         ),
                         child: const Text('Update'),
                       ),

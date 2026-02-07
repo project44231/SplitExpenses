@@ -67,14 +67,14 @@ class SettlementCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: AppTheme.accentColor.withValues(alpha: 0.1),
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
                 children: [
                   Icon(
                     Icons.arrow_forward,
-                    color: AppTheme.accentColor,
+                    color: AppTheme.primaryColor,
                     size: 24,
                   ),
                   const SizedBox(height: 4),
@@ -83,7 +83,7 @@ class SettlementCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.accentColor,
+                      color: AppTheme.primaryColor,
                     ),
                   ),
                 ],

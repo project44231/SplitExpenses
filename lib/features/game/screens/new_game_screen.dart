@@ -242,19 +242,19 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
               if (_selectedPlayerIds.isNotEmpty)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: AppTheme.accentColor.withValues(alpha: 0.1),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.1),
                   child: Row(
                     children: [
                       Icon(
                         Icons.check_circle,
-                        color: AppTheme.accentColor,
+                        color: AppTheme.primaryColor,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '${_selectedPlayerIds.length} player${_selectedPlayerIds.length == 1 ? '' : 's'} selected',
                         style: TextStyle(
-                          color: AppTheme.accentColor,
+                          color: AppTheme.primaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -313,7 +313,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
                                 : null,
                             secondary: CircleAvatar(
                               backgroundColor: isSelected 
-                                  ? AppTheme.accentColor 
+                                  ? AppTheme.primaryColor 
                                   : Colors.grey.shade300,
                               child: Text(
                                 player.name[0].toUpperCase(),
@@ -325,7 +325,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
                                 ),
                               ),
                             ),
-                            activeColor: AppTheme.accentColor,
+                            activeColor: AppTheme.primaryColor,
                           );
                         },
                       ),
@@ -365,7 +365,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
                           : _createGame,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: AppTheme.accentColor,
+                        backgroundColor: AppTheme.primaryColor,
                       ),
                       child: _isCreating
                           ? const SizedBox(

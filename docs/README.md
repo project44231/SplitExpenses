@@ -7,6 +7,7 @@ Flutter app for tracking poker home games with buy-ins, settlements, and statist
 - **[Status](STATUS.md)** - Current progress & next steps
 - **[Setup](SETUP.md)** - Firebase configuration (when ready)
 - **[Features](FEATURES.md)** - All planned features
+- **[Color Theme](COLOR_THEME.md)** - 🎨 Modern blue color scheme & design guidelines
 
 ## Quick Start
 

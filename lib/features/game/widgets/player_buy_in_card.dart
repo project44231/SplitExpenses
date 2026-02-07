@@ -95,7 +95,7 @@ class _PlayerBuyInCardState extends State<PlayerBuyInCard> {
                 const SizedBox(width: 4),
                 IconButton(
                   icon: const Icon(Icons.add_circle, size: 28),
-                  color: AppTheme.accentColor,
+                  color: AppTheme.primaryColor,
                   onPressed: widget.onAddBuyIn,
                   tooltip: 'Add Buy-In',
                 ),
@@ -232,14 +232,14 @@ class _PlayerBuyInCardState extends State<PlayerBuyInCard> {
                                     begin: Alignment.topLeft,
                                     end: Alignment.bottomRight,
                                     colors: [
-                                      AppTheme.accentColor,
-                                      AppTheme.accentColor.withValues(alpha: 0.7),
+                                      AppTheme.primaryColor,
+                                      AppTheme.primaryColor.withValues(alpha: 0.7),
                                     ],
                                   ),
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: AppTheme.accentColor.withValues(alpha: 0.3),
+                                      color: AppTheme.primaryColor.withValues(alpha: 0.3),
                                       blurRadius: 4,
                                       offset: const Offset(0, 2),
                                     ),
@@ -280,7 +280,7 @@ class _PlayerBuyInCardState extends State<PlayerBuyInCard> {
                                       vertical: 2,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: AppTheme.accentColor.withValues(alpha: 0.1),
+                                      color: AppTheme.primaryColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -288,7 +288,7 @@ class _PlayerBuyInCardState extends State<PlayerBuyInCard> {
                                       style: TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w500,
-                                        color: AppTheme.accentColor,
+                                        color: AppTheme.primaryColor,
                                       ),
                                     ),
                                   ),
@@ -299,7 +299,7 @@ class _PlayerBuyInCardState extends State<PlayerBuyInCard> {
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.edit, size: 18),
-                                    color: AppTheme.accentColor,
+                                    color: AppTheme.primaryColor,
                                     onPressed: () => widget.onEditBuyIn?.call(buyIn),
                                     tooltip: 'Edit',
                                     padding: EdgeInsets.zero,
