@@ -30,6 +30,7 @@ class ActiveGameScreen extends ConsumerStatefulWidget {
 class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
   Game? _currentGame;
   bool _isLoading = true;
+  int _buyInsRefreshKey = 0; // Key to force buy-ins reload
 
   @override
   void initState() {
@@ -208,7 +209,9 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
               type: result['type'],
             );
         print('DEBUG: Buy-in added successfully');
-        setState(() {}); // Trigger rebuild
+        setState(() {
+          _buyInsRefreshKey++; // Force buy-ins to reload
+        });
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -249,7 +252,9 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     if (newAmount != null && mounted) {
       final updatedBuyIn = buyIn.copyWith(amount: newAmount);
       await ref.read(gameProvider.notifier).updateBuyIn(updatedBuyIn);
-      setState(() {}); // Trigger rebuild
+      setState(() {
+        _buyInsRefreshKey++; // Force buy-ins to reload
+      });
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -407,11 +412,13 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
 
     if (confirmed == true && mounted) {
       await ref.read(gameProvider.notifier).deleteBuyIn(buyIn.id);
-      setState(() {}); // Trigger rebuild
+      setState(() {
+        _buyInsRefreshKey++; // Force buy-ins to reload
+      });
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Buy-in deleted successfully')),
+          SnackBar(content: Text('Buy-in deleted for $playerName')),
         );
       }
     }
@@ -466,6 +473,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     final playersAsync = ref.watch(playerProvider);
     
     return FutureBuilder<List<BuyIn>>(
+      key: ValueKey(_buyInsRefreshKey), // Force rebuild when key changes
       future: ref.read(gameProvider.notifier).getBuyIns(_currentGame!.id),
       builder: (context, buyInSnapshot) {
         if (buyInSnapshot.connectionState == ConnectionState.waiting) {

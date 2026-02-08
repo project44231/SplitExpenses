@@ -300,11 +300,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text('Settlement'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _backToGame,
-        ),
         actions: [
           if (hasCashOuts)
             IconButton(

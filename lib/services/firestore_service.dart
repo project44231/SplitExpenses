@@ -6,6 +6,7 @@ import '../models/cash_out.dart';
 import '../models/settlement.dart';
 import '../models/game_group.dart';
 import '../models/expense.dart';
+import '../models/cash_out_reconciliation.dart';
 
 /// Firestore service for cloud data persistence
 class FirestoreService {
@@ -19,6 +20,7 @@ class FirestoreService {
   static const String _settlementsCollection = 'settlements';
   static const String _groupsCollection = 'game_groups';
   static const String _expensesCollection = 'expenses';
+  static const String _reconciliationsCollection = 'reconciliations';
 
   // ==================== Games ====================
 
@@ -313,6 +315,49 @@ class FirestoreService {
         .toList();
   }
 
+  // ==================== Reconciliations ====================
+
+  /// Save or update a cash-out reconciliation
+  Future<void> saveReconciliation(
+    CashOutReconciliation reconciliation,
+    String userId,
+  ) async {
+    await _firestore
+        .collection(_reconciliationsCollection)
+        .doc(reconciliation.id)
+        .set({
+          ...reconciliation.toJson(),
+          'userId': userId,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+  }
+
+  /// Get reconciliation for a game
+  Future<CashOutReconciliation?> getReconciliation(String gameId) async {
+    final snapshot = await _firestore
+        .collection(_reconciliationsCollection)
+        .where('gameId', isEqualTo: gameId)
+        .orderBy('timestamp', descending: true)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isEmpty) return null;
+    return CashOutReconciliation.fromJson(snapshot.docs.first.data());
+  }
+
+  /// Get all reconciliations for a game
+  Future<List<CashOutReconciliation>> getReconciliations(String gameId) async {
+    final snapshot = await _firestore
+        .collection(_reconciliationsCollection)
+        .where('gameId', isEqualTo: gameId)
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => CashOutReconciliation.fromJson(doc.data()))
+        .toList();
+  }
+
   // ==================== Batch Operations ====================
 
   /// Sync all game data (for initial load or recovery)
@@ -324,6 +369,7 @@ class FirestoreService {
       getCashOuts(gameId),
       getSettlements(gameId),
       getExpenses(gameId),
+      getReconciliations(gameId),
     ]);
   }
 }

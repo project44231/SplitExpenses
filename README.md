@@ -1,4 +1,4 @@
-# Game Tracker
+R# Game Tracker
 
 A Flutter-based poker home game tracker with buy-in management, settlements, and statistics.
 
