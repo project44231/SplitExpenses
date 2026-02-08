@@ -29,6 +29,7 @@ mixin _$Game {
   DateTime get startTime => throw _privateConstructorUsedError;
   DateTime? get endTime => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
+  String? get shareToken => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -56,6 +57,7 @@ abstract class $GameCopyWith<$Res> {
       DateTime startTime,
       DateTime? endTime,
       String? notes,
+      String? shareToken,
       DateTime createdAt,
       DateTime? updatedAt});
 }
@@ -84,6 +86,7 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
     Object? startTime = null,
     Object? endTime = freezed,
     Object? notes = freezed,
+    Object? shareToken = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -124,6 +127,10 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
               as String?,
+      shareToken: freezed == shareToken
+          ? _value.shareToken
+          : shareToken // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -153,6 +160,7 @@ abstract class _$$GameImplCopyWith<$Res> implements $GameCopyWith<$Res> {
       DateTime startTime,
       DateTime? endTime,
       String? notes,
+      String? shareToken,
       DateTime createdAt,
       DateTime? updatedAt});
 }
@@ -178,6 +186,7 @@ class __$$GameImplCopyWithImpl<$Res>
     Object? startTime = null,
     Object? endTime = freezed,
     Object? notes = freezed,
+    Object? shareToken = freezed,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -218,6 +227,10 @@ class __$$GameImplCopyWithImpl<$Res>
           ? _value.notes
           : notes // ignore: cast_nullable_to_non_nullable
               as String?,
+      shareToken: freezed == shareToken
+          ? _value.shareToken
+          : shareToken // ignore: cast_nullable_to_non_nullable
+              as String?,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -243,6 +256,7 @@ class _$GameImpl implements _Game {
       required this.startTime,
       this.endTime,
       this.notes,
+      this.shareToken,
       required this.createdAt,
       this.updatedAt})
       : _playerIds = playerIds,
@@ -285,13 +299,15 @@ class _$GameImpl implements _Game {
   @override
   final String? notes;
   @override
+  final String? shareToken;
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'Game(id: $id, groupId: $groupId, status: $status, currency: $currency, playerIds: $playerIds, customBuyInAmounts: $customBuyInAmounts, startTime: $startTime, endTime: $endTime, notes: $notes, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Game(id: $id, groupId: $groupId, status: $status, currency: $currency, playerIds: $playerIds, customBuyInAmounts: $customBuyInAmounts, startTime: $startTime, endTime: $endTime, notes: $notes, shareToken: $shareToken, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -312,6 +328,8 @@ class _$GameImpl implements _Game {
                 other.startTime == startTime) &&
             (identical(other.endTime, endTime) || other.endTime == endTime) &&
             (identical(other.notes, notes) || other.notes == notes) &&
+            (identical(other.shareToken, shareToken) ||
+                other.shareToken == shareToken) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -331,6 +349,7 @@ class _$GameImpl implements _Game {
       startTime,
       endTime,
       notes,
+      shareToken,
       createdAt,
       updatedAt);
 
@@ -361,6 +380,7 @@ abstract class _Game implements Game {
       required final DateTime startTime,
       final DateTime? endTime,
       final String? notes,
+      final String? shareToken,
       required final DateTime createdAt,
       final DateTime? updatedAt}) = _$GameImpl;
 
@@ -384,6 +404,8 @@ abstract class _Game implements Game {
   DateTime? get endTime;
   @override
   String? get notes;
+  @override
+  String? get shareToken;
   @override
   DateTime get createdAt;
   @override

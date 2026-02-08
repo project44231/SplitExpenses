@@ -52,4 +52,5 @@ class AppConstants {
   static const String settingsRoute = '/settings';
   static const String groupsRoute = '/groups';
   static const String playersRoute = '/players';
+  static const String playerContactsRoute = '/player-contacts';
 }

@@ -8,8 +8,10 @@ import '../../../core/utils/formatters.dart';
 import '../../../models/buy_in.dart';
 import '../../../models/game.dart';
 import '../../../models/player.dart';
+import '../../../services/game_share_service.dart';
 import '../providers/game_provider.dart';
 import '../../players/providers/player_provider.dart';
+import '../../players/widgets/player_selection_dialog.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../widgets/game_timer.dart';
 import '../widgets/player_buy_in_card.dart';
@@ -71,88 +73,38 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
   Future<void> _showAddPlayerDialog() async {
     if (_currentGame == null) return;
 
-    final TextEditingController nameController = TextEditingController();
-    
-    final result = await showDialog<String>(
+    final player = await showDialog<Player>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Player'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Player Name',
-                hintText: 'Enter player name',
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.words,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                Navigator.pop(context, nameController.text);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryColor,
-            ),
-            child: const Text('Add'),
-          ),
-        ],
+      builder: (context) => PlayerSelectionDialog(
+        excludePlayerIds: _currentGame!.playerIds,
       ),
     );
 
-    if (result != null && mounted) {
+    if (player != null && mounted) {
       try {
-        // Add new player
-        print('DEBUG: Adding player: $result');
-        final player = await ref.read(playerProvider.notifier).addPlayer(
-              name: result,
-            );
+        // Add player to current game
+        final updatedPlayerIds = [..._currentGame!.playerIds, player.id];
+        
+        final updatedGame = _currentGame!.copyWith(
+          playerIds: updatedPlayerIds,
+          updatedAt: DateTime.now(),
+        );
+        
+        await ref.read(gameProvider.notifier).updateGame(updatedGame);
+        
+        // Reload players to ensure UI updates
+        await ref.read(playerProvider.notifier).loadPlayers();
+        
+        setState(() {
+          _currentGame = updatedGame;
+        });
 
-        print('DEBUG: Player created: ${player?.id} - ${player?.name}');
-
-        if (player != null && mounted) {
-          // Add player to current game
-          final updatedPlayerIds = [..._currentGame!.playerIds, player.id];
-          print('DEBUG: Updated player IDs: $updatedPlayerIds');
-          
-          final updatedGame = _currentGame!.copyWith(
-            playerIds: updatedPlayerIds,
-            updatedAt: DateTime.now(),
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('${player.name} added to game')),
           );
-          
-          await ref.read(gameProvider.notifier).updateGame(updatedGame);
-          print('DEBUG: Game updated with new player');
-          
-          // Reload players to ensure UI updates
-          await ref.read(playerProvider.notifier).loadPlayers();
-          print('DEBUG: Players reloaded');
-          
-          setState(() {
-            _currentGame = updatedGame;
-          });
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${player.name} added')),
-            );
-          }
-        } else {
-          print('DEBUG: Player is null or not mounted');
         }
-      } catch (e, stack) {
-        print('DEBUG ERROR adding player: $e');
-        print('DEBUG Stack: $stack');
+      } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -424,6 +376,117 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     }
   }
 
+  Future<void> _shareGame() async {
+    if (_currentGame == null) return;
+
+    try {
+      final shareService = GameShareService();
+      
+      // Generate share token if not exists
+      String shareToken = _currentGame!.shareToken ?? shareService.generateShareToken();
+      
+      // Update game with share token
+      if (_currentGame!.shareToken == null) {
+        final updatedGame = _currentGame!.copyWith(
+          shareToken: shareToken,
+          updatedAt: DateTime.now(),
+        );
+        await ref.read(gameProvider.notifier).updateGame(updatedGame);
+        setState(() {
+          _currentGame = updatedGame;
+        });
+      }
+
+      // Show share options dialog
+      final shareUrl = shareService.buildShareUrl(_currentGame!.id, shareToken);
+      
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Share Game'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Players can view live standings at:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: SelectableText(
+                    shareUrl,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  '• Link stays active permanently\n'
+                  '• Shows live updates\n'
+                  '• Read-only access',
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await shareService.copyShareUrl(
+                    gameId: _currentGame!.id,
+                    shareToken: shareToken,
+                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Link copied to clipboard')),
+                    );
+                  }
+                },
+                child: const Text('Copy Link'),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.pop(context);
+                  await shareService.shareGame(
+                    game: _currentGame!,
+                    shareToken: shareToken,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Share'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error sharing game: $e'),
+            backgroundColor: AppTheme.errorColor,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _endGame() async {
     if (_currentGame == null) return;
 
@@ -533,6 +596,11 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
                 ),
                 title: const Text('Active Game'),
                 actions: [
+                  IconButton(
+                    icon: const Icon(Icons.share),
+                    onPressed: _shareGame,
+                    tooltip: 'Share Game',
+                  ),
                   IconButton(
                     icon: const Icon(Icons.settings),
                     onPressed: _showGameSettingsDialog,

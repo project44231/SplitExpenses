@@ -11,7 +11,12 @@ class Player with _$Player {
     String? email,
     String? phone,
     String? photoUrl,
+    String? notes,
     @Default([]) List<String> groupIds,
+    @Default(false) bool isFavorite,
+    @Default(0) int gamesPlayed,
+    DateTime? lastPlayedAt,
+    @Default(0.0) double totalProfit,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _Player;

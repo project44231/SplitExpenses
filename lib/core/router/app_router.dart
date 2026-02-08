@@ -11,6 +11,7 @@ import '../../features/history/screens/history_screen.dart';
 import '../../features/history/screens/game_details_screen.dart';
 import '../../features/profile/screens/profile_screen.dart';
 import '../../features/groups/screens/groups_screen.dart';
+import '../../features/players/screens/player_contacts_screen.dart';
 import '../constants/app_constants.dart';
 
 /// App router configuration
@@ -100,6 +101,12 @@ class AppRouter {
       GoRoute(
         path: AppConstants.groupsRoute,
         builder: (context, state) => const GroupsScreen(),
+      ),
+
+      // Player Contacts
+      GoRoute(
+        path: AppConstants.playerContactsRoute,
+        builder: (context, state) => const PlayerContactsScreen(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

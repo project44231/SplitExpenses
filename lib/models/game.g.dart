@@ -24,6 +24,7 @@ _$GameImpl _$$GameImplFromJson(Map<String, dynamic> json) => _$GameImpl(
           ? null
           : DateTime.parse(json['endTime'] as String),
       notes: json['notes'] as String?,
+      shareToken: json['shareToken'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] == null
           ? null
@@ -41,6 +42,7 @@ Map<String, dynamic> _$$GameImplToJson(_$GameImpl instance) =>
       'startTime': instance.startTime.toIso8601String(),
       'endTime': instance.endTime?.toIso8601String(),
       'notes': instance.notes,
+      'shareToken': instance.shareToken,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };

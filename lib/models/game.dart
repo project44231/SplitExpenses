@@ -21,6 +21,7 @@ class Game with _$Game {
     required DateTime startTime,
     DateTime? endTime,
     String? notes,
+    String? shareToken,
     required DateTime createdAt,
     DateTime? updatedAt,
   }) = _Game;

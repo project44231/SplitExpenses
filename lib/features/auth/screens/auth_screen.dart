@@ -49,10 +49,10 @@ class AuthScreen extends ConsumerWidget {
               // Show loading or button
               authState.when(
                 data: (user) {
-                  // If user is already authenticated, navigate to active game
+                  // If user is already authenticated, navigate to home screen
                   if (user != null) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      context.go('/game');
+                      context.go(AppConstants.homeRoute);
                     });
                   }
 
@@ -61,7 +61,7 @@ class AuthScreen extends ConsumerWidget {
                     onPressed: () async {
                       await ref.read(authNotifierProvider.notifier).signInAsGuest();
                       if (context.mounted) {
-                        context.go('/game');
+                        context.go(AppConstants.homeRoute);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -118,7 +118,7 @@ class AuthScreen extends ConsumerWidget {
                   try {
                     await ref.read(authNotifierProvider.notifier).signInWithGoogle();
                     if (context.mounted) {
-                      context.go('/game');
+                      context.go(AppConstants.homeRoute);
                     }
                   } catch (e) {
                     if (context.mounted) {
@@ -132,7 +132,7 @@ class AuthScreen extends ConsumerWidget {
                     }
                   }
                 },
-                icon: const Icon(Icons.g_mobiledata, size: 28, color: AppTheme.primaryColor),
+                icon: const Icon(Icons.g_mobiledata, size: 32, color: AppTheme.primaryColor),
                 label: const Text('Sign in with Google'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -144,7 +144,7 @@ class AuthScreen extends ConsumerWidget {
 
               OutlinedButton.icon(
                 onPressed: null, // TODO: Implement Apple Sign In
-                icon: const Icon(Icons.apple, size: 24),
+                icon: Icon(Icons.apple, size: 28, color: Colors.grey.shade400),
                 label: const Text('Sign in with Apple'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -154,7 +154,7 @@ class AuthScreen extends ConsumerWidget {
 
               OutlinedButton.icon(
                 onPressed: null, // TODO: Implement Email Sign In
-                icon: const Icon(Icons.email, size: 20),
+                icon: Icon(Icons.email, size: 24, color: Colors.grey.shade400),
                 label: const Text('Sign in with Email'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),

@@ -25,7 +25,12 @@ mixin _$Player {
   String? get email => throw _privateConstructorUsedError;
   String? get phone => throw _privateConstructorUsedError;
   String? get photoUrl => throw _privateConstructorUsedError;
+  String? get notes => throw _privateConstructorUsedError;
   List<String> get groupIds => throw _privateConstructorUsedError;
+  bool get isFavorite => throw _privateConstructorUsedError;
+  int get gamesPlayed => throw _privateConstructorUsedError;
+  DateTime? get lastPlayedAt => throw _privateConstructorUsedError;
+  double get totalProfit => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
@@ -49,7 +54,12 @@ abstract class $PlayerCopyWith<$Res> {
       String? email,
       String? phone,
       String? photoUrl,
+      String? notes,
       List<String> groupIds,
+      bool isFavorite,
+      int gamesPlayed,
+      DateTime? lastPlayedAt,
+      double totalProfit,
       DateTime createdAt,
       DateTime? updatedAt});
 }
@@ -74,7 +84,12 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
     Object? email = freezed,
     Object? phone = freezed,
     Object? photoUrl = freezed,
+    Object? notes = freezed,
     Object? groupIds = null,
+    Object? isFavorite = null,
+    Object? gamesPlayed = null,
+    Object? lastPlayedAt = freezed,
+    Object? totalProfit = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -99,10 +114,30 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
           ? _value.photoUrl
           : photoUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
       groupIds: null == groupIds
           ? _value.groupIds
           : groupIds // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      isFavorite: null == isFavorite
+          ? _value.isFavorite
+          : isFavorite // ignore: cast_nullable_to_non_nullable
+              as bool,
+      gamesPlayed: null == gamesPlayed
+          ? _value.gamesPlayed
+          : gamesPlayed // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastPlayedAt: freezed == lastPlayedAt
+          ? _value.lastPlayedAt
+          : lastPlayedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      totalProfit: null == totalProfit
+          ? _value.totalProfit
+          : totalProfit // ignore: cast_nullable_to_non_nullable
+              as double,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -128,7 +163,12 @@ abstract class _$$PlayerImplCopyWith<$Res> implements $PlayerCopyWith<$Res> {
       String? email,
       String? phone,
       String? photoUrl,
+      String? notes,
       List<String> groupIds,
+      bool isFavorite,
+      int gamesPlayed,
+      DateTime? lastPlayedAt,
+      double totalProfit,
       DateTime createdAt,
       DateTime? updatedAt});
 }
@@ -151,7 +191,12 @@ class __$$PlayerImplCopyWithImpl<$Res>
     Object? email = freezed,
     Object? phone = freezed,
     Object? photoUrl = freezed,
+    Object? notes = freezed,
     Object? groupIds = null,
+    Object? isFavorite = null,
+    Object? gamesPlayed = null,
+    Object? lastPlayedAt = freezed,
+    Object? totalProfit = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -176,10 +221,30 @@ class __$$PlayerImplCopyWithImpl<$Res>
           ? _value.photoUrl
           : photoUrl // ignore: cast_nullable_to_non_nullable
               as String?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
       groupIds: null == groupIds
           ? _value._groupIds
           : groupIds // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      isFavorite: null == isFavorite
+          ? _value.isFavorite
+          : isFavorite // ignore: cast_nullable_to_non_nullable
+              as bool,
+      gamesPlayed: null == gamesPlayed
+          ? _value.gamesPlayed
+          : gamesPlayed // ignore: cast_nullable_to_non_nullable
+              as int,
+      lastPlayedAt: freezed == lastPlayedAt
+          ? _value.lastPlayedAt
+          : lastPlayedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime?,
+      totalProfit: null == totalProfit
+          ? _value.totalProfit
+          : totalProfit // ignore: cast_nullable_to_non_nullable
+              as double,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -201,7 +266,12 @@ class _$PlayerImpl implements _Player {
       this.email,
       this.phone,
       this.photoUrl,
+      this.notes,
       final List<String> groupIds = const [],
+      this.isFavorite = false,
+      this.gamesPlayed = 0,
+      this.lastPlayedAt,
+      this.totalProfit = 0.0,
       required this.createdAt,
       this.updatedAt})
       : _groupIds = groupIds;
@@ -219,6 +289,8 @@ class _$PlayerImpl implements _Player {
   final String? phone;
   @override
   final String? photoUrl;
+  @override
+  final String? notes;
   final List<String> _groupIds;
   @override
   @JsonKey()
@@ -229,13 +301,24 @@ class _$PlayerImpl implements _Player {
   }
 
   @override
+  @JsonKey()
+  final bool isFavorite;
+  @override
+  @JsonKey()
+  final int gamesPlayed;
+  @override
+  final DateTime? lastPlayedAt;
+  @override
+  @JsonKey()
+  final double totalProfit;
+  @override
   final DateTime createdAt;
   @override
   final DateTime? updatedAt;
 
   @override
   String toString() {
-    return 'Player(id: $id, name: $name, email: $email, phone: $phone, photoUrl: $photoUrl, groupIds: $groupIds, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Player(id: $id, name: $name, email: $email, phone: $phone, photoUrl: $photoUrl, notes: $notes, groupIds: $groupIds, isFavorite: $isFavorite, gamesPlayed: $gamesPlayed, lastPlayedAt: $lastPlayedAt, totalProfit: $totalProfit, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -249,7 +332,16 @@ class _$PlayerImpl implements _Player {
             (identical(other.phone, phone) || other.phone == phone) &&
             (identical(other.photoUrl, photoUrl) ||
                 other.photoUrl == photoUrl) &&
+            (identical(other.notes, notes) || other.notes == notes) &&
             const DeepCollectionEquality().equals(other._groupIds, _groupIds) &&
+            (identical(other.isFavorite, isFavorite) ||
+                other.isFavorite == isFavorite) &&
+            (identical(other.gamesPlayed, gamesPlayed) ||
+                other.gamesPlayed == gamesPlayed) &&
+            (identical(other.lastPlayedAt, lastPlayedAt) ||
+                other.lastPlayedAt == lastPlayedAt) &&
+            (identical(other.totalProfit, totalProfit) ||
+                other.totalProfit == totalProfit) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -258,8 +350,21 @@ class _$PlayerImpl implements _Player {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, email, phone, photoUrl,
-      const DeepCollectionEquality().hash(_groupIds), createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      name,
+      email,
+      phone,
+      photoUrl,
+      notes,
+      const DeepCollectionEquality().hash(_groupIds),
+      isFavorite,
+      gamesPlayed,
+      lastPlayedAt,
+      totalProfit,
+      createdAt,
+      updatedAt);
 
   /// Create a copy of Player
   /// with the given fields replaced by the non-null parameter values.
@@ -284,7 +389,12 @@ abstract class _Player implements Player {
       final String? email,
       final String? phone,
       final String? photoUrl,
+      final String? notes,
       final List<String> groupIds,
+      final bool isFavorite,
+      final int gamesPlayed,
+      final DateTime? lastPlayedAt,
+      final double totalProfit,
       required final DateTime createdAt,
       final DateTime? updatedAt}) = _$PlayerImpl;
 
@@ -301,7 +411,17 @@ abstract class _Player implements Player {
   @override
   String? get photoUrl;
   @override
+  String? get notes;
+  @override
   List<String> get groupIds;
+  @override
+  bool get isFavorite;
+  @override
+  int get gamesPlayed;
+  @override
+  DateTime? get lastPlayedAt;
+  @override
+  double get totalProfit;
   @override
   DateTime get createdAt;
   @override
