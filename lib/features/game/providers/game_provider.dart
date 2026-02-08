@@ -248,9 +248,13 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   /// Update a buy-in
   Future<void> updateBuyIn(BuyIn buyIn) async {
     try {
+      // Save locally
       await _localStorage.saveBuyIn(buyIn);
+      
+      // Save to Firestore (always)
+      await _firestoreService.saveBuyIn(buyIn, _userId);
     } catch (e) {
-      // Handle error
+      rethrow;
     }
   }
 
