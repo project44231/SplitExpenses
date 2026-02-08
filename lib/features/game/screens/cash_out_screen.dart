@@ -131,6 +131,9 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
           }
         }
 
+        // NOW end the game (only when cash-outs are submitted)
+        await ref.read(gameProvider.notifier).endGame(widget.gameId);
+
         if (mounted) {
           // Navigate to settlement screen
           context.go('${AppConstants.settlementRoute}/${widget.gameId}');
@@ -156,17 +159,13 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              'images/app_icon.png',
-              width: 60,
-              height: 60,
-              fit: BoxFit.cover,
-            ),
-          ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Go back to active game (game stays active)
+            context.go('${AppConstants.activeGameRoute}/${widget.gameId}');
+          },
+          tooltip: 'Back to Game',
         ),
         title: const Text('Enter Cash-Outs'),
         backgroundColor: AppTheme.primaryColor,
@@ -180,7 +179,7 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
               color: AppTheme.primaryColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -356,7 +355,7 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, -2),
                 ),

@@ -112,13 +112,32 @@ class AuthScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              // Sign in buttons (disabled for now - will implement in Phase 2)
+              // Google Sign In Button
               OutlinedButton.icon(
-                onPressed: null, // TODO: Implement Google Sign In
-                icon: const Icon(Icons.g_mobiledata, size: 28),
+                onPressed: () async {
+                  try {
+                    await ref.read(authNotifierProvider.notifier).signInWithGoogle();
+                    if (context.mounted) {
+                      context.go('/game');
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Sign in failed: ${e.toString()}'),
+                          backgroundColor: AppTheme.errorColor,
+                          duration: const Duration(seconds: 4),
+                        ),
+                      );
+                    }
+                  }
+                },
+                icon: const Icon(Icons.g_mobiledata, size: 28, color: AppTheme.primaryColor),
                 label: const Text('Sign in with Google'),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  foregroundColor: AppTheme.primaryColor,
+                  side: const BorderSide(color: AppTheme.primaryColor),
                 ),
               ),
               const SizedBox(height: 12),

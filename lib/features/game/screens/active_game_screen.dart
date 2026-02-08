@@ -111,28 +111,53 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     );
 
     if (result != null && mounted) {
-      // Add new player
-      final player = await ref.read(playerProvider.notifier).addPlayer(
-            name: result,
+      try {
+        // Add new player
+        print('DEBUG: Adding player: $result');
+        final player = await ref.read(playerProvider.notifier).addPlayer(
+              name: result,
+            );
+
+        print('DEBUG: Player created: ${player?.id} - ${player?.name}');
+
+        if (player != null && mounted) {
+          // Add player to current game
+          final updatedPlayerIds = [..._currentGame!.playerIds, player.id];
+          print('DEBUG: Updated player IDs: $updatedPlayerIds');
+          
+          final updatedGame = _currentGame!.copyWith(
+            playerIds: updatedPlayerIds,
+            updatedAt: DateTime.now(),
           );
+          
+          await ref.read(gameProvider.notifier).updateGame(updatedGame);
+          print('DEBUG: Game updated with new player');
+          
+          // Reload players to ensure UI updates
+          await ref.read(playerProvider.notifier).loadPlayers();
+          print('DEBUG: Players reloaded');
+          
+          setState(() {
+            _currentGame = updatedGame;
+          });
 
-      if (player != null && mounted) {
-        // Add player to current game
-        final updatedPlayerIds = [..._currentGame!.playerIds, player.id];
-        final updatedGame = _currentGame!.copyWith(
-          playerIds: updatedPlayerIds,
-          updatedAt: DateTime.now(),
-        );
-        
-        await ref.read(gameProvider.notifier).updateGame(updatedGame);
-        
-        setState(() {
-          _currentGame = updatedGame;
-        });
-
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('${player.name} added')),
+            );
+          }
+        } else {
+          print('DEBUG: Player is null or not mounted');
+        }
+      } catch (e, stack) {
+        print('DEBUG ERROR adding player: $e');
+        print('DEBUG Stack: $stack');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${player.name} added')),
+            SnackBar(
+              content: Text('Error adding player: $e'),
+              backgroundColor: AppTheme.errorColor,
+            ),
           );
         }
       }
@@ -174,14 +199,34 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     );
 
     if (result != null && mounted) {
-      await ref.read(gameProvider.notifier).addBuyIn(
-            gameId: _currentGame!.id,
-            playerId: result['playerId'],
-            amount: result['amount'],
-            type: result['type'],
+      try {
+        print('DEBUG: Adding buy-in - gameId: ${_currentGame!.id}, playerId: ${result['playerId']}, amount: ${result['amount']}');
+        await ref.read(gameProvider.notifier).addBuyIn(
+              gameId: _currentGame!.id,
+              playerId: result['playerId'],
+              amount: result['amount'],
+              type: result['type'],
+            );
+        print('DEBUG: Buy-in added successfully');
+        setState(() {}); // Trigger rebuild
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Buy-in added successfully')),
           );
-
-      setState(() {}); // Trigger rebuild
+        }
+      } catch (e, stack) {
+        print('DEBUG ERROR adding buy-in: $e');
+        print('DEBUG Stack: $stack');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error adding buy-in: $e'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -397,11 +442,8 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
     );
 
     if (confirm == true && mounted) {
-      await ref.read(gameProvider.notifier).endGame(_currentGame!.id);
-      if (mounted) {
-        // Navigate to cash-out screen instead of settlement
-        context.go('/cash-out/${_currentGame!.id}');
-      }
+      // Navigate to cash-out screen (game stays active until cash-outs are submitted)
+      context.go('/cash-out/${_currentGame!.id}');
     }
   }
 
@@ -420,26 +462,33 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
       );
     }
 
-    return FutureBuilder(
-      future: Future.wait([
-        ref.read(gameProvider.notifier).getBuyIns(_currentGame!.id),
-        Future.value(ref.read(playerProvider)),
-      ]),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+    // Watch the player provider to get live updates
+    final playersAsync = ref.watch(playerProvider);
+    
+    return FutureBuilder<List<BuyIn>>(
+      future: ref.read(gameProvider.notifier).getBuyIns(_currentGame!.id),
+      builder: (context, buyInSnapshot) {
+        if (buyInSnapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
-        final buyIns = (snapshot.data?[0] as List<BuyIn>?) ?? [];
-        final playersAsync = snapshot.data?[1] as AsyncValue<List<Player>>?;
+        final buyIns = buyInSnapshot.data ?? [];
 
-        return playersAsync?.when(
+        return playersAsync.when(
           data: (allPlayers) {
+            print('DEBUG: All players count: ${allPlayers.length}');
+            print('DEBUG: Game player IDs: ${_currentGame!.playerIds}');
+            
             final gamePlayers = allPlayers
                 .where((p) => _currentGame!.playerIds.contains(p.id))
                 .toList();
+            
+            print('DEBUG: Game players count: ${gamePlayers.length}');
+            for (final p in gamePlayers) {
+              print('DEBUG: Player in game: ${p.id} - ${p.name}');
+            }
 
             // Calculate totals
             final playerTotals = <String, double>{};

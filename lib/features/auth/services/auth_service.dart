@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../models/app_user.dart';
 import '../../../services/local_storage_service.dart';
 import '../../../core/constants/app_constants.dart';
@@ -17,6 +18,14 @@ class AuthService {
   /// Check if user is in guest mode
   bool get isGuestMode {
     return _localStorage.getBool(AppConstants.isGuestModeKey) ?? false;
+  }
+
+  /// Get current user ID (returns 'guest' for guest mode, Firebase UID for authenticated users)
+  String? get currentUserId {
+    if (isGuestMode) {
+      return 'guest';
+    }
+    return _firebaseAuth?.currentUser?.uid;
   }
 
   /// Get current user (guest or authenticated)
@@ -118,9 +127,77 @@ class AuthService {
   }
 
   /// Sign in with Google
-  /// TODO: Implement when Google Sign In is set up
   Future<AppUser?> signInWithGoogle() async {
-    throw UnimplementedError('Google Sign In not implemented yet');
+    if (_firebaseAuth == null) {
+      throw Exception('Firebase not initialized');
+    }
+
+    try {
+      // Trigger the Google authentication flow
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+
+      // Sign out first to ensure account picker shows up
+      await googleSignIn.signOut();
+
+      // Initiate Google Sign In
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      // If user cancels the sign-in
+      if (googleUser == null) {
+        return null;
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Create a new credential
+      final credential = firebase_auth.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credential
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+
+      if (userCredential.user == null) return null;
+
+      // Clear guest mode flag if it was set
+      await _localStorage.remove(AppConstants.isGuestModeKey);
+
+      // Return AppUser
+      return AppUser(
+        id: userCredential.user!.uid,
+        email: userCredential.user!.email ?? '',
+        displayName: userCredential.user!.displayName,
+        photoUrl: userCredential.user!.photoURL,
+        isGuest: false,
+        createdAt: userCredential.user!.metadata.creationTime ?? DateTime.now(),
+        lastLoginAt: DateTime.now(),
+      );
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      // Handle Firebase-specific errors
+      switch (e.code) {
+        case 'account-exists-with-different-credential':
+          throw Exception('An account already exists with a different sign-in method.');
+        case 'invalid-credential':
+          throw Exception('Invalid credential. Please try again.');
+        case 'operation-not-allowed':
+          throw Exception('Google Sign-In is not enabled. Please contact support.');
+        case 'user-disabled':
+          throw Exception('This account has been disabled.');
+        case 'user-not-found':
+          throw Exception('No user found.');
+        case 'wrong-password':
+          throw Exception('Wrong password.');
+        default:
+          throw Exception('Authentication failed: ${e.message}');
+      }
+    } catch (e) {
+      // Handle other errors
+      throw Exception('Failed to sign in with Google: $e');
+    }
   }
 
   /// Sign in with Apple

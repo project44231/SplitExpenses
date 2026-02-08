@@ -7,7 +7,12 @@ Flutter app for tracking poker home games with buy-ins, settlements, and statist
 - **[Status](STATUS.md)** - Current progress & next steps
 - **[Setup](SETUP.md)** - Firebase configuration (when ready)
 - **[Features](FEATURES.md)** - All planned features
+- **[Game Flow](GAME_FLOW.md)** - Complete game lifecycle and navigation
 - **[Color Theme](COLOR_THEME.md)** - 🎨 Modern blue color scheme & design guidelines
+- **[Firebase Integration](FIREBASE_INTEGRATION.md)** - Cloud storage and sync architecture
+- **[Guest Data Cleanup](GUEST_DATA_CLEANUP.md)** - 🧹 Managing and cleaning up guest data
+- **[Google Sign-In Setup](GOOGLE_SIGNIN_SETUP.md)** - 🔐 Complete Google authentication configuration
+- **[Quick Start: Google Auth](QUICK_START_GOOGLE_AUTH.md)** - ⚡ Get Google Sign-In working in 10 minutes
 
 ## Quick Start
 

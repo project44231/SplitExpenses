@@ -2,31 +2,54 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/player.dart';
 import '../../../services/local_storage_service.dart';
+import '../../../services/firestore_service.dart';
 import '../../../features/auth/providers/auth_provider.dart';
+import '../../game/providers/game_provider.dart';
 
 /// Provider for managing players
 final playerProvider = StateNotifierProvider<PlayerNotifier, AsyncValue<List<Player>>>((ref) {
   final localStorage = ref.watch(localStorageServiceProvider);
-  return PlayerNotifier(localStorage);
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  final authService = ref.watch(authServiceProvider);
+  return PlayerNotifier(localStorage, firestoreService, authService);
 });
 
 /// Notifier for player state management
 class PlayerNotifier extends StateNotifier<AsyncValue<List<Player>>> {
   final LocalStorageService _localStorage;
+  final FirestoreService _firestoreService;
+  final dynamic _authService;
   final _uuid = const Uuid();
 
-  PlayerNotifier(this._localStorage) : super(const AsyncValue.loading()) {
+  PlayerNotifier(this._localStorage, this._firestoreService, this._authService) 
+      : super(const AsyncValue.loading()) {
     loadPlayers();
   }
 
-  /// Load all players from storage
+  /// Get current user ID (returns 'guest' for guest mode, Firebase UID for logged in)
+  String get _userId => _authService.currentUserId ?? 'guest';
+
+  /// Load all players from storage (Always uses Firestore, with local cache)
   Future<void> loadPlayers() async {
     state = const AsyncValue.loading();
     try {
-      final players = await _localStorage.getAllPlayers();
+      // Load from Firestore (works for both guest and authenticated users)
+      final players = await _firestoreService.getPlayers(_userId);
+      
+      // Cache locally for offline access
+      for (final player in players) {
+        await _localStorage.savePlayer(player);
+      }
+      
       state = AsyncValue.data(players);
     } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      // Fallback to local storage on error (offline mode)
+      try {
+        final players = await _localStorage.getAllPlayers();
+        state = AsyncValue.data(players);
+      } catch (localError, _) {
+        state = AsyncValue.error(e, stack);
+      }
     }
   }
 
@@ -45,12 +68,25 @@ class PlayerNotifier extends StateNotifier<AsyncValue<List<Player>>> {
         createdAt: DateTime.now(),
       );
 
+      print('DEBUG PlayerProvider: Saving player locally: ${player.id} - ${player.name}');
       await _localStorage.savePlayer(player);
+      print('DEBUG PlayerProvider: Saved locally ✓');
+      
+      // Save to Firestore (always)
+      print('DEBUG PlayerProvider: Saving to Firestore with userId: $_userId');
+      await _firestoreService.savePlayer(player, _userId);
+      print('DEBUG PlayerProvider: Saved to Firestore ✓');
+      
+      print('DEBUG PlayerProvider: Reloading players...');
       await loadPlayers(); // Reload list
+      print('DEBUG PlayerProvider: Players reloaded ✓');
 
+      print('DEBUG PlayerProvider: Returning player: ${player.id}');
       return player;
-    } catch (e) {
-      // Handle error silently, return null
+    } catch (e, stack) {
+      // Handle error with logging
+      print('DEBUG PlayerProvider ERROR: $e');
+      print('DEBUG PlayerProvider Stack: $stack');
       return null;
     }
   }
@@ -60,6 +96,10 @@ class PlayerNotifier extends StateNotifier<AsyncValue<List<Player>>> {
     try {
       final updated = player.copyWith(updatedAt: DateTime.now());
       await _localStorage.savePlayer(updated);
+      
+      // Save to Firestore (always)
+      await _firestoreService.savePlayer(updated, _userId);
+      
       await loadPlayers();
     } catch (e) {
       // Handle error
@@ -70,6 +110,10 @@ class PlayerNotifier extends StateNotifier<AsyncValue<List<Player>>> {
   Future<void> deletePlayer(String playerId) async {
     try {
       await _localStorage.deletePlayer(playerId);
+      
+      // Delete from Firestore (always)
+      await _firestoreService.deletePlayer(playerId);
+      
       await loadPlayers();
     } catch (e) {
       // Handle error

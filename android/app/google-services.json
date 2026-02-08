@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "393328283698",
+    "project_id": "gametracker-a834b",
+    "storage_bucket": "gametracker-a834b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:393328283698:android:36f5135ea09c90601f6c2b",
+        "android_client_info": {
+          "package_name": "com.gametracker.poker_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "393328283698-h46rdjsbrmi1313p0o0f0cfiel3ni811.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.gametracker.poker_tracker",
+            "certificate_hash": "a01d11f7c7fe3f3cc6ea5160e7a242e44290f30c"
+          }
+        },
+        {
+          "client_id": "393328283698-jci6cr0gb6jl4uoatsfq24vai94ilgn7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5S9P-pRbp80AlkfJ28kVgHZNqu18rg7s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "393328283698-jci6cr0gb6jl4uoatsfq24vai94ilgn7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "393328283698-842bf04numlhqa64glfpntj5tej41qc0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.gametracker.pokerTracker"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

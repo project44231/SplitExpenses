@@ -5,13 +5,21 @@ import '../../../models/game_group.dart';
 import '../../../models/buy_in.dart';
 import '../../../models/cash_out.dart';
 import '../../../services/local_storage_service.dart';
+import '../../../services/firestore_service.dart';
 import '../../../features/auth/providers/auth_provider.dart';
 import '../../../core/constants/currency.dart';
+
+/// Provider for Firestore service
+final firestoreServiceProvider = Provider<FirestoreService>((ref) {
+  return FirestoreService();
+});
 
 /// Provider for managing games
 final gameProvider = StateNotifierProvider<GameNotifier, AsyncValue<List<Game>>>((ref) {
   final localStorage = ref.watch(localStorageServiceProvider);
-  return GameNotifier(localStorage);
+  final firestoreService = ref.watch(firestoreServiceProvider);
+  final authService = ref.watch(authServiceProvider);
+  return GameNotifier(localStorage, firestoreService, authService);
 });
 
 /// Provider for the current active game
@@ -20,20 +28,39 @@ final activeGameProvider = StateProvider<Game?>((ref) => null);
 /// Notifier for game state management
 class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   final LocalStorageService _localStorage;
+  final FirestoreService _firestoreService;
+  final dynamic _authService;
   final _uuid = const Uuid();
 
-  GameNotifier(this._localStorage) : super(const AsyncValue.loading()) {
+  GameNotifier(this._localStorage, this._firestoreService, this._authService) 
+      : super(const AsyncValue.loading()) {
     loadGames();
   }
 
-  /// Load all games from storage
+  /// Get current user ID (returns 'guest' for guest mode, Firebase UID for logged in)
+  String get _userId => _authService.currentUserId ?? 'guest';
+
+  /// Load all games from storage (Always uses Firestore, with local cache)
   Future<void> loadGames() async {
     state = const AsyncValue.loading();
     try {
-      final games = await _localStorage.getAllGames();
+      // Load from Firestore (works for both guest and authenticated users)
+      final games = await _firestoreService.getGames(_userId);
+      
+      // Cache locally for offline access
+      for (final game in games) {
+        await _localStorage.saveGame(game);
+      }
+      
       state = AsyncValue.data(games);
     } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
+      // Fallback to local storage on error (offline mode)
+      try {
+        final games = await _localStorage.getAllGames();
+        state = AsyncValue.data(games);
+      } catch (localError, _) {
+        state = AsyncValue.error(e, stack);
+      }
     }
   }
 
@@ -59,7 +86,12 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
         createdAt: DateTime.now(),
       );
 
+      // Save to local storage
       await _localStorage.saveGame(game);
+      
+      // Save to Firestore (always, for both guest and authenticated users)
+      await _firestoreService.saveGame(game, _userId);
+      
       await loadGames();
 
       return game;
@@ -83,11 +115,15 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     final newGroup = GameGroup(
       id: _uuid.v4(),
       name: 'Quick Games',
-      ownerId: 'guest', // Guest user
+      ownerId: _userId,
       createdAt: DateTime.now(),
     );
 
     await _localStorage.saveGameGroup(newGroup);
+    
+    // Save to Firestore (always)
+    await _firestoreService.saveGameGroup(newGroup, _userId);
+    
     return newGroup.id;
   }
 
@@ -104,6 +140,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       );
 
       await _localStorage.saveGame(updatedGame);
+      
+      // Save to Firestore (always)
+      await _firestoreService.saveGame(updatedGame, _userId);
+      
       await loadGames();
     } catch (e) {
       // Handle error
@@ -114,6 +154,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   Future<void> deleteGame(String gameId) async {
     try {
       await _localStorage.deleteGame(gameId);
+      
+      // Delete from Firestore (always)
+      await _firestoreService.deleteGame(gameId);
+      
       await loadGames();
     } catch (e) {
       // Handle error
@@ -122,17 +166,48 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
 
   /// Get game by ID
   Future<Game?> getGame(String gameId) async {
-    return await _localStorage.getGame(gameId);
+    try {
+      // Try Firestore first (for both guest and authenticated users)
+      final game = await _firestoreService.getGame(gameId);
+      if (game != null) {
+        await _localStorage.saveGame(game);
+        return game;
+      }
+      return await _localStorage.getGame(gameId);
+    } catch (e) {
+      // Fallback to local storage
+      return await _localStorage.getGame(gameId);
+    }
   }
 
   /// Get buy-ins for a game
   Future<List<BuyIn>> getBuyIns(String gameId) async {
-    return await _localStorage.getBuyInsByGame(gameId);
+    try {
+      // Try Firestore first (for both guest and authenticated users)
+      final buyIns = await _firestoreService.getBuyIns(gameId);
+      for (final buyIn in buyIns) {
+        await _localStorage.saveBuyIn(buyIn);
+      }
+      return buyIns;
+    } catch (e) {
+      // Fallback to local storage
+      return await _localStorage.getBuyInsByGame(gameId);
+    }
   }
 
   /// Get cash-outs for a game
   Future<List<CashOut>> getCashOuts(String gameId) async {
-    return await _localStorage.getCashOutsByGame(gameId);
+    try {
+      // Try Firestore first (for both guest and authenticated users)
+      final cashOuts = await _firestoreService.getCashOuts(gameId);
+      for (final cashOut in cashOuts) {
+        await _localStorage.saveCashOut(cashOut);
+      }
+      return cashOuts;
+    } catch (e) {
+      // Fallback to local storage
+      return await _localStorage.getCashOutsByGame(gameId);
+    }
   }
 
   /// Add a buy-in
@@ -154,9 +229,19 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
         notes: notes,
       );
 
+      print('DEBUG GameProvider: Saving buy-in locally: ${buyIn.id} - \$${buyIn.amount}');
       await _localStorage.saveBuyIn(buyIn);
-    } catch (e) {
+      print('DEBUG GameProvider: Saved locally ✓');
+      
+      // Save to Firestore (always)
+      print('DEBUG GameProvider: Saving buy-in to Firestore with userId: $_userId');
+      await _firestoreService.saveBuyIn(buyIn, _userId);
+      print('DEBUG GameProvider: Saved to Firestore ✓');
+    } catch (e, stack) {
       // Handle error
+      print('DEBUG GameProvider ERROR adding buy-in: $e');
+      print('DEBUG Stack: $stack');
+      rethrow;
     }
   }
 
@@ -173,8 +258,11 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   Future<void> deleteBuyIn(String buyInId) async {
     try {
       await _localStorage.deleteBuyIn(buyInId);
+      
+      // Delete from Firestore (always)
+      await _firestoreService.deleteBuyIn(buyInId);
     } catch (e) {
-      // Handle error
+      rethrow;
     }
   }
 
@@ -196,6 +284,9 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       );
 
       await _localStorage.saveCashOut(cashOut);
+      
+      // Save to Firestore (always)
+      await _firestoreService.saveCashOut(cashOut, _userId);
     } catch (e) {
       // Handle error
     }
@@ -205,6 +296,9 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   Future<void> clearCashOuts(String gameId) async {
     try {
       await _localStorage.deleteCashOutsByGame(gameId);
+      
+      // Delete from Firestore (always)
+      await _firestoreService.deleteCashOutsByGame(gameId);
     } catch (e) {
       // Handle error
     }
