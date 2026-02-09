@@ -192,6 +192,28 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+
+        .refresh-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 12px;
+            width: 100%;
+        }
+
+        .refresh-btn:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .refresh-btn:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -225,6 +247,7 @@
             <div class="players-section">
                 <div class="players-title">Current Standings</div>
                 <div id="playersList"></div>
+                <button id="refreshBtn" class="refresh-btn" onclick="manualRefresh()">🔄 Refresh</button>
                 <div class="last-updated">
                     Last updated: <span id="lastUpdated">Just now</span>
                 </div>
@@ -234,6 +257,6 @@
         <div id="error" class="error" style="display: none;"></div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script type="module" src="/app.js"></script>
 </body>
 </html>

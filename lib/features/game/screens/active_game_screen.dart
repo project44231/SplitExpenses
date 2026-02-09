@@ -604,6 +604,69 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     }
   }
 
+  Future<void> _showCancelGameDialog() async {
+    if (_currentGame == null) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel This Game'),
+        content: const Text(
+          'Are you sure you want to cancel this game?\n\n'
+          'This will delete the current game and all buy-ins, and start a fresh game.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No, Keep Game'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.errorColor,
+            ),
+            child: const Text('Yes, Cancel Game'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      try {
+        // Delete the current game
+        await ref.read(gameProvider.notifier).deleteGame(_currentGame!.id);
+        
+        // Create a new game
+        final newGame = await ref.read(gameProvider.notifier).getOrCreateCurrentGame();
+        
+        if (mounted) {
+          setState(() {
+            _currentGame = newGame;
+            _isLoading = false;
+            _notesController.text = '';
+            _buyInsRefreshKey++;
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Game cancelled. New game started.'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error cancelling game: $e'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
@@ -690,10 +753,38 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                     onPressed: _shareGame,
                     tooltip: 'Share Game',
                   ),
-                  IconButton(
+                  PopupMenuButton<String>(
                     icon: const Icon(Icons.settings),
-                    onPressed: _showGameSettingsDialog,
                     tooltip: 'Game Settings',
+                    onSelected: (value) {
+                      if (value == 'buy_in_settings') {
+                        _showGameSettingsDialog();
+                      } else if (value == 'cancel_game') {
+                        _showCancelGameDialog();
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'buy_in_settings',
+                        child: Row(
+                          children: [
+                            Icon(Icons.attach_money, size: 20),
+                            SizedBox(width: 12),
+                            Text('Buy-In Settings'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'cancel_game',
+                        child: Row(
+                          children: [
+                            Icon(Icons.cancel, size: 20, color: Colors.red),
+                            SizedBox(width: 12),
+                            Text('Cancel This Game', style: TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -952,30 +1043,41 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                                           ),
                                           border: const OutlineInputBorder(),
                                           filled: true,
-                                          fillColor: Colors.blue.shade50,
-                                          contentPadding: const EdgeInsets.fromLTRB(12, 12, 48, 12),
+                                          fillColor: Colors.white,
+                                          contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 48),
                                         ),
                                       ),
                                       Positioned(
-                                        right: 4,
-                                        top: 4,
-                                        child: IconButton(
+                                        right: 8,
+                                        bottom: 28,
+                                        child: ElevatedButton.icon(
                                           onPressed: _isSavingNotes ? null : _saveNotes,
                                           icon: _isSavingNotes
                                               ? const SizedBox(
-                                                  width: 20,
-                                                  height: 20,
+                                                  width: 14,
+                                                  height: 14,
                                                   child: CircularProgressIndicator(
                                                     strokeWidth: 2,
-                                                    color: AppTheme.primaryColor,
+                                                    color: Colors.white,
                                                   ),
                                                 )
                                               : const Icon(
-                                                  Icons.check_circle,
-                                                  color: AppTheme.primaryColor,
-                                                  size: 28,
+                                                  Icons.save,
+                                                  size: 16,
                                                 ),
-                                          tooltip: 'Save Notes',
+                                          label: Text(
+                                            _isSavingNotes ? 'Saving...' : 'Save',
+                                            style: const TextStyle(fontSize: 13),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppTheme.primaryColor,
+                                            foregroundColor: Colors.white,
+                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            elevation: 2,
+                                          ),
                                         ),
                                       ),
                                     ],

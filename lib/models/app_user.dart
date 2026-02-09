@@ -19,9 +19,10 @@ class AppUser with _$AppUser {
   factory AppUser.fromJson(Map<String, dynamic> json) => _$AppUserFromJson(json);
   
   /// Create a guest user
-  factory AppUser.guest() => AppUser(
-        id: 'guest',
+  factory AppUser.guest([String? guestId]) => AppUser(
+        id: guestId ?? 'guest',
         email: 'guest@local',
+        displayName: 'Guest User',
         isGuest: true,
         createdAt: DateTime.now(),
       );

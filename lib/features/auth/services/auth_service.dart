@@ -20,10 +20,10 @@ class AuthService {
     return _localStorage.getBool(AppConstants.isGuestModeKey) ?? false;
   }
 
-  /// Get current user ID (returns 'guest' for guest mode, Firebase UID for authenticated users)
+  /// Get current user ID (returns unique guest ID for guest mode, Firebase UID for authenticated users)
   String? get currentUserId {
     if (isGuestMode) {
-      return 'guest';
+      return _localStorage.getString('guestUserId') ?? 'guest';
     }
     return _firebaseAuth?.currentUser?.uid;
   }
@@ -31,7 +31,8 @@ class AuthService {
   /// Get current user (guest or authenticated)
   AppUser? getCurrentUser() {
     if (isGuestMode) {
-      return AppUser.guest();
+      final guestId = _localStorage.getString('guestUserId') ?? 'guest';
+      return AppUser.guest(guestId);
     }
 
     final firebaseUser = _firebaseAuth?.currentUser;
@@ -51,13 +52,23 @@ class AuthService {
   /// Sign in as guest
   Future<AppUser> signInAsGuest() async {
     await _localStorage.setBool(AppConstants.isGuestModeKey, true);
-    return AppUser.guest();
+    
+    // Generate or retrieve unique guest ID
+    String? guestId = _localStorage.getString('guestUserId');
+    if (guestId == null) {
+      // Generate new unique guest ID
+      final uuid = DateTime.now().millisecondsSinceEpoch.toString();
+      guestId = 'guest_$uuid';
+      await _localStorage.setString('guestUserId', guestId);
+    }
+    
+    return AppUser.guest(guestId);
   }
 
   /// Sign out
   Future<void> signOut() async {
     if (isGuestMode) {
-      // Clear guest mode flag
+      // Clear guest mode flag (but keep guestUserId for re-login)
       await _localStorage.remove(AppConstants.isGuestModeKey);
     } else {
       // Sign out from Firebase
@@ -216,7 +227,8 @@ class AuthService {
     if (_firebaseAuth == null) {
       // No Firebase, check guest mode
       if (isGuestMode) {
-        yield AppUser.guest();
+        final guestId = _localStorage.getString('guestUserId') ?? 'guest';
+        yield AppUser.guest(guestId);
       }
       return;
     }
@@ -234,7 +246,8 @@ class AuthService {
           lastLoginAt: DateTime.now(),
         );
       } else if (isGuestMode) {
-        yield AppUser.guest();
+        final guestId = _localStorage.getString('guestUserId') ?? 'guest';
+        yield AppUser.guest(guestId);
       } else {
         yield null;
       }

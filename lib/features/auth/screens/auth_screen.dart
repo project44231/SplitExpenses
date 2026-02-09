@@ -29,10 +29,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // App branding
-              const Icon(
-                Icons.casino,
-                size: 80,
-                color: AppTheme.primaryColor,
+              Image.asset(
+                'images/app_icon.png',
+                width: 100,
+                height: 100,
               ),
               const SizedBox(height: 16),
               Text(
