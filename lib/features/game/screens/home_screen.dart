@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../history/screens/history_screen.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../feedback/screens/contact_feedback_screen.dart';
 import 'active_game_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = [
     const ActiveGameScreen(gameId: 'current'),
-    const _GroupsPlaceholder(),
+    const ContactFeedbackScreen(),
     const HistoryScreen(),
     const ProfileScreen(),
   ];
@@ -44,8 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Game',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.group),
-            label: 'Groups',
+            icon: Icon(Icons.feedback),
+            label: 'Feedback',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.history),
@@ -54,35 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// Placeholder pages
-class _GroupsPlaceholder extends StatelessWidget {
-  const _GroupsPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.group, size: 64, color: Colors.grey.shade400),
-          const SizedBox(height: 16),
-          Text(
-            'Groups',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming soon',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.grey.shade600,
-                ),
           ),
         ],
       ),

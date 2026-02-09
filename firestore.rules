@@ -12,140 +12,67 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
-    // Helper function to check if resource is owned by guest or current user
-    function isOwnerOrGuest(userId) {
-      return userId == 'guest' || (isAuthenticated() && request.auth.uid == userId);
-    }
-    
-    // Helper function to check if user owns the game
-    function ownsGame(gameId) {
-      return isAuthenticated() && 
-             get(/databases/$(database)/documents/games/$(gameId)).data.userId == request.auth.uid;
-    }
-    
-    // Helper function to check if game has valid share token
-    function hasValidShareToken(gameId, shareToken) {
-      let game = get(/databases/$(database)/documents/games/$(gameId)).data;
-      return game.shareToken != null && game.shareToken == shareToken;
-    }
-
     // Games collection
     match /games/{gameId} {
-      // Allow read if:
-      // 1. User owns the game, OR
-      // 2. Game is owned by guest, OR
-      // 3. Game has a valid shareToken (for public sharing)
-      allow read: if isOwnerOrGuest(resource.data.userId) ||
-                     (resource.data.shareToken != null && resource.data.shareToken != '');
-      
-      // Allow create if authenticated or guest mode
-      allow create: if isAuthenticated() || request.resource.data.userId == 'guest';
-      
-      // Allow update/delete only if user owns the game
-      allow update, delete: if isOwnerOrGuest(resource.data.userId);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-
+    
     // Players collection
     match /players/{playerId} {
-      // Allow read if user owns the player or it's a guest player
-      allow read: if isOwnerOrGuest(resource.data.userId);
-      
-      // Allow create if authenticated or guest mode
-      allow create: if isAuthenticated() || request.resource.data.userId == 'guest';
-      
-      // Allow update/delete only if user owns the player
-      allow update, delete: if isOwnerOrGuest(resource.data.userId);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-
+    
     // Buy-ins collection
     match /buy_ins/{buyInId} {
-      // Allow read if:
-      // 1. User owns the associated game, OR
-      // 2. Game is owned by guest, OR
-      // 3. Game has valid share token (for public sharing)
-      allow read: if isOwnerOrGuest(resource.data.userId) ||
-                     exists(/databases/$(database)/documents/games/$(resource.data.gameId)) &&
-                     (get(/databases/$(database)/documents/games/$(resource.data.gameId)).data.shareToken != null);
-      
-      // Allow create if authenticated or guest mode
-      allow create: if isAuthenticated() || request.resource.data.userId == 'guest';
-      
-      // Allow update/delete if user owns the associated game
-      allow update, delete: if isOwnerOrGuest(resource.data.userId);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-
+    
     // Cash-outs collection
     match /cash_outs/{cashOutId} {
-      // Allow read if user owns the associated game or game is guest-owned
-      allow read: if isOwnerOrGuest(resource.data.userId);
-      
-      // Allow create if authenticated or guest mode
-      allow create: if isAuthenticated() || request.resource.data.userId == 'guest';
-      
-      // Allow update/delete if user owns the associated game
-      allow update, delete: if isOwnerOrGuest(resource.data.userId);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-
+    
     // Settlements collection
     match /settlements/{settlementId} {
-      // Allow read if user owns the associated game or game is guest-owned
-      allow read: if isOwnerOrGuest(resource.data.userId);
-      
-      // Allow create if authenticated or guest mode
-      allow create: if isAuthenticated() || request.resource.data.userId == 'guest';
-      
-      // Allow update/delete if user owns the associated game
-      allow update, delete: if isOwnerOrGuest(resource.data.userId);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-
-    // Expenses collection
-    match /expenses/{expenseId} {
-      // Allow read if user owns the associated game or game is guest-owned
-      allow read: if isOwnerOrGuest(resource.data.userId);
-      
-      // Allow create if authenticated or guest mode
-      allow create: if isAuthenticated() || request.resource.data.userId == 'guest';
-      
-      // Allow update/delete if user owns the associated game
-      allow update, delete: if isOwnerOrGuest(resource.data.userId);
-    }
-
-    // Reconciliations collection
-    match /reconciliations/{reconciliationId} {
-      // Allow read if user owns the associated game or game is guest-owned
-      allow read: if isOwnerOrGuest(resource.data.userId);
-      
-      // Allow create if authenticated or guest mode
-      allow create: if isAuthenticated() || request.resource.data.userId == 'guest';
-      
-      // Allow update/delete if user owns the associated game
-      allow update, delete: if isOwnerOrGuest(resource.data.userId);
-    }
-
+    
     // Game groups collection
     match /game_groups/{groupId} {
-      // Allow read if user owns the group or it's guest-owned
-      allow read: if isOwnerOrGuest(resource.data.userId);
-      
-      // Allow create if authenticated or guest mode
-      allow create: if isAuthenticated() || request.resource.data.userId == 'guest';
-      
-      // Allow update/delete if user owns the group
-      allow update, delete: if isOwnerOrGuest(resource.data.userId);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-
-    // Users collection (for future use)
-    match /users/{userId} {
-      // Users can only read their own data
-      allow read: if isOwner(userId);
-      
-      // Users can only write their own data
-      allow write: if isOwner(userId);
+    
+    // Expenses collection
+    match /expenses/{expenseId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
-
-    // Deny access to all other documents
-    match /{document=**} {
-      allow read, write: if false;
+    
+    // Reconciliations collection
+    match /reconciliations/{reconciliationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Feedback collection
+    match /feedback/{feedbackId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow update, delete: if false; // Feedback is immutable once submitted
     }
   }
 }

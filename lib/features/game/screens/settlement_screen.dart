@@ -16,6 +16,7 @@ import '../providers/game_provider.dart';
 import '../../players/providers/player_provider.dart';
 import '../widgets/cash_out_dialog.dart';
 import '../widgets/settlement_card.dart';
+import '../widgets/settlement_history_dialog.dart';
 
 class SettlementScreen extends ConsumerStatefulWidget {
   final String gameId;
@@ -160,11 +161,34 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         _mismatchPercent = mismatchPercent;
         _isLoading = false;
       });
+
+      // Save settlement to Firestore if we have transactions
+      if (transactions.isNotEmpty) {
+        print('DEBUG: Settlement calculated with ${transactions.length} transactions, saving to Firestore...');
+        _saveSettlementToFirestore(transactions);
+      } else {
+        print('DEBUG: No transactions to save (empty transactions list)');
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Error loading game: $e';
         _isLoading = false;
       });
+    }
+  }
+
+  /// Save settlement transactions to Firestore for tracking
+  Future<void> _saveSettlementToFirestore(List<SettlementTransaction> transactions) async {
+    try {
+      print('DEBUG: Calling gameProvider.saveSettlement for game ${widget.gameId}');
+      await ref.read(gameProvider.notifier).saveSettlement(
+        gameId: widget.gameId,
+        transactions: transactions,
+      );
+      print('DEBUG: Settlement saved successfully to Firestore! ✓');
+    } catch (e) {
+      print('ERROR: Failed to save settlement to Firestore: $e');
+      // Don't show error to user as this is a background operation
     }
   }
 
@@ -245,6 +269,16 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     Share.share(summary, subject: 'Poker Game Settlement');
   }
 
+  void _showSettlementHistory(Currency currency) {
+    showDialog(
+      context: context,
+      builder: (context) => SettlementHistoryDialog(
+        gameId: widget.gameId,
+        currency: currency,
+      ),
+    );
+  }
+
   Future<void> _backToGame() async {
     // Navigate back to the specific game (to continue or review)
     if (!mounted) return;
@@ -309,12 +343,18 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         automaticallyImplyLeading: false,
         title: const Text('Settlement'),
         actions: [
-          if (hasCashOuts)
+          if (hasCashOuts) ...[
+            IconButton(
+              icon: const Icon(Icons.history),
+              onPressed: () => _showSettlementHistory(currency),
+              tooltip: 'Settlement History',
+            ),
             IconButton(
               icon: const Icon(Icons.share),
               onPressed: _shareSettlement,
               tooltip: 'Share Settlement',
             ),
+          ],
         ],
       ),
       body: SingleChildScrollView(

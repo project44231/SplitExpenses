@@ -4,6 +4,7 @@ import '../../../models/game.dart';
 import '../../../models/game_group.dart';
 import '../../../models/buy_in.dart';
 import '../../../models/cash_out.dart';
+import '../../../models/settlement.dart';
 import '../../../services/local_storage_service.dart';
 import '../../../services/firestore_service.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -368,6 +369,40 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     } catch (e) {
       // Handle error
       rethrow;
+    }
+  }
+
+  /// Save settlement for a game
+  Future<void> saveSettlement({
+    required String gameId,
+    required List<SettlementTransaction> transactions,
+  }) async {
+    try {
+      final settlement = Settlement(
+        id: _uuid.v4(),
+        gameId: gameId,
+        transactions: transactions,
+        generatedAt: DateTime.now(),
+      );
+
+      // Save to Firestore (always)
+      await _firestoreService.saveSettlement(settlement, _userId);
+      
+      print('Settlement saved to Firestore: ${settlement.id} with ${transactions.length} transactions');
+    } catch (e) {
+      print('ERROR saving settlement: $e');
+      rethrow;
+    }
+  }
+
+  /// Get settlements for a game
+  Future<List<Settlement>> getSettlements(String gameId) async {
+    try {
+      // Try Firestore first
+      return await _firestoreService.getSettlements(gameId);
+    } catch (e) {
+      print('ERROR getting settlements: $e');
+      return [];
     }
   }
 }

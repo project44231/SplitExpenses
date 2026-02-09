@@ -217,6 +217,7 @@ Settlement _$SettlementFromJson(Map<String, dynamic> json) {
 mixin _$Settlement {
   String get id => throw _privateConstructorUsedError;
   String get gameId => throw _privateConstructorUsedError;
+  @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
   List<SettlementTransaction> get transactions =>
       throw _privateConstructorUsedError;
   DateTime get generatedAt => throw _privateConstructorUsedError;
@@ -240,6 +241,7 @@ abstract class $SettlementCopyWith<$Res> {
   $Res call(
       {String id,
       String gameId,
+      @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
       List<SettlementTransaction> transactions,
       DateTime generatedAt});
 }
@@ -296,6 +298,7 @@ abstract class _$$SettlementImplCopyWith<$Res>
   $Res call(
       {String id,
       String gameId,
+      @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
       List<SettlementTransaction> transactions,
       DateTime generatedAt});
 }
@@ -345,6 +348,7 @@ class _$SettlementImpl implements _Settlement {
   const _$SettlementImpl(
       {required this.id,
       required this.gameId,
+      @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
       required final List<SettlementTransaction> transactions,
       required this.generatedAt})
       : _transactions = transactions;
@@ -358,6 +362,7 @@ class _$SettlementImpl implements _Settlement {
   final String gameId;
   final List<SettlementTransaction> _transactions;
   @override
+  @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
   List<SettlementTransaction> get transactions {
     if (_transactions is EqualUnmodifiableListView) return _transactions;
     // ignore: implicit_dynamic_type
@@ -410,6 +415,7 @@ abstract class _Settlement implements Settlement {
   const factory _Settlement(
       {required final String id,
       required final String gameId,
+      @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
       required final List<SettlementTransaction> transactions,
       required final DateTime generatedAt}) = _$SettlementImpl;
 
@@ -421,6 +427,7 @@ abstract class _Settlement implements Settlement {
   @override
   String get gameId;
   @override
+  @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
   List<SettlementTransaction> get transactions;
   @override
   DateTime get generatedAt;

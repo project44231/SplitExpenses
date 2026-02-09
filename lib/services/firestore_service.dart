@@ -7,6 +7,7 @@ import '../models/settlement.dart';
 import '../models/game_group.dart';
 import '../models/expense.dart';
 import '../models/cash_out_reconciliation.dart';
+import '../models/feedback.dart';
 
 /// Firestore service for cloud data persistence
 class FirestoreService {
@@ -21,6 +22,7 @@ class FirestoreService {
   static const String _groupsCollection = 'game_groups';
   static const String _expensesCollection = 'expenses';
   static const String _reconciliationsCollection = 'reconciliations';
+  static const String _feedbackCollection = 'feedback';
 
   // ==================== Games ====================
 
@@ -243,7 +245,19 @@ class FirestoreService {
 
   // ==================== Settlements ====================
 
-  /// Save settlements for a game
+  /// Save a single settlement for a game
+  Future<void> saveSettlement(Settlement settlement, String userId) async {
+    await _firestore
+        .collection(_settlementsCollection)
+        .doc(settlement.id)
+        .set({
+          ...settlement.toJson(),
+          'userId': userId,
+          'updatedAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+  }
+
+  /// Save multiple settlements for a game (batch operation)
   Future<void> saveSettlements(List<Settlement> settlements, String gameId, String userId) async {
     final batch = _firestore.batch();
     
@@ -268,11 +282,25 @@ class FirestoreService {
     final snapshot = await _firestore
         .collection(_settlementsCollection)
         .where('gameId', isEqualTo: gameId)
+        .orderBy('generatedAt', descending: true)
         .get();
 
     return snapshot.docs
         .map((doc) => Settlement.fromJson(_convertTimestamps(doc.data())))
         .toList();
+  }
+
+  /// Get the latest settlement for a game
+  Future<Settlement?> getLatestSettlement(String gameId) async {
+    final snapshot = await _firestore
+        .collection(_settlementsCollection)
+        .where('gameId', isEqualTo: gameId)
+        .orderBy('generatedAt', descending: true)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isEmpty) return null;
+    return Settlement.fromJson(_convertTimestamps(snapshot.docs.first.data()));
   }
 
   // ==================== Game Groups ====================
@@ -369,6 +397,45 @@ class FirestoreService {
     return snapshot.docs
         .map((doc) => CashOutReconciliation.fromJson(_convertTimestamps(doc.data())))
         .toList();
+  }
+
+  // ==================== Feedback ====================
+
+  /// Submit feedback
+  Future<void> submitFeedback(UserFeedback feedback, String userId) async {
+    await _firestore
+        .collection(_feedbackCollection)
+        .doc(feedback.id)
+        .set({
+          ...feedback.toJson(),
+          'userId': userId,
+          'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: false));
+  }
+
+  /// Get all feedback for a user
+  Future<List<UserFeedback>> getFeedbackByUserId(String userId) async {
+    final snapshot = await _firestore
+        .collection(_feedbackCollection)
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => UserFeedback.fromJson(_convertTimestamps(doc.data())))
+        .toList();
+  }
+
+  /// Stream feedback for a user (for future real-time updates)
+  Stream<List<UserFeedback>> streamFeedback(String userId) {
+    return _firestore
+        .collection(_feedbackCollection)
+        .where('userId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => UserFeedback.fromJson(_convertTimestamps(doc.data())))
+            .toList());
   }
 
   // ==================== Batch Operations ====================

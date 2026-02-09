@@ -1,31 +1,16 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Helper function to check if user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
+    
+    // Feedback images
+    match /feedback_images/{userId}/{imageId} {
+      allow write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null;
     }
     
-    // Helper function to check if user owns the resource
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-    
-    // User uploads (profile photos, etc.)
-    match /users/{userId}/{allPaths=**} {
-      allow read: if true; // Public read for profile photos
-      allow write: if isOwner(userId);
-    }
-    
-    // Game-related uploads (future use)
-    match /games/{gameId}/{allPaths=**} {
-      allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
-    }
-    
-    // Deny all other access
+    // Other storage paths (adjust as needed)
     match /{allPaths=**} {
-      allow read, write: if false;
+      allow read, write: if request.auth != null;
     }
   }
 }

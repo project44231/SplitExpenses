@@ -26,9 +26,7 @@ _$SettlementImpl _$$SettlementImplFromJson(Map<String, dynamic> json) =>
     _$SettlementImpl(
       id: json['id'] as String,
       gameId: json['gameId'] as String,
-      transactions: (json['transactions'] as List<dynamic>)
-          .map((e) => SettlementTransaction.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      transactions: _transactionsFromJson(json['transactions'] as List),
       generatedAt: DateTime.parse(json['generatedAt'] as String),
     );
 
@@ -36,6 +34,6 @@ Map<String, dynamic> _$$SettlementImplToJson(_$SettlementImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'gameId': instance.gameId,
-      'transactions': instance.transactions,
+      'transactions': _transactionsToJson(instance.transactions),
       'generatedAt': instance.generatedAt.toIso8601String(),
     };
