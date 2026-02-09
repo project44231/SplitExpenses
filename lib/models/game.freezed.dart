@@ -21,6 +21,7 @@ Game _$GameFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Game {
   String get id => throw _privateConstructorUsedError;
+  String? get name => throw _privateConstructorUsedError;
   String get groupId => throw _privateConstructorUsedError;
   GameStatus get status => throw _privateConstructorUsedError;
   String get currency => throw _privateConstructorUsedError;
@@ -49,6 +50,7 @@ abstract class $GameCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
+      String? name,
       String groupId,
       GameStatus status,
       String currency,
@@ -78,6 +80,7 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
   @override
   $Res call({
     Object? id = null,
+    Object? name = freezed,
     Object? groupId = null,
     Object? status = null,
     Object? currency = null,
@@ -95,6 +98,10 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
+      name: freezed == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String?,
       groupId: null == groupId
           ? _value.groupId
           : groupId // ignore: cast_nullable_to_non_nullable
@@ -152,6 +159,7 @@ abstract class _$$GameImplCopyWith<$Res> implements $GameCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
+      String? name,
       String groupId,
       GameStatus status,
       String currency,
@@ -178,6 +186,7 @@ class __$$GameImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
+    Object? name = freezed,
     Object? groupId = null,
     Object? status = null,
     Object? currency = null,
@@ -195,6 +204,10 @@ class __$$GameImplCopyWithImpl<$Res>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
+      name: freezed == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String?,
       groupId: null == groupId
           ? _value.groupId
           : groupId // ignore: cast_nullable_to_non_nullable
@@ -248,6 +261,7 @@ class __$$GameImplCopyWithImpl<$Res>
 class _$GameImpl implements _Game {
   const _$GameImpl(
       {required this.id,
+      this.name,
       required this.groupId,
       required this.status,
       required this.currency,
@@ -267,6 +281,8 @@ class _$GameImpl implements _Game {
 
   @override
   final String id;
+  @override
+  final String? name;
   @override
   final String groupId;
   @override
@@ -307,7 +323,7 @@ class _$GameImpl implements _Game {
 
   @override
   String toString() {
-    return 'Game(id: $id, groupId: $groupId, status: $status, currency: $currency, playerIds: $playerIds, customBuyInAmounts: $customBuyInAmounts, startTime: $startTime, endTime: $endTime, notes: $notes, shareToken: $shareToken, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Game(id: $id, name: $name, groupId: $groupId, status: $status, currency: $currency, playerIds: $playerIds, customBuyInAmounts: $customBuyInAmounts, startTime: $startTime, endTime: $endTime, notes: $notes, shareToken: $shareToken, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
@@ -316,6 +332,7 @@ class _$GameImpl implements _Game {
         (other.runtimeType == runtimeType &&
             other is _$GameImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
             (identical(other.groupId, groupId) || other.groupId == groupId) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.currency, currency) ||
@@ -341,6 +358,7 @@ class _$GameImpl implements _Game {
   int get hashCode => Object.hash(
       runtimeType,
       id,
+      name,
       groupId,
       status,
       currency,
@@ -372,6 +390,7 @@ class _$GameImpl implements _Game {
 abstract class _Game implements Game {
   const factory _Game(
       {required final String id,
+      final String? name,
       required final String groupId,
       required final GameStatus status,
       required final String currency,
@@ -388,6 +407,8 @@ abstract class _Game implements Game {
 
   @override
   String get id;
+  @override
+  String? get name;
   @override
   String get groupId;
   @override

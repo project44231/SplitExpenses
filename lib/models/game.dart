@@ -13,6 +13,7 @@ enum GameStatus {
 class Game with _$Game {
   const factory Game({
     required String id,
+    String? name,
     required String groupId,
     required GameStatus status,
     required String currency,

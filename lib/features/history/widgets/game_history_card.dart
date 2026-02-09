@@ -88,6 +88,19 @@ class GameHistoryCard extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Game name (if set)
+              if (game.name != null && game.name!.isNotEmpty) ...[
+                Text(
+                  game.name!,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+              
               // Date and duration
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

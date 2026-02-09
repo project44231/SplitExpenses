@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
@@ -667,6 +668,39 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     }
   }
 
+  /// Generate default game name based on date and time
+  String _generateDefaultGameName(DateTime startTime) {
+    final dayOfWeek = DateFormat('EEEE').format(startTime);
+    final timeOfDay = startTime.hour >= 17 ? 'Night' : startTime.hour >= 12 ? 'Afternoon' : 'Morning';
+    return '$dayOfWeek $timeOfDay Game';
+  }
+
+  /// Show dialog to edit game name
+  Future<void> _showEditGameNameDialog() async {
+    if (_currentGame == null) return;
+
+    final initialName = _currentGame!.name ?? _generateDefaultGameName(_currentGame!.startTime);
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => _EditGameNameDialog(initialName: initialName),
+    );
+
+    if (result != null && mounted) {
+      final updatedGame = await ref.read(gameProvider.notifier)
+          .updateGameName(_currentGame!.id, result);
+      if (updatedGame != null) {
+        setState(() => _currentGame = updatedGame);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Game name updated'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
@@ -746,13 +780,24 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                     ),
                   ),
                 ),
-                title: const Text('Active Game'),
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.share),
-                    onPressed: _shareGame,
-                    tooltip: 'Share Game',
+                title: GestureDetector(
+                  onTap: _showEditGameNameDialog,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          _currentGame?.name ?? _generateDefaultGameName(_currentGame!.startTime),
+                          style: const TextStyle(fontSize: 18),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.edit, size: 16, color: Colors.white),
+                    ],
                   ),
+                ),
+                actions: [
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.settings),
                     tooltip: 'Game Settings',
@@ -947,7 +992,20 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
+                        // Live Link Button
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: _shareGame,
+                            icon: const Icon(Icons.link, size: 18, color: Colors.white),
+                            label: const Text('Live Link', style: TextStyle(color: Colors.white)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor,
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
                         // End Game Button
                         if (buyIns.isNotEmpty)
                           Expanded(
@@ -1179,6 +1237,61 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
           ),
         ) ?? const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
+    );
+  }
+}
+
+/// Dialog widget for editing game name with proper controller lifecycle
+class _EditGameNameDialog extends StatefulWidget {
+  final String initialName;
+
+  const _EditGameNameDialog({required this.initialName});
+
+  @override
+  State<_EditGameNameDialog> createState() => _EditGameNameDialogState();
+}
+
+class _EditGameNameDialogState extends State<_EditGameNameDialog> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialName);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Edit Game Name'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        maxLength: 50,
+        decoration: const InputDecoration(
+          hintText: 'Enter game name',
+          border: OutlineInputBorder(),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primaryColor,
+          ),
+          child: const Text('Save'),
+        ),
+      ],
     );
   }
 }

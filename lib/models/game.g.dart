@@ -8,6 +8,7 @@ part of 'game.dart';
 
 _$GameImpl _$$GameImplFromJson(Map<String, dynamic> json) => _$GameImpl(
       id: json['id'] as String,
+      name: json['name'] as String?,
       groupId: json['groupId'] as String,
       status: $enumDecode(_$GameStatusEnumMap, json['status']),
       currency: json['currency'] as String,
@@ -34,6 +35,7 @@ _$GameImpl _$$GameImplFromJson(Map<String, dynamic> json) => _$GameImpl(
 Map<String, dynamic> _$$GameImplToJson(_$GameImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'name': instance.name,
       'groupId': instance.groupId,
       'status': _$GameStatusEnumMap[instance.status]!,
       'currency': instance.currency,
