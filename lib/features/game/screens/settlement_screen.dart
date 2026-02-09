@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
@@ -248,9 +249,9 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
   Future<void> _startNewGame() async {
     // Start a completely new game
     if (!mounted) return;
-    // Navigate to /game which will trigger getOrCreateCurrentGame
+    // Navigate to home which will trigger getOrCreateCurrentGame
     // Since current game is ended, it will create a new one
-    context.go('/game');
+    context.go(AppConstants.homeRoute);
   }
 
   @override

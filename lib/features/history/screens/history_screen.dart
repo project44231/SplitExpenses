@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/game.dart';
 import '../../../models/buy_in.dart';
@@ -349,7 +350,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
               ),
               const SizedBox(height: 32),
               ElevatedButton.icon(
-                onPressed: () => context.go('/game'),
+                onPressed: () => context.go(AppConstants.homeRoute),
                 icon: const Icon(Icons.add),
                 label: const Text('Start a Game'),
                 style: ElevatedButton.styleFrom(

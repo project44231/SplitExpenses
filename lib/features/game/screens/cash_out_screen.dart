@@ -345,8 +345,8 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
       }
       
       if (mounted) {
-        // Navigate to home screen (game list)
-        context.go('/game');
+        // Navigate to home screen (with bottom nav bar)
+        context.go(AppConstants.homeRoute);
       }
     } catch (e) {
       if (mounted) {

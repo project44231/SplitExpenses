@@ -5,11 +5,18 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../providers/auth_provider.dart';
 
-class AuthScreen extends ConsumerWidget {
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  bool _hasAutoRedirected = false;
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authNotifierProvider);
 
     return Scaffold(
@@ -49,10 +56,14 @@ class AuthScreen extends ConsumerWidget {
               // Show loading or button
               authState.when(
                 data: (user) {
-                  // If user is already authenticated, navigate to home screen
-                  if (user != null) {
+                  // Only auto-redirect if user is authenticated AND not guest
+                  // This prevents redirecting guests who just logged out to sign in properly
+                  if (user != null && !user.isGuest && !_hasAutoRedirected) {
+                    _hasAutoRedirected = true;
                     WidgetsBinding.instance.addPostFrameCallback((_) {
-                      context.go(AppConstants.homeRoute);
+                      if (mounted) {
+                        context.go(AppConstants.homeRoute);
+                      }
                     });
                   }
 
