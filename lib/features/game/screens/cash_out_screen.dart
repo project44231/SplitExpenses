@@ -42,6 +42,8 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
   Map<String, double> _buyInTotals = {};
   Currency? _currency;
   final List<Expense> _expenses = [];
+  String? _gameNotes;
+  bool _isNotesExpanded = false;
 
   @override
   void initState() {
@@ -57,6 +59,9 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
       
       final game = await ref.read(gameProvider.notifier).getGame(widget.gameId);
       if (game == null || !mounted) return;
+      
+      // Store game notes
+      _gameNotes = game.notes;
 
       final buyIns = await ref.read(gameProvider.notifier).getBuyIns(widget.gameId);
       final cashOuts = await ref.read(gameProvider.notifier).getCashOuts(widget.gameId);
@@ -536,6 +541,82 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
                               color: Colors.blue.shade900,
                             ),
                           ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // Game Notes (if available)
+                if (_gameNotes != null && _gameNotes!.trim().isNotEmpty)
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Column(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            setState(() => _isNotesExpanded = !_isNotesExpanded);
+                          },
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.note_alt_outlined,
+                                  size: 18,
+                                  color: Colors.blue.shade700,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Game Notes',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue.shade900,
+                                  ),
+                                ),
+                                if (!_isNotesExpanded)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade700,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ),
+                                const Spacer(),
+                                Icon(
+                                  _isNotesExpanded ? Icons.expand_less : Icons.expand_more,
+                                  size: 20,
+                                  color: Colors.blue.shade700,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          child: _isNotesExpanded
+                              ? Container(
+                                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                                  child: Text(
+                                    _gameNotes!,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.blue.shade800,
+                                    ),
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
                         ),
                       ],
                     ),

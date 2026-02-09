@@ -405,6 +405,31 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       return [];
     }
   }
+
+  /// Update game notes
+  Future<Game?> updateGameNotes(String gameId, String notes) async {
+    try {
+      final game = await getGame(gameId);
+      if (game == null) return null;
+
+      final updatedGame = game.copyWith(
+        notes: notes,
+        updatedAt: DateTime.now(),
+      );
+
+      // Save to Firestore and local storage
+      await _firestoreService.saveGame(updatedGame, _userId);
+      await _localStorage.saveGame(updatedGame);
+
+      // Reload games to update state
+      await loadGames();
+
+      return updatedGame;
+    } catch (e) {
+      print('ERROR updating game notes: $e');
+      rethrow;
+    }
+  }
 }
 
 /// Provider for game groups

@@ -33,6 +33,9 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
   Game? _currentGame;
   bool _isLoading = true;
   int _buyInsRefreshKey = 0; // Key to force buy-ins reload
+  bool _isNotesExpanded = false;
+  final _notesController = TextEditingController();
+  bool _isSavingNotes = false;
 
   @override
   bool get wantKeepAlive => true; // Keep state alive when switching tabs
@@ -42,6 +45,12 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     super.initState();
     // Delay provider modification until after the widget tree is built
     Future.microtask(() => _initializeGame());
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
   }
 
   Future<void> _refreshGameData() async {
@@ -84,12 +93,48 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
       
       if (mounted) {
         setState(() => _isLoading = false);
+        // Load notes into controller
+        _notesController.text = _currentGame?.notes ?? '';
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error loading game: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _saveNotes() async {
+    if (_currentGame == null) return;
+
+    setState(() => _isSavingNotes = true);
+
+    try {
+      final updatedGame = await ref.read(gameProvider.notifier).updateGameNotes(
+        _currentGame!.id,
+        _notesController.text.trim(),
+      );
+
+      if (updatedGame != null && mounted) {
+        setState(() {
+          _currentGame = updatedGame;
+          _isSavingNotes = false;
+          _isNotesExpanded = false; // Close notes after saving
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Notes saved'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSavingNotes = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving notes: $e')),
         );
       }
     }
@@ -826,6 +871,118 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                               ),
                             ),
                           ),
+                      ],
+                    ),
+                  ),
+
+                  // Game Notes Section
+                  Container(
+                    color: Colors.grey.shade50,
+                    child: Column(
+                      children: [
+                        InkWell(
+                          onTap: () {
+                            setState(() => _isNotesExpanded = !_isNotesExpanded);
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: Colors.grey.shade300),
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.note_alt_outlined,
+                                  size: 20,
+                                  color: AppTheme.primaryColor,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Game Notes',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                ),
+                                if ((_currentGame?.notes ?? '').isNotEmpty && !_isNotesExpanded)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: Container(
+                                      width: 6,
+                                      height: 6,
+                                      decoration: BoxDecoration(
+                                        color: AppTheme.primaryColor,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  ),
+                                const Spacer(),
+                                Icon(
+                                  _isNotesExpanded ? Icons.expand_less : Icons.expand_more,
+                                  color: Colors.grey.shade600,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          child: _isNotesExpanded
+                              ? Container(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Stack(
+                                    children: [
+                                      TextField(
+                                        controller: _notesController,
+                                        maxLines: 4,
+                                        maxLength: 1000,
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontSize: 14,
+                                        ),
+                                        decoration: InputDecoration(
+                                          hintText: 'Add notes about this game...',
+                                          hintStyle: TextStyle(
+                                            color: Colors.grey.shade600,
+                                            fontSize: 14,
+                                          ),
+                                          border: const OutlineInputBorder(),
+                                          filled: true,
+                                          fillColor: Colors.blue.shade50,
+                                          contentPadding: const EdgeInsets.fromLTRB(12, 12, 48, 12),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        right: 4,
+                                        top: 4,
+                                        child: IconButton(
+                                          onPressed: _isSavingNotes ? null : _saveNotes,
+                                          icon: _isSavingNotes
+                                              ? const SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2,
+                                                    color: AppTheme.primaryColor,
+                                                  ),
+                                                )
+                                              : const Icon(
+                                                  Icons.check_circle,
+                                                  color: AppTheme.primaryColor,
+                                                  size: 28,
+                                                ),
+                                          tooltip: 'Save Notes',
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : const SizedBox.shrink(),
+                        ),
                       ],
                     ),
                   ),

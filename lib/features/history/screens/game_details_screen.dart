@@ -35,6 +35,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
   Map<String, double> _buyInTotals = {};
   Map<String, double> _cashOutTotals = {};
   Map<String, int> _buyInCounts = {};
+  bool _isNotesExpanded = false;
   
   @override
   void initState() {
@@ -304,6 +305,84 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
           ),
         ),
         const SizedBox(height: 16),
+
+        // Game Notes Card (if available)
+        if (_game!.notes != null && _game!.notes!.trim().isNotEmpty)
+          Card(
+            elevation: 2,
+            child: Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    setState(() => _isNotesExpanded = !_isNotesExpanded);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.note_alt_outlined,
+                          size: 20,
+                          color: AppTheme.primaryColor,
+                        ),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Game Notes',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (!_isNotesExpanded)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8),
+                            child: Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        Icon(
+                          _isNotesExpanded ? Icons.expand_less : Icons.expand_more,
+                          color: Colors.grey.shade600,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  child: _isNotesExpanded
+                      ? Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Divider(height: 1),
+                              const SizedBox(height: 12),
+                              Text(
+                                _game!.notes!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+          ),
+        if (_game!.notes != null && _game!.notes!.trim().isNotEmpty)
+          const SizedBox(height: 16),
 
         // Winners/Losers Card
         if (biggestWinner != null || biggestLoser != null)
