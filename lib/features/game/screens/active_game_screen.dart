@@ -29,16 +29,41 @@ class ActiveGameScreen extends ConsumerStatefulWidget {
   ConsumerState<ActiveGameScreen> createState() => _ActiveGameScreenState();
 }
 
-class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
+class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with AutomaticKeepAliveClientMixin {
   Game? _currentGame;
   bool _isLoading = true;
   int _buyInsRefreshKey = 0; // Key to force buy-ins reload
+
+  @override
+  bool get wantKeepAlive => true; // Keep state alive when switching tabs
 
   @override
   void initState() {
     super.initState();
     // Delay provider modification until after the widget tree is built
     Future.microtask(() => _initializeGame());
+  }
+
+  Future<void> _refreshGameData() async {
+    if (!mounted || _currentGame == null) return;
+    
+    try {
+      // Force reload from Firebase by calling loadGames first
+      await ref.read(gameProvider.notifier).loadGames();
+      
+      // Get the fresh game data
+      final game = await ref.read(gameProvider.notifier).getGame(_currentGame!.id);
+      
+      if (game != null && mounted) {
+        setState(() {
+          _currentGame = game;
+        });
+        print('DEBUG: Refreshed game - playerIds: ${game.playerIds}');
+      }
+    } catch (e) {
+      // Silently fail on refresh, don't show error
+      print('Error refreshing game data: $e');
+    }
   }
 
   Future<void> _initializeGame() async {
@@ -73,17 +98,28 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
   Future<void> _showAddPlayerDialog() async {
     if (_currentGame == null) return;
 
-    final player = await showDialog<Player>(
+    final result = await showDialog<dynamic>(
       context: context,
       builder: (context) => PlayerSelectionDialog(
         excludePlayerIds: _currentGame!.playerIds,
       ),
     );
 
-    if (player != null && mounted) {
+    if (result != null && mounted) {
       try {
-        // Add player to current game
-        final updatedPlayerIds = [..._currentGame!.playerIds, player.id];
+        // Handle both single player (backward compatibility) and multiple players
+        List<Player> playersToAdd = [];
+        if (result is Player) {
+          playersToAdd = [result];
+        } else if (result is List<Player>) {
+          playersToAdd = result;
+        }
+
+        if (playersToAdd.isEmpty) return;
+
+        // Add all selected players to current game
+        final newPlayerIds = playersToAdd.map((p) => p.id).toList();
+        final updatedPlayerIds = [..._currentGame!.playerIds, ...newPlayerIds];
         
         final updatedGame = _currentGame!.copyWith(
           playerIds: updatedPlayerIds,
@@ -95,15 +131,21 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
         // Reload players to ensure UI updates
         await ref.read(playerProvider.notifier).loadPlayers();
         
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                playersToAdd.length == 1
+                    ? '${playersToAdd[0].name} added to game'
+                    : '${playersToAdd.length} players added to game',
+              ),
+            ),
+          );
+        }
+        
         setState(() {
           _currentGame = updatedGame;
         });
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${player.name} added to game')),
-          );
-        }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -519,6 +561,8 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
+    
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -788,7 +832,9 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
 
                   // Player List or Empty State
                   Expanded(
-                    child: gamePlayers.isEmpty
+                    child: RefreshIndicator(
+                      onRefresh: _refreshGameData,
+                      child: gamePlayers.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -830,11 +876,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
                               ],
                             ),
                           )
-                        : RefreshIndicator(
-                            onRefresh: () async {
-                              setState(() {});
-                            },
-                            child: ListView.builder(
+                        : ListView.builder(
                               itemCount: gamePlayers.length,
                               padding: const EdgeInsets.symmetric(vertical: 8),
                               itemBuilder: (context, index) {
@@ -862,7 +904,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> {
                                 );
                               },
                             ),
-                          ),
+                    ),
                   ),
 
                 ],

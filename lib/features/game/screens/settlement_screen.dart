@@ -44,7 +44,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
   @override
   void initState() {
     super.initState();
-    _loadGameData();
+    // Delay provider modification until after the widget tree is built
+    Future.microtask(() => _loadGameData());
   }
 
   Future<void> _loadGameData() async {
@@ -54,6 +55,9 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     });
 
     try {
+      // First, ensure players are loaded
+      await ref.read(playerProvider.notifier).loadPlayers();
+      
       final game = await ref.read(gameProvider.notifier).getGame(widget.gameId);
       final buyIns = await ref.read(gameProvider.notifier).getBuyIns(widget.gameId);
       final cashOuts = await ref.read(gameProvider.notifier).getCashOuts(widget.gameId);
@@ -66,6 +70,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         return;
       }
 
+      // Now get players after ensuring they're loaded
       final playersAsync = ref.read(playerProvider);
       final allPlayers = playersAsync.when(
         data: (players) => players,

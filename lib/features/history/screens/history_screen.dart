@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/game.dart';
 import '../../../models/buy_in.dart';
 import '../../../models/cash_out.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../game/providers/game_provider.dart';
+import '../../../services/firestore_service.dart';
 import '../widgets/game_history_card.dart';
 import '../widgets/leaderboard_tab.dart';
 import '../widgets/history_filter_dialog.dart';
@@ -55,12 +54,16 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
         return;
       }
 
-      final gamesAsync = ref.read(gameProvider);
-      final allGames = gamesAsync.when(
-        data: (games) => games,
-        loading: () => <Game>[],
-        error: (_, __) => <Game>[],
-      );
+      // Get current user ID
+      final userId = authService.currentUserId;
+      if (userId == null) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Load games directly from Firebase only (not local storage)
+      final firestoreService = FirestoreService();
+      final allGames = await firestoreService.getGames(userId);
 
       // Filter ended games and sort by end time
       final endedGames = allGames
@@ -68,13 +71,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
           .toList()
         ..sort((a, b) => b.endTime!.compareTo(a.endTime!));
 
-      // Load buy-ins and cash-outs for each game
+      // Load buy-ins and cash-outs for each game from Firebase only
       final gamesBuyIns = <String, List<BuyIn>>{};
       final gamesCashOuts = <String, List<CashOut>>{};
 
       for (final game in endedGames) {
-        final buyIns = await ref.read(gameProvider.notifier).getBuyIns(game.id);
-        final cashOuts = await ref.read(gameProvider.notifier).getCashOuts(game.id);
+        final buyIns = await firestoreService.getBuyIns(game.id);
+        final cashOuts = await firestoreService.getCashOuts(game.id);
         gamesBuyIns[game.id] = buyIns;
         gamesCashOuts[game.id] = cashOuts;
       }
@@ -346,20 +349,6 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey.shade600,
-                ),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton.icon(
-                onPressed: () => context.go(AppConstants.homeRoute),
-                icon: const Icon(Icons.add),
-                label: const Text('Start a Game'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 14,
-                  ),
                 ),
               ),
             ],

@@ -44,7 +44,7 @@ class FirestoreService {
         .get();
 
     if (!doc.exists) return null;
-    return Game.fromJson(doc.data()!);
+    return Game.fromJson(_convertTimestamps(doc.data()!));
   }
 
   /// Get all games for a user
@@ -56,8 +56,21 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => Game.fromJson(doc.data()))
+        .map((doc) => Game.fromJson(_convertTimestamps(doc.data())))
         .toList();
+  }
+
+  /// Convert Firestore Timestamps to ISO8601 strings for JSON parsing
+  Map<String, dynamic> _convertTimestamps(Map<String, dynamic> data) {
+    final converted = <String, dynamic>{};
+    data.forEach((key, value) {
+      if (value is Timestamp) {
+        converted[key] = value.toDate().toIso8601String();
+      } else {
+        converted[key] = value;
+      }
+    });
+    return converted;
   }
 
   /// Get active games for a user
@@ -70,7 +83,7 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => Game.fromJson(doc.data()))
+        .map((doc) => Game.fromJson(_convertTimestamps(doc.data())))
         .toList();
   }
 
@@ -90,7 +103,7 @@ class FirestoreService {
         .orderBy('startTime', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => Game.fromJson(doc.data()))
+            .map((doc) => Game.fromJson(_convertTimestamps(doc.data())))
             .toList());
   }
 
@@ -117,7 +130,7 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => Player.fromJson(doc.data()))
+        .map((doc) => Player.fromJson(_convertTimestamps(doc.data())))
         .toList();
   }
 
@@ -137,7 +150,7 @@ class FirestoreService {
         .orderBy('name')
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => Player.fromJson(doc.data()))
+            .map((doc) => Player.fromJson(_convertTimestamps(doc.data())))
             .toList());
   }
 
@@ -164,7 +177,7 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => BuyIn.fromJson(doc.data()))
+        .map((doc) => BuyIn.fromJson(_convertTimestamps(doc.data())))
         .toList();
   }
 
@@ -184,7 +197,7 @@ class FirestoreService {
         .orderBy('timestamp')
         .snapshots()
         .map((snapshot) => snapshot.docs
-            .map((doc) => BuyIn.fromJson(doc.data()))
+            .map((doc) => BuyIn.fromJson(_convertTimestamps(doc.data())))
             .toList());
   }
 
@@ -210,7 +223,7 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => CashOut.fromJson(doc.data()))
+        .map((doc) => CashOut.fromJson(_convertTimestamps(doc.data())))
         .toList();
   }
 
@@ -258,7 +271,7 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => Settlement.fromJson(doc.data()))
+        .map((doc) => Settlement.fromJson(_convertTimestamps(doc.data())))
         .toList();
   }
 
@@ -285,7 +298,7 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => GameGroup.fromJson(doc.data()))
+        .map((doc) => GameGroup.fromJson(_convertTimestamps(doc.data())))
         .toList();
   }
 
@@ -311,7 +324,7 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => Expense.fromJson(doc.data()))
+        .map((doc) => Expense.fromJson(_convertTimestamps(doc.data())))
         .toList();
   }
 
@@ -342,7 +355,7 @@ class FirestoreService {
         .get();
 
     if (snapshot.docs.isEmpty) return null;
-    return CashOutReconciliation.fromJson(snapshot.docs.first.data());
+    return CashOutReconciliation.fromJson(_convertTimestamps(snapshot.docs.first.data()));
   }
 
   /// Get all reconciliations for a game
@@ -354,7 +367,7 @@ class FirestoreService {
         .get();
 
     return snapshot.docs
-        .map((doc) => CashOutReconciliation.fromJson(doc.data()))
+        .map((doc) => CashOutReconciliation.fromJson(_convertTimestamps(doc.data())))
         .toList();
   }
 

@@ -24,6 +24,7 @@ class _PlayerSelectionDialogState
     extends ConsumerState<PlayerSelectionDialog> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  final Set<Player> _selectedPlayers = {};
 
   @override
   void dispose() {
@@ -53,13 +54,26 @@ class _PlayerSelectionDialogState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Select Player',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Select Players',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      if (_selectedPlayers.isNotEmpty)
+                        Text(
+                          '${_selectedPlayers.length} selected',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white70,
+                          ),
+                        ),
+                    ],
                   ),
                   Row(
                     children: [
@@ -148,20 +162,37 @@ class _PlayerSelectionDialogState
                             ),
                           ),
                         ...availablePlayers.map((player) {
+                          final isSelected = _selectedPlayers.contains(player);
                           return ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: AppTheme.primaryColor
-                                  .withValues(alpha: 0.2),
-                              child: Text(
-                                player.name[0].toUpperCase(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppTheme.primaryColor,
-                                ),
-                              ),
+                            leading: Checkbox(
+                              value: isSelected,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == true) {
+                                    _selectedPlayers.add(player);
+                                  } else {
+                                    _selectedPlayers.remove(player);
+                                  }
+                                });
+                              },
+                              activeColor: AppTheme.primaryColor,
                             ),
                             title: Row(
                               children: [
+                                CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: AppTheme.primaryColor
+                                      .withValues(alpha: 0.2),
+                                  child: Text(
+                                    player.name[0].toUpperCase(),
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primaryColor,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
                                 Flexible(child: Text(player.name)),
                                 if (player.isFavorite) ...[
                                   const SizedBox(width: 4),
@@ -174,30 +205,21 @@ class _PlayerSelectionDialogState
                               ],
                             ),
                             subtitle: player.gamesPlayed > 0
-                                ? Text('${player.gamesPlayed} games played')
+                                ? Padding(
+                                    padding: const EdgeInsets.only(left: 44),
+                                    child: Text('${player.gamesPlayed} games played'),
+                                  )
                                 : null,
                             trailing: PopupMenuButton<String>(
                               icon: const Icon(Icons.more_vert),
                               onSelected: (value) {
-                                if (value == 'select') {
-                                  Navigator.pop(context, player);
-                                } else if (value == 'edit') {
+                                if (value == 'edit') {
                                   _editPlayer(player);
                                 } else if (value == 'delete') {
                                   _deletePlayer(player);
                                 }
                               },
                               itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: 'select',
-                                  child: Row(
-                                    children: [
-                                      Icon(Icons.check, size: 18),
-                                      SizedBox(width: 12),
-                                      Text('Select Player'),
-                                    ],
-                                  ),
-                                ),
                                 const PopupMenuItem(
                                   value: 'edit',
                                   child: Row(
@@ -220,7 +242,15 @@ class _PlayerSelectionDialogState
                                 ),
                               ],
                             ),
-                            onTap: () => Navigator.pop(context, player),
+                            onTap: () {
+                              setState(() {
+                                if (isSelected) {
+                                  _selectedPlayers.remove(player);
+                                } else {
+                                  _selectedPlayers.add(player);
+                                }
+                              });
+                            },
                           );
                         }),
                       ],
@@ -307,16 +337,38 @@ class _PlayerSelectionDialogState
                   top: BorderSide(color: Colors.grey.shade300),
                 ),
               ),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _addNewPlayer,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add New Player'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.primaryColor,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: _addNewPlayer,
+                      icon: const Icon(Icons.add),
+                      label: const Text('New Player'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.primaryColor,
+                      ),
+                    ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _selectedPlayers.isEmpty
+                          ? null
+                          : () => Navigator.pop(context, _selectedPlayers.toList()),
+                      icon: const Icon(Icons.check, color: Colors.white),
+                      label: Text(
+                        _selectedPlayers.isEmpty
+                            ? 'Select Players'
+                            : 'Add ${_selectedPlayers.length}',
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -333,13 +385,16 @@ class _PlayerSelectionDialogState
 
     if (result != null && mounted) {
       try {
-        await ref.read(playerProvider.notifier).addPlayer(
+        final player = await ref.read(playerProvider.notifier).addPlayer(
           name: result.name,
           email: result.email,
           phone: result.phone,
         );
-        if (mounted) {
-          Navigator.pop(context, result);
+        if (mounted && player != null) {
+          // Add the new player to selected list
+          setState(() {
+            _selectedPlayers.add(player);
+          });
         }
       } catch (e) {
         if (mounted) {
@@ -357,7 +412,15 @@ class _PlayerSelectionDialogState
     try {
       final player = await ref.read(playerProvider.notifier).addPlayer(name: name);
       if (mounted && player != null) {
-        Navigator.pop(context, player);
+        // Add the new player to selected list
+        setState(() {
+          _selectedPlayers.add(player);
+        });
+        // Clear search
+        _searchController.clear();
+        setState(() {
+          _searchQuery = '';
+        });
       }
     } catch (e) {
       if (mounted) {

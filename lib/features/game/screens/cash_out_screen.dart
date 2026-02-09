@@ -46,16 +46,22 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
   @override
   void initState() {
     super.initState();
-    _loadGameData();
+    // Delay provider modification until after the widget tree is built
+    Future.microtask(() => _loadGameData());
   }
 
   Future<void> _loadGameData() async {
     try {
+      // First, ensure players are loaded
+      await ref.read(playerProvider.notifier).loadPlayers();
+      
       final game = await ref.read(gameProvider.notifier).getGame(widget.gameId);
       if (game == null || !mounted) return;
 
       final buyIns = await ref.read(gameProvider.notifier).getBuyIns(widget.gameId);
       final cashOuts = await ref.read(gameProvider.notifier).getCashOuts(widget.gameId);
+      
+      // Now get players after ensuring they're loaded
       final playersAsync = ref.read(playerProvider);
       
       final allPlayers = playersAsync.when(
@@ -64,7 +70,15 @@ class _CashOutScreenState extends ConsumerState<CashOutScreen> {
         error: (_, __) => <Player>[],
       );
 
+      print('DEBUG CashOut: Game playerIds: ${game.playerIds}');
+      print('DEBUG CashOut: All players count: ${allPlayers.length}');
+      
       final gamePlayers = allPlayers.where((p) => game.playerIds.contains(p.id)).toList();
+      
+      print('DEBUG CashOut: Game players count: ${gamePlayers.length}');
+      for (final p in gamePlayers) {
+        print('DEBUG CashOut: Player: ${p.id} - ${p.name}');
+      }
       
       final buyInTotals = <String, double>{};
       for (final buyIn in buyIns) {

@@ -6,7 +6,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../models/game.dart';
 import '../../auth/providers/auth_provider.dart';
-import '../../game/providers/game_provider.dart';
+import '../../../services/firestore_service.dart';
 import '../widgets/edit_profile_dialog.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -30,12 +30,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final gamesAsync = ref.read(gameProvider);
-      final allGames = gamesAsync.when(
-        data: (games) => games,
-        loading: () => <Game>[],
-        error: (_, __) => <Game>[],
-      );
+      final authService = ref.read(authServiceProvider);
+      
+      // Get current user ID
+      final userId = authService.currentUserId;
+      if (userId == null || authService.isGuestMode) {
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Load games directly from Firebase only (not local storage)
+      final firestoreService = FirestoreService();
+      final allGames = await firestoreService.getGames(userId);
 
       final stats = _calculateHostingStats(allGames);
 
