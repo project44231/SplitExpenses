@@ -41,19 +41,28 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   /// Get current user ID (returns 'guest' for guest mode, Firebase UID for logged in)
   String get _userId => _authService.currentUserId ?? 'guest';
 
-  /// Load all games from storage (Always uses Firestore, with local cache)
+  /// Check if user is in guest mode
+  bool get _isGuestMode => _authService.isGuestMode;
+
+  /// Load all games from storage (Firestore for authenticated, local storage for guest)
   Future<void> loadGames() async {
     state = const AsyncValue.loading();
     try {
-      // Load from Firestore (works for both guest and authenticated users)
-      final games = await _firestoreService.getGames(_userId);
-      
-      // Cache locally for offline access
-      for (final game in games) {
-        await _localStorage.saveGame(game);
+      if (_isGuestMode) {
+        // Guest mode: use local storage only
+        final games = await _localStorage.getAllGames();
+        state = AsyncValue.data(games);
+      } else {
+        // Authenticated: load from Firestore and cache locally
+        final games = await _firestoreService.getGames(_userId);
+        
+        // Cache locally for offline access
+        for (final game in games) {
+          await _localStorage.saveGame(game);
+        }
+        
+        state = AsyncValue.data(games);
       }
-      
-      state = AsyncValue.data(games);
     } catch (e, stack) {
       // Fallback to local storage on error (offline mode)
       try {
@@ -90,8 +99,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       // Save to local storage
       await _localStorage.saveGame(game);
       
-      // Save to Firestore (always, for both guest and authenticated users)
-      await _firestoreService.saveGame(game, _userId);
+      // Save to Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.saveGame(game, _userId);
+      }
       
       await loadGames();
 
@@ -122,8 +133,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
 
     await _localStorage.saveGameGroup(newGroup);
     
-    // Save to Firestore (always)
-    await _firestoreService.saveGameGroup(newGroup, _userId);
+    // Save to Firestore (only for authenticated users)
+    if (!_isGuestMode) {
+      await _firestoreService.saveGameGroup(newGroup, _userId);
+    }
     
     return newGroup.id;
   }
@@ -142,8 +155,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
 
       await _localStorage.saveGame(updatedGame);
       
-      // Save to Firestore (always)
-      await _firestoreService.saveGame(updatedGame, _userId);
+      // Save to Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.saveGame(updatedGame, _userId);
+      }
       
       await loadGames();
     } catch (e) {
@@ -156,8 +171,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     try {
       await _localStorage.deleteGame(gameId);
       
-      // Delete from Firestore (always)
-      await _firestoreService.deleteGame(gameId);
+      // Delete from Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.deleteGame(gameId);
+      }
       
       await loadGames();
     } catch (e) {
@@ -168,13 +185,18 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   /// Get game by ID
   Future<Game?> getGame(String gameId) async {
     try {
-      // Try Firestore first (for both guest and authenticated users)
-      final game = await _firestoreService.getGame(gameId);
-      if (game != null) {
-        await _localStorage.saveGame(game);
-        return game;
+      if (_isGuestMode) {
+        // Guest mode: use local storage only
+        return await _localStorage.getGame(gameId);
+      } else {
+        // Authenticated: try Firestore first
+        final game = await _firestoreService.getGame(gameId);
+        if (game != null) {
+          await _localStorage.saveGame(game);
+          return game;
+        }
+        return await _localStorage.getGame(gameId);
       }
-      return await _localStorage.getGame(gameId);
     } catch (e) {
       // Fallback to local storage
       return await _localStorage.getGame(gameId);
@@ -184,12 +206,17 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   /// Get buy-ins for a game
   Future<List<BuyIn>> getBuyIns(String gameId) async {
     try {
-      // Try Firestore first (for both guest and authenticated users)
-      final buyIns = await _firestoreService.getBuyIns(gameId);
-      for (final buyIn in buyIns) {
-        await _localStorage.saveBuyIn(buyIn);
+      if (_isGuestMode) {
+        // Guest mode: use local storage only
+        return await _localStorage.getBuyInsByGame(gameId);
+      } else {
+        // Authenticated: try Firestore first
+        final buyIns = await _firestoreService.getBuyIns(gameId);
+        for (final buyIn in buyIns) {
+          await _localStorage.saveBuyIn(buyIn);
+        }
+        return buyIns;
       }
-      return buyIns;
     } catch (e) {
       // Fallback to local storage
       return await _localStorage.getBuyInsByGame(gameId);
@@ -199,12 +226,17 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   /// Get cash-outs for a game
   Future<List<CashOut>> getCashOuts(String gameId) async {
     try {
-      // Try Firestore first (for both guest and authenticated users)
-      final cashOuts = await _firestoreService.getCashOuts(gameId);
-      for (final cashOut in cashOuts) {
-        await _localStorage.saveCashOut(cashOut);
+      if (_isGuestMode) {
+        // Guest mode: use local storage only
+        return await _localStorage.getCashOutsByGame(gameId);
+      } else {
+        // Authenticated: try Firestore first
+        final cashOuts = await _firestoreService.getCashOuts(gameId);
+        for (final cashOut in cashOuts) {
+          await _localStorage.saveCashOut(cashOut);
+        }
+        return cashOuts;
       }
-      return cashOuts;
     } catch (e) {
       // Fallback to local storage
       return await _localStorage.getCashOutsByGame(gameId);
@@ -234,10 +266,14 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       await _localStorage.saveBuyIn(buyIn);
       print('DEBUG GameProvider: Saved locally ✓');
       
-      // Save to Firestore (always)
-      print('DEBUG GameProvider: Saving buy-in to Firestore with userId: $_userId');
-      await _firestoreService.saveBuyIn(buyIn, _userId);
-      print('DEBUG GameProvider: Saved to Firestore ✓');
+      // Save to Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        print('DEBUG GameProvider: Saving buy-in to Firestore with userId: $_userId');
+        await _firestoreService.saveBuyIn(buyIn, _userId);
+        print('DEBUG GameProvider: Saved to Firestore ✓');
+      } else {
+        print('DEBUG GameProvider: Skipping Firestore (guest mode)');
+      }
     } catch (e, stack) {
       // Handle error
       print('DEBUG GameProvider ERROR adding buy-in: $e');
@@ -252,8 +288,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       // Save locally
       await _localStorage.saveBuyIn(buyIn);
       
-      // Save to Firestore (always)
-      await _firestoreService.saveBuyIn(buyIn, _userId);
+      // Save to Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.saveBuyIn(buyIn, _userId);
+      }
     } catch (e) {
       rethrow;
     }
@@ -264,8 +302,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     try {
       await _localStorage.deleteBuyIn(buyInId);
       
-      // Delete from Firestore (always)
-      await _firestoreService.deleteBuyIn(buyInId);
+      // Delete from Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.deleteBuyIn(buyInId);
+      }
     } catch (e) {
       rethrow;
     }
@@ -290,8 +330,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
 
       await _localStorage.saveCashOut(cashOut);
       
-      // Save to Firestore (always)
-      await _firestoreService.saveCashOut(cashOut, _userId);
+      // Save to Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.saveCashOut(cashOut, _userId);
+      }
     } catch (e) {
       // Handle error
     }
@@ -302,8 +344,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     try {
       await _localStorage.deleteCashOutsByGame(gameId);
       
-      // Delete from Firestore (always)
-      await _firestoreService.deleteCashOutsByGame(gameId);
+      // Delete from Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.deleteCashOutsByGame(gameId);
+      }
     } catch (e) {
       // Handle error
     }
@@ -362,8 +406,10 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       // Save to local storage
       await _localStorage.saveGame(game);
       
-      // Save to Firestore (always, for both guest and authenticated users)
-      await _firestoreService.saveGame(game, _userId);
+      // Save to Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.saveGame(game, _userId);
+      }
       
       await loadGames();
     } catch (e) {
@@ -385,10 +431,13 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
         generatedAt: DateTime.now(),
       );
 
-      // Save to Firestore (always)
-      await _firestoreService.saveSettlement(settlement, _userId);
-      
-      print('Settlement saved to Firestore: ${settlement.id} with ${transactions.length} transactions');
+      // Save to Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.saveSettlement(settlement, _userId);
+        print('Settlement saved to Firestore: ${settlement.id} with ${transactions.length} transactions');
+      } else {
+        print('Settlement saved locally (guest mode): ${settlement.id} with ${transactions.length} transactions');
+      }
     } catch (e) {
       print('ERROR saving settlement: $e');
       rethrow;
@@ -398,8 +447,14 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   /// Get settlements for a game
   Future<List<Settlement>> getSettlements(String gameId) async {
     try {
-      // Try Firestore first
-      return await _firestoreService.getSettlements(gameId);
+      if (_isGuestMode) {
+        // Guest mode: settlements not supported yet
+        print('Settlements not available in guest mode');
+        return [];
+      } else {
+        // Authenticated: get from Firestore
+        return await _firestoreService.getSettlements(gameId);
+      }
     } catch (e) {
       print('ERROR getting settlements: $e');
       return [];
@@ -417,9 +472,13 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
         updatedAt: DateTime.now(),
       );
 
-      // Save to Firestore and local storage
-      await _firestoreService.saveGame(updatedGame, _userId);
+      // Save to local storage
       await _localStorage.saveGame(updatedGame);
+      
+      // Save to Firestore (only for authenticated users)
+      if (!_isGuestMode) {
+        await _firestoreService.saveGame(updatedGame, _userId);
+      }
 
       // Reload games to update state
       await loadGames();

@@ -1,0 +1,13 @@
+---
+description: Generate concise responses to minimize token usage
+alwaysApply: true
+---
+
+# Concise Response Guidelines
+
+- Keep summaries **short and focused**
+- Use bullet points instead of paragraphs
+- Only include essential information
+- Avoid repeating what was already done
+- No unnecessary pleasantries or filler text
+- Get straight to the point

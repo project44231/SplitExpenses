@@ -58,9 +58,16 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
     
-    // Feedback collection
+    // Feedback collection - Allow anyone to submit feedback (including guests)
     match /feedback/{feedbackId} {
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      // Allow anyone to create feedback (no authentication required)
+      allow create: if request.resource.data.keys().hasAll(['userId', 'userName', 'userEmail', 'message', 'type'])
+                    && request.resource.data.userName is string
+                    && request.resource.data.userEmail is string
+                    && request.resource.data.userEmail.matches('.*@.*')
+                    && request.resource.data.message is string
+                    && request.resource.data.message.size() >= 10;
+      // Allow users to read their own feedback
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow update, delete: if false; // Feedback is immutable once submitted
     }

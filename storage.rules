@@ -2,10 +2,12 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     
-    // Feedback images
+    // Feedback images - Allow anyone to upload (including guests)
     match /feedback_images/{userId}/{imageId} {
-      allow write: if request.auth != null && request.auth.uid == userId;
-      allow read: if request.auth != null;
+      // Allow anyone to upload feedback images with size restrictions
+      allow write: if request.resource.size < 5 * 1024 * 1024  // Max 5MB
+                   && request.resource.contentType.matches('image/.*');
+      allow read: if request.auth != null;  // Only authenticated users can read
     }
     
     // Other storage paths (adjust as needed)

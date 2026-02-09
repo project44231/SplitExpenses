@@ -1,0 +1,39 @@
+---
+description: Flutter and Dart coding standards
+globs: "**/*.dart"
+alwaysApply: false
+---
+
+# Flutter/Dart Standards
+
+## State Management
+- Use Riverpod for state management
+- Provider pattern: `StateNotifierProvider` for complex state
+- Keep providers in separate files
+
+## Error Handling
+```dart
+// ❌ BAD - Silent failure
+try {
+  await someOperation();
+} catch (e) {}
+
+// ✅ GOOD - Log and handle
+try {
+  await someOperation();
+} catch (e, stack) {
+  print('Error: $e');
+  rethrow;
+}
+```
+
+## Async Operations
+- Always use `async/await` over `.then()`
+- Check `mounted` before `setState()` after async calls
+- Use `AsyncValue` for loading/error states in Riverpod
+
+## Naming
+- Files: `snake_case.dart`
+- Classes: `PascalCase`
+- Variables/functions: `camelCase`
+- Private members: prefix with `_`

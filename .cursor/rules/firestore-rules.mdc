@@ -1,0 +1,32 @@
+---
+description: Firestore security rules patterns
+globs: "**/firestore.rules"
+alwaysApply: false
+---
+
+# Firestore Security Rules
+
+## Standard Pattern
+```javascript
+// User-owned data
+match /collection/{docId} {
+  allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+  allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+  allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+}
+```
+
+## Guest-Accessible Collections
+For features like feedback where guests should have access:
+
+```javascript
+// Allow anyone to create (validation instead of auth)
+match /feedback/{feedbackId} {
+  allow create: if request.resource.data.userName is string
+                && request.resource.data.userEmail.matches('.*@.*')
+                && request.resource.data.message.size() >= 10;
+}
+```
+
+## Deploy After Changes
+Always deploy: `firebase deploy --only firestore:rules`

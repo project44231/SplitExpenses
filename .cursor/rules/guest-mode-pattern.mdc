@@ -1,0 +1,51 @@
+---
+description: Guest mode vs authenticated user handling pattern
+globs: "**/providers/**/*.dart"
+alwaysApply: false
+---
+
+# Guest Mode Pattern
+
+## Provider Setup
+Always add guest mode check in providers:
+
+```dart
+class MyNotifier extends StateNotifier<AsyncValue<List<Data>>> {
+  final dynamic _authService;
+  
+  String get _userId => _authService.currentUserId ?? 'guest';
+  bool get _isGuestMode => _authService.isGuestMode;
+}
+```
+
+## Data Operations
+**Guest users = local storage only**
+**Authenticated users = Firestore + local cache**
+
+```dart
+// ✅ GOOD
+Future<void> saveData(Data data) async {
+  await _localStorage.save(data);
+  
+  if (!_isGuestMode) {
+    await _firestoreService.save(data, _userId);
+  }
+}
+
+// ✅ GOOD
+Future<List<Data>> loadData() async {
+  if (_isGuestMode) {
+    return await _localStorage.getAll();
+  } else {
+    final data = await _firestoreService.getAll(_userId);
+    // Cache locally
+    for (final item in data) {
+      await _localStorage.save(item);
+    }
+    return data;
+  }
+}
+```
+
+## Rule: Never let guest users access Firestore
+Guest mode must use 100% local storage to avoid permission errors.
