@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/constants/currency.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../models/game.dart';
 import '../../../models/player.dart';
 import '../../../models/buy_in.dart';
@@ -125,6 +127,11 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go(AppConstants.homeRoute),
+            tooltip: 'Back to Home',
+          ),
           title: const Text('Game Details'),
           backgroundColor: AppTheme.primaryColor,
         ),
@@ -135,6 +142,11 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
     if (_game == null) {
       return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go(AppConstants.homeRoute),
+            tooltip: 'Back to Home',
+          ),
           title: const Text('Game Details'),
           backgroundColor: AppTheme.primaryColor,
         ),
@@ -144,6 +156,11 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppConstants.homeRoute),
+          tooltip: 'Back to Home',
+        ),
         title: const Text('Game Details'),
         backgroundColor: AppTheme.primaryColor,
         actions: [
@@ -161,6 +178,17 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withOpacity(0.6),
+          labelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+          ),
           tabs: const [
             Tab(text: 'Overview'),
             Tab(text: 'Players'),

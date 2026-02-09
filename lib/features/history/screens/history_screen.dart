@@ -294,6 +294,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withOpacity(0.6),
+          labelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.normal,
+          ),
           tabs: const [
             Tab(text: 'Games', icon: Icon(Icons.history, size: 20)),
             Tab(text: 'Leaderboard', icon: Icon(Icons.leaderboard, size: 20)),
