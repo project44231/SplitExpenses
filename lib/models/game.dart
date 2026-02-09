@@ -18,7 +18,7 @@ class Game with _$Game {
     required GameStatus status,
     required String currency,
     @Default([]) List<String> playerIds,
-    @Default([20, 50, 100, 200]) List<double> customBuyInAmounts,
+    @Default([10, 50, 100]) List<double> customBuyInAmounts,
     required DateTime startTime,
     DateTime? endTime,
     String? notes,

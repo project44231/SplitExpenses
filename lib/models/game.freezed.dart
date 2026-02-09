@@ -266,7 +266,7 @@ class _$GameImpl implements _Game {
       required this.status,
       required this.currency,
       final List<String> playerIds = const [],
-      final List<double> customBuyInAmounts = const [20, 50, 100, 200],
+      final List<double> customBuyInAmounts = const [10, 50, 100],
       required this.startTime,
       this.endTime,
       this.notes,

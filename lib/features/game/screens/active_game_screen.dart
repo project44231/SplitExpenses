@@ -34,9 +34,6 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
   Game? _currentGame;
   bool _isLoading = true;
   int _buyInsRefreshKey = 0; // Key to force buy-ins reload
-  bool _isNotesExpanded = false;
-  final _notesController = TextEditingController();
-  bool _isSavingNotes = false;
 
   @override
   bool get wantKeepAlive => true; // Keep state alive when switching tabs
@@ -50,7 +47,6 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
 
   @override
   void dispose() {
-    _notesController.dispose();
     super.dispose();
   }
 
@@ -94,8 +90,6 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
       
       if (mounted) {
         setState(() => _isLoading = false);
-        // Load notes into controller
-        _notesController.text = _currentGame?.notes ?? '';
       }
     } catch (e) {
       if (mounted) {
@@ -107,22 +101,18 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     }
   }
 
-  Future<void> _saveNotes() async {
+  Future<void> _saveNotes(String notes) async {
     if (_currentGame == null) return;
-
-    setState(() => _isSavingNotes = true);
 
     try {
       final updatedGame = await ref.read(gameProvider.notifier).updateGameNotes(
         _currentGame!.id,
-        _notesController.text.trim(),
+        notes.trim(),
       );
 
       if (updatedGame != null && mounted) {
         setState(() {
           _currentGame = updatedGame;
-          _isSavingNotes = false;
-          _isNotesExpanded = false; // Close notes after saving
         });
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -133,7 +123,6 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isSavingNotes = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error saving notes: $e')),
         );
@@ -234,7 +223,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
         currency: currency,
         preselectedPlayerId: preselectedPlayerId,
         quickAmounts: _currentGame!.customBuyInAmounts.isEmpty 
-          ? [20, 50, 100, 200]
+          ? [10, 50, 100]
           : _currentGame!.customBuyInAmounts,
       ),
     );
@@ -284,7 +273,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
         currency: currency,
         playerName: playerName,
         quickAmounts: _currentGame!.customBuyInAmounts.isEmpty 
-          ? [20, 50, 100, 200]
+          ? [10, 50, 100]
           : _currentGame!.customBuyInAmounts,
       ),
     );
@@ -320,7 +309,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
 
     if (newAmounts != null && mounted) {
       final updatedGame = _currentGame!.copyWith(
-        customBuyInAmounts: newAmounts.isEmpty ? [20, 50, 100, 200] : newAmounts,
+        customBuyInAmounts: newAmounts.isEmpty ? [10, 50, 100] : newAmounts,
         updatedAt: DateTime.now(),
       );
       
@@ -644,7 +633,6 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
           setState(() {
             _currentGame = newGame;
             _isLoading = false;
-            _notesController.text = '';
             _buyInsRefreshKey++;
           });
           
@@ -769,13 +757,13 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
             return Scaffold(
               appBar: AppBar(
                 leading: Padding(
-                  padding: const EdgeInsets.all(4.0),
+                  padding: const EdgeInsets.all(2.0),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
                       'images/app_icon.png',
-                      width: 60,
-                      height: 60,
+                      width: 90,
+                      height: 90,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -1025,126 +1013,9 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                   ),
 
                   // Game Notes Section
-                  Container(
-                    color: Colors.grey.shade50,
-                    child: Column(
-                      children: [
-                        InkWell(
-                          onTap: () {
-                            setState(() => _isNotesExpanded = !_isNotesExpanded);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(color: Colors.grey.shade300),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.note_alt_outlined,
-                                  size: 20,
-                                  color: AppTheme.primaryColor,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Game Notes',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.grey.shade800,
-                                  ),
-                                ),
-                                if ((_currentGame?.notes ?? '').isNotEmpty && !_isNotesExpanded)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8),
-                                    child: Container(
-                                      width: 6,
-                                      height: 6,
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primaryColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
-                                  ),
-                                const Spacer(),
-                                Icon(
-                                  _isNotesExpanded ? Icons.expand_less : Icons.expand_more,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        AnimatedSize(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: _isNotesExpanded
-                              ? Container(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Stack(
-                                    children: [
-                                      TextField(
-                                        controller: _notesController,
-                                        maxLines: 4,
-                                        maxLength: 1000,
-                                        style: const TextStyle(
-                                          color: Colors.black87,
-                                          fontSize: 14,
-                                        ),
-                                        decoration: InputDecoration(
-                                          hintText: 'Add notes about this game...',
-                                          hintStyle: TextStyle(
-                                            color: Colors.grey.shade600,
-                                            fontSize: 14,
-                                          ),
-                                          border: const OutlineInputBorder(),
-                                          filled: true,
-                                          fillColor: Colors.white,
-                                          contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 48),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        right: 8,
-                                        bottom: 28,
-                                        child: ElevatedButton.icon(
-                                          onPressed: _isSavingNotes ? null : _saveNotes,
-                                          icon: _isSavingNotes
-                                              ? const SizedBox(
-                                                  width: 14,
-                                                  height: 14,
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    color: Colors.white,
-                                                  ),
-                                                )
-                                              : const Icon(
-                                                  Icons.save,
-                                                  size: 16,
-                                                ),
-                                          label: Text(
-                                            _isSavingNotes ? 'Saving...' : 'Save',
-                                            style: const TextStyle(fontSize: 13),
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: AppTheme.primaryColor,
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                            elevation: 2,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ],
-                    ),
+                  _GameNotesSection(
+                    game: _currentGame!,
+                    onSaveNotes: _saveNotes,
                   ),
 
                   // Player List or Empty State
@@ -1237,6 +1108,197 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
           ),
         ) ?? const Scaffold(body: Center(child: CircularProgressIndicator()));
       },
+    );
+  }
+}
+
+/// Separate widget for game notes to prevent entire page rebuild
+class _GameNotesSection extends StatefulWidget {
+  final Game game;
+  final Future<void> Function(String notes) onSaveNotes;
+
+  const _GameNotesSection({
+    required this.game,
+    required this.onSaveNotes,
+  });
+
+  @override
+  State<_GameNotesSection> createState() => _GameNotesSectionState();
+}
+
+class _GameNotesSectionState extends State<_GameNotesSection> {
+  bool _isExpanded = false;
+  late final TextEditingController _notesController;
+  bool _isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _notesController = TextEditingController(text: widget.game.notes ?? '');
+  }
+
+  @override
+  void didUpdateWidget(_GameNotesSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controller if game notes changed externally
+    if (widget.game.notes != oldWidget.game.notes) {
+      _notesController.text = widget.game.notes ?? '';
+    }
+  }
+
+  @override
+  void dispose() {
+    _notesController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    if (_isSaving) return;
+    
+    setState(() => _isSaving = true);
+    try {
+      await widget.onSaveNotes(_notesController.text);
+      if (mounted) {
+        setState(() {
+          _isSaving = false;
+          _isExpanded = false; // Close after saving
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      height: _isExpanded ? 200 : 48,
+      color: Colors.grey.shade50,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: () {
+              setState(() => _isExpanded = !_isExpanded);
+            },
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey.shade300),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.note_alt_outlined,
+                    size: 20,
+                    color: AppTheme.primaryColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Game Notes',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  if ((widget.game.notes ?? '').isNotEmpty && !_isExpanded)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8),
+                      child: Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  const Spacer(),
+                  AnimatedRotation(
+                    turns: _isExpanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 250),
+                    child: Icon(
+                      Icons.expand_more,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isExpanded)
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Stack(
+                  children: [
+                    TextField(
+                      controller: _notesController,
+                      maxLines: 4,
+                      maxLength: 1000,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Add notes about this game...',
+                        hintStyle: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 14,
+                        ),
+                        border: const OutlineInputBorder(),
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.fromLTRB(12, 12, 12, 48),
+                      ),
+                    ),
+                    Positioned(
+                      right: 8,
+                      bottom: 28,
+                      child: ElevatedButton.icon(
+                        onPressed: _isSaving ? null : _handleSave,
+                        icon: _isSaving
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.save,
+                                size: 16,
+                              ),
+                        label: Text(
+                          _isSaving ? 'Saving...' : 'Save',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          elevation: 2,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

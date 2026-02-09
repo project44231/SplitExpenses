@@ -17,7 +17,7 @@ class EditBuyInDialog extends StatefulWidget {
     required this.buyIn,
     required this.currency,
     required this.playerName,
-    this.quickAmounts = const [20, 50, 100, 200],
+    this.quickAmounts = const [10, 50, 100],
   });
 
   @override

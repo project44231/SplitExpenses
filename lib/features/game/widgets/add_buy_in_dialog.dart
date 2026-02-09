@@ -18,7 +18,7 @@ class AddBuyInDialog extends StatefulWidget {
     required this.players,
     required this.currency,
     this.preselectedPlayerId,
-    this.quickAmounts = const [20, 50, 100, 200],
+    this.quickAmounts = const [10, 50, 100],
   });
 
   @override
