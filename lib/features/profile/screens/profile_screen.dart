@@ -491,7 +491,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       applicationName: AppConstants.appName,
       applicationVersion: AppConstants.appVersion,
       applicationIcon: Image.asset(
-        'assets/images/icon.png',
+        'images/app_icon.png',
         width: 64,
         height: 64,
       ),

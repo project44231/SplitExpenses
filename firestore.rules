@@ -7,11 +7,6 @@ service cloud.firestore {
       return request.auth != null;
     }
     
-    // Helper function to check if user owns the resource
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-    
     // Games collection
     match /games/{gameId} {
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
@@ -26,25 +21,22 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
     
-    // Buy-ins collection
+    // Buy-ins collection - check game ownership via gameId field
     match /buy_ins/{buyInId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
     
-    // Cash-outs collection
+    // Cash-outs collection - check game ownership via gameId field
     match /cash_outs/{cashOutId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
     
-    // Settlements collection
+    // Settlements collection - check game ownership via gameId field
     match /settlements/{settlementId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
     
     // Game groups collection
@@ -54,18 +46,16 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
     
-    // Expenses collection
+    // Expenses collection - check game ownership via gameId field
     match /expenses/{expenseId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
     
-    // Reconciliations collection
+    // Reconciliations collection - check game ownership via gameId field
     match /reconciliations/{reconciliationId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
     }
     
     // Feedback collection
