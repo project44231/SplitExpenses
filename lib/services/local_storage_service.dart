@@ -223,6 +223,19 @@ class LocalStorageService {
     return null;
   }
 
+  Future<List<Settlement>> getSettlementsByGame(String gameId) async {
+    final settlements = <Settlement>[];
+    for (var json in _settlementsBox.values) {
+      final settlement = Settlement.fromJson(Map<String, dynamic>.from(json));
+      if (settlement.gameId == gameId) {
+        settlements.add(settlement);
+      }
+    }
+    // Sort by generated time, most recent first
+    settlements.sort((a, b) => b.generatedAt.compareTo(a.generatedAt));
+    return settlements;
+  }
+
   Future<void> _deleteSettlementsByGame(String gameId) async {
     final keysToDelete = <String>[];
     for (var entry in _settlementsBox.toMap().entries) {

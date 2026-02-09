@@ -18,34 +18,51 @@ class MyNotifier extends StateNotifier<AsyncValue<List<Data>>> {
 }
 ```
 
-## Data Operations
-**Guest users = local storage only**
-**Authenticated users = Firestore + local cache**
+## Data Operations (Updated Pattern)
+**Both guest and authenticated users = Firestore + local cache**
 
+### Benefits
+- ✅ Guest data persisted to cloud (survives cache clear)
+- ✅ Multi-device access with same guest ID
+- ✅ Easy migration to authenticated account
+- ✅ GuestCleanupService works automatically
+- ✅ Local cache provides offline access
+
+### Save Pattern
 ```dart
-// ✅ GOOD
+// ✅ GOOD - Both guest and authenticated persist to Firestore
 Future<void> saveData(Data data) async {
+  // Save locally first (fast)
   await _localStorage.save(data);
   
-  if (!_isGuestMode) {
-    await _firestoreService.save(data, _userId);
-  }
+  // Save to Firestore with userId (guest or authenticated)
+  await _firestoreService.save(data, _userId);
 }
+```
 
-// ✅ GOOD
+### Load Pattern
+```dart
+// ✅ GOOD - Try Firestore first, fallback to local
 Future<List<Data>> loadData() async {
-  if (_isGuestMode) {
-    return await _localStorage.getAll();
-  } else {
+  try {
+    // Load from Firestore (both guest and authenticated)
     final data = await _firestoreService.getAll(_userId);
-    // Cache locally
+    
+    // Cache locally for offline access
     for (final item in data) {
       await _localStorage.save(item);
     }
+    
     return data;
+  } catch (e) {
+    // Fallback to local storage on error (offline mode)
+    return await _localStorage.getAll();
   }
 }
 ```
 
-## Rule: Never let guest users access Firestore
-Guest mode must use 100% local storage to avoid permission errors.
+## Firestore Rules
+Guest users identified by userId starting with 'guest' or 'guest_':
+- Can read/write their own data
+- Data isolated by userId
+- GuestCleanupService periodically removes old guest data

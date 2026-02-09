@@ -29,28 +29,19 @@ class PlayerNotifier extends StateNotifier<AsyncValue<List<Player>>> {
   /// Get current user ID (returns 'guest' for guest mode, Firebase UID for logged in)
   String get _userId => _authService.currentUserId ?? 'guest';
 
-  /// Check if user is in guest mode
-  bool get _isGuestMode => _authService.isGuestMode;
-
-  /// Load all players from storage (Firestore for authenticated, local storage for guest)
+  /// Load all players from storage (Firestore + local cache for both guest and authenticated)
   Future<void> loadPlayers() async {
     state = const AsyncValue.loading();
     try {
-      if (_isGuestMode) {
-        // Guest mode: use local storage only
-        final players = await _localStorage.getAllPlayers();
-        state = AsyncValue.data(players);
-      } else {
-        // Authenticated: load from Firestore and cache locally
-        final players = await _firestoreService.getPlayers(_userId);
-        
-        // Cache locally for offline access
-        for (final player in players) {
-          await _localStorage.savePlayer(player);
-        }
-        
-        state = AsyncValue.data(players);
+      // Load from Firestore and cache locally (both guest and authenticated)
+      final players = await _firestoreService.getPlayers(_userId);
+      
+      // Cache locally for offline access
+      for (final player in players) {
+        await _localStorage.savePlayer(player);
       }
+      
+      state = AsyncValue.data(players);
     } catch (e, stack) {
       // Fallback to local storage on error (offline mode)
       try {
@@ -81,14 +72,10 @@ class PlayerNotifier extends StateNotifier<AsyncValue<List<Player>>> {
       await _localStorage.savePlayer(player);
       print('DEBUG PlayerProvider: Saved locally ✓');
       
-      // Save to Firestore (only for authenticated users)
-      if (!_isGuestMode) {
-        print('DEBUG PlayerProvider: Saving to Firestore with userId: $_userId');
-        await _firestoreService.savePlayer(player, _userId);
-        print('DEBUG PlayerProvider: Saved to Firestore ✓');
-      } else {
-        print('DEBUG PlayerProvider: Skipping Firestore (guest mode)');
-      }
+      // Save to Firestore (both guest and authenticated users)
+      print('DEBUG PlayerProvider: Saving to Firestore with userId: $_userId');
+      await _firestoreService.savePlayer(player, _userId);
+      print('DEBUG PlayerProvider: Saved to Firestore ✓');
       
       print('DEBUG PlayerProvider: Reloading players...');
       await loadPlayers(); // Reload list
@@ -110,10 +97,8 @@ class PlayerNotifier extends StateNotifier<AsyncValue<List<Player>>> {
       final updated = player.copyWith(updatedAt: DateTime.now());
       await _localStorage.savePlayer(updated);
       
-      // Save to Firestore (only for authenticated users)
-      if (!_isGuestMode) {
-        await _firestoreService.savePlayer(updated, _userId);
-      }
+      // Save to Firestore (both guest and authenticated users)
+      await _firestoreService.savePlayer(updated, _userId);
       
       await loadPlayers();
     } catch (e) {
@@ -126,10 +111,8 @@ class PlayerNotifier extends StateNotifier<AsyncValue<List<Player>>> {
     try {
       await _localStorage.deletePlayer(playerId);
       
-      // Delete from Firestore (only for authenticated users)
-      if (!_isGuestMode) {
-        await _firestoreService.deletePlayer(playerId);
-      }
+      // Delete from Firestore (both guest and authenticated users)
+      await _firestoreService.deletePlayer(playerId);
       
       await loadPlayers();
     } catch (e) {
