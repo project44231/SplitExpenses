@@ -175,7 +175,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
               // Info text
               Text(
-                'Guest mode: Games are saved locally only.\nSign in to sync across devices and share results.',
+                'Guest mode: Limited features.\nSign in to sync across devices and share results.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppTheme.lightTextSecondary,
