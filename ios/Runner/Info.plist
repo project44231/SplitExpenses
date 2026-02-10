@@ -56,5 +56,9 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Access photos to set player profile pictures</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take photos for player profile pictures</string>
 </dict>
 </plist>
