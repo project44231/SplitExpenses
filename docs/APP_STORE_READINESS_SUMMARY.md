@@ -23,11 +23,11 @@
 
 **Android**
 - Changed from: `poker_tracker` (technical name)
-- Changed to: `Game buy in tracker` (user-friendly)
+- Changed to: `Game buy-in tracker` (user-friendly)
 - Location: `android/app/src/main/AndroidManifest.xml`
 
 **iOS**
-- Already correct: `Game buy in tracker`
+- Already correct: `Game buy-in tracker`
 - Location: `ios/Runner/Info.plist`
 
 ### 3. Android Release Signing Configuration ✓
@@ -254,7 +254,7 @@ Test checklist:
 - [ ] Create Google Play Console account ($25 one-time)
 - [ ] Create new app listing
 - [ ] Upload signed App Bundle (`.aab`)
-- [ ] Add app title: "Game buy in tracker"
+- [ ] Add app title: "Game buy-in tracker"
 - [ ] Add short description (80 char)
 - [ ] Add full description (from metadata doc)
 - [ ] Upload screenshots
@@ -280,7 +280,7 @@ Test checklist:
 **Store Listing:**
 - [ ] Create App Store Connect listing
 - [ ] Upload IPA via Xcode or Application Loader
-- [ ] Add app name: "Game buy in tracker"
+- [ ] Add app name: "Game buy-in tracker"
 - [ ] Add subtitle/promotional text
 - [ ] Add description (from metadata doc)
 - [ ] Upload screenshots (all required sizes)
@@ -449,7 +449,7 @@ Your app is **technically ready** for stores with these completed:
 
 ## 🎉 Final Notes
 
-Your Game buy in tracker app is in excellent shape! The code is solid, the features are complete, and the technical foundation is ready. The remaining work is primarily:
+Your Game buy-in tracker app is in excellent shape! The code is solid, the features are complete, and the technical foundation is ready. The remaining work is primarily:
 
 1. **Administrative** (accounts, enrollments)
 2. **Creative** (screenshots, marketing)

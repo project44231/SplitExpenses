@@ -1,4 +1,4 @@
-# Game buy in tracker
+# Game buy-in tracker
 
 Track game buy-ins for home games with ease. Manage players, settlements, and view game history all in one place.
 

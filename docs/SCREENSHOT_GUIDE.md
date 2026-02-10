@@ -318,7 +318,7 @@ sips -z 2340 1080 input.png --out output.png
 
 Include:
 - App icon
-- App name: "Game buy in tracker"
+- App name: "Game buy-in tracker"
 - Tagline: "Track. Settle. Play." or "Home Poker Games Made Simple"
 - Background: Use app colors (#1E88E5 blue)
 - Optional: Screenshots or mockups

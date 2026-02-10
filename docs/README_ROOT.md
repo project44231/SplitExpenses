@@ -1,4 +1,4 @@
-# Game buy in tracker
+# Game buy-in tracker
 
 A Flutter app for tracking poker home game buy-ins, managing settlements, and viewing comprehensive statistics.
 

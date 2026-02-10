@@ -1,7 +1,7 @@
 /// App-wide constants
 class AppConstants {
   // App Info
-  static const String appName = 'Game buy in tracker';
+  static const String appName = 'Game buy-in tracker';
   static const String appVersion = '1.0.0';
   
   // Validation
