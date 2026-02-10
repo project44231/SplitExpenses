@@ -4,7 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
-    "public": "web/share",
+    "public": "web",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -12,8 +12,12 @@
     ],
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/share",
+        "destination": "/share/index.html"
+      },
+      {
+        "source": "/privacy-policy",
+        "destination": "/privacy-policy.html"
       }
     ],
     "headers": [

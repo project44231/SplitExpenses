@@ -1,6 +1,6 @@
-# Setup Guide - Poker Tracker
+# Setup Guide - Game buy in tracker
 
-This guide will walk you through setting up the Poker Tracker app from scratch.
+This guide will walk you through setting up the Game buy in tracker app from scratch.
 
 ## Table of Contents
 1. [Prerequisites](#prerequisites)
@@ -126,7 +126,7 @@ Both should pass with no errors.
 2. **iOS bundle ID**: `com.gametracker.pokerTracker`
    - Find this in `ios/Runner.xcodeproj/project.pbxproj`
    - Or in Xcode: Runner → General → Bundle Identifier
-3. **App nickname**: "Poker Tracker iOS" (optional)
+3. **App nickname**: "Game buy in tracker iOS" (optional)
 4. **App Store ID**: Leave blank for now
 5. Click "Register app"
 6. **Download** `GoogleService-Info.plist`
@@ -141,7 +141,7 @@ Both should pass with no errors.
 1. In Firebase Console, click Android icon
 2. **Android package name**: `com.gametracker.poker_tracker`
    - Find in `android/app/build.gradle` → `applicationId`
-3. **App nickname**: "Poker Tracker Android" (optional)
+3. **App nickname**: "Game buy in tracker Android" (optional)
 4. **SHA-1**: Leave blank for now (needed later for Google Sign In)
 5. Click "Register app"
 6. **Download** `google-services.json`

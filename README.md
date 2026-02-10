@@ -1,6 +1,6 @@
-# Poker Tracker
+# Game buy in tracker
 
-Track poker buy-ins for home games with ease. Manage players, settlements, and view game history all in one place.
+Track game buy-ins for home games with ease. Manage players, settlements, and view game history all in one place.
 
 ## Features
 

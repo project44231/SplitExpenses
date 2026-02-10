@@ -1,6 +1,6 @@
 # Google Sign-In Setup Guide
 
-Complete step-by-step guide to configure Google authentication for your Poker Tracker app.
+Complete step-by-step guide to configure Google authentication for your Game buy in tracker app.
 
 ## Table of Contents
 

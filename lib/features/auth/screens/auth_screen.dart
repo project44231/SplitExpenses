@@ -151,27 +151,27 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   side: const BorderSide(color: AppTheme.primaryColor),
                 ),
               ),
-              const SizedBox(height: 12),
-
-              OutlinedButton.icon(
-                onPressed: null, // TODO: Implement Apple Sign In
-                icon: Icon(Icons.apple, size: 28, color: Colors.grey.shade400),
-                label: const Text('Sign in with Apple'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              OutlinedButton.icon(
-                onPressed: null, // TODO: Implement Email Sign In
-                icon: Icon(Icons.email, size: 24, color: Colors.grey.shade400),
-                label: const Text('Sign in with Email'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
               const SizedBox(height: 32),
+
+              // Apple Sign In - Hidden for now
+              // OutlinedButton.icon(
+              //   onPressed: null, // TODO: Implement Apple Sign In
+              //   icon: Icon(Icons.apple, size: 28, color: Colors.grey.shade400),
+              //   label: const Text('Sign in with Apple'),
+              //   style: OutlinedButton.styleFrom(
+              //     padding: const EdgeInsets.symmetric(vertical: 16),
+              //   ),
+              // ),
+
+              // Email Sign In - Hidden for now
+              // OutlinedButton.icon(
+              //   onPressed: null, // TODO: Implement Email Sign In
+              //   icon: Icon(Icons.email, size: 24, color: Colors.grey.shade400),
+              //   label: const Text('Sign in with Email'),
+              //   style: OutlinedButton.styleFrom(
+              //     padding: const EdgeInsets.symmetric(vertical: 16),
+              //   ),
+              // ),
 
               // Info text
               Text(

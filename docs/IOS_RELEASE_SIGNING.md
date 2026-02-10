@@ -70,7 +70,7 @@ Xcode will automatically:
 3. Click **Identifiers** → **+** button
 4. Select **App IDs** → **App**
 5. Configure:
-   - **Description**: Poker Tracker
+   - **Description**: Game buy in tracker
    - **Bundle ID**: `com.gametracker.pokerTracker` (Explicit)
    - **Capabilities**: Enable if needed:
      - Sign in with Apple (if using Apple Sign-In)
@@ -132,7 +132,7 @@ Upload via Xcode or Application Loader.
 2. Click **My Apps** → **+** → **New App**
 3. Fill in:
    - **Platforms**: iOS
-   - **Name**: Poker Tracker
+   - **Name**: Game buy in tracker
    - **Primary Language**: English (U.S.)
    - **Bundle ID**: Select `com.gametracker.pokerTracker`
    - **SKU**: pokertracker (or any unique identifier)

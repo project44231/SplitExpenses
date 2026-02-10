@@ -1,6 +1,6 @@
 # 📱 Store Submission Quick Checklist
 
-**App:** Poker Tracker v1.0.0  
+**App:** Game buy in tracker v1.0.0  
 **Date:** February 9, 2026
 
 Use this checklist to track your progress toward App Store and Google Play submission.
@@ -160,7 +160,7 @@ Then in Xcode:
 
 - [ ] Click "Create app" in Play Console
 - [ ] **App details:**
-  - Name: Poker Tracker
+  - Name: Game buy in tracker
   - Default language: English (US)
   - App/Game: Game
   - Free/Paid: Free
@@ -211,7 +211,7 @@ Then in Xcode:
 - [ ] Go to App Store Connect
 - [ ] Click "My Apps" → "+" → "New App"
 - [ ] **Platforms:** iOS
-- [ ] **Name:** Poker Tracker
+- [ ] **Name:** Game buy in tracker
 - [ ] **Primary Language:** English (U.S.)
 - [ ] **Bundle ID:** com.gametracker.pokerTracker
 - [ ] **SKU:** pokertracker (or any unique ID)

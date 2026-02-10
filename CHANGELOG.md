@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Poker Tracker app will be documented in this file.
+All notable changes to the Game buy in tracker app will be documented in this file.
 
 ## [Unreleased]
 

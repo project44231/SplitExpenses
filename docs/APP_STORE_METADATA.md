@@ -7,7 +7,7 @@ This document contains all the text, descriptions, and metadata needed for your 
 ## App Information
 
 ### App Name
-**Poker Tracker**
+**Game buy in tracker**
 
 ### Package/Bundle ID
 - **Android**: com.gametracker.poker_tracker
@@ -29,25 +29,25 @@ This document contains all the text, descriptions, and metadata needed for your 
 
 **Option 1:**
 ```
-Track home poker games: buy-ins, settlements & stats. Free, no ads!
+Track home games: buy-ins, settlements & stats. Free, no ads!
 ```
 
 **Option 2:**
 ```
-Home poker game tracker with smart settlements and player statistics
+Home game tracker with smart settlements and player statistics
 ```
 
 **Option 3:**
 ```
-Simplify your poker night! Track buy-ins, calculate settlements easily.
+Simplify your game night! Track buy-ins, calculate settlements easily.
 ```
 
 ### Full Description (4000 characters max)
 
 ```
-🎮 TRACK YOUR HOME POKER GAMES WITH EASE
+🎮 TRACK YOUR HOME GAMES WITH EASE
 
-Hosting a poker night with friends? Poker Tracker is the ultimate companion for managing buy-ins, calculating settlements, and tracking game statistics. No more spreadsheets, no more confusion—just simple, powerful tracking for home games.
+Hosting a game night with friends? Game buy in tracker is the ultimate companion for managing buy-ins, calculating settlements, and tracking game statistics. No more spreadsheets, no more confusion—just simple, powerful tracking for home games.
 
 ✨ KEY FEATURES
 
@@ -93,13 +93,13 @@ Hosting a poker night with friends? Poker Tracker is the ultimate companion for 
 • Offline mode with automatic sync
 
 🎲 PERFECT FOR:
-• Weekly poker nights with friends
+• Weekly game nights with friends
 • Home tournament hosting
 • Casual cash games
-• Social poker clubs
+• Social game clubs
 • Game result tracking
 
-💡 WHY POKER TRACKER?
+💡 WHY GAME BUY IN TRACKER?
 
 ✓ NO REAL MONEY HANDLING - We never touch your money, just track it
 ✓ FREE WITH NO ADS - Focus on the game, not distractions
@@ -108,7 +108,7 @@ Hosting a poker night with friends? Poker Tracker is the ultimate companion for 
 ✓ ALWAYS IMPROVING - Regular updates based on user feedback
 
 🚫 NOT A GAMBLING APP
-Poker Tracker is designed for tracking friendly home games only. We do not facilitate real money gambling or online poker. This is purely a tracking and settlement calculation tool for in-person games.
+Game buy in tracker is designed for tracking friendly home games only. We do not facilitate real money gambling or online games. This is purely a tracking and settlement calculation tool for in-person games.
 
 📱 REQUIREMENTS
 • Android 6.0+ or iOS 13.0+
@@ -122,7 +122,7 @@ Poker Tracker is designed for tracking friendly home games only. We do not facil
 • Comprehensive privacy policy available
 
 🆓 FREE FOREVER
-Poker Tracker is completely free with no hidden costs, premium tiers, or in-app purchases. We built this because we love poker nights and wanted a better way to track them.
+Game buy in tracker is completely free with no hidden costs, premium tiers, or in-app purchases. We built this because we love game nights and wanted a better way to track them.
 
 📈 COMING SOON
 • Tournament bracket management
@@ -132,17 +132,17 @@ Poker Tracker is completely free with no hidden costs, premium tiers, or in-app 
 • Export to PDF
 
 💬 WE LOVE FEEDBACK
-Got suggestions or found a bug? Contact us! We're a small team passionate about making the best poker tracking app possible.
+Got suggestions or found a bug? Contact us! We're a small team passionate about making the best game tracking app possible.
 
-Download Poker Tracker today and never worry about messy settlements again. Your poker nights just got a whole lot easier! 🃏
+Download Game buy in tracker today and never worry about messy settlements again. Your game nights just got a whole lot easier! 🃏
 ```
 
 ### What's New (Version 1.0.0)
 
 ```
-🎉 Welcome to Poker Tracker 1.0!
+🎉 Welcome to Game buy in tracker 1.0!
 
-Your ultimate home poker game companion is here! This first release includes:
+Your ultimate home game companion is here! This first release includes:
 
 ✨ Core Features:
 • Real-time game tracking with live buy-ins
@@ -164,7 +164,7 @@ Your ultimate home poker game companion is here! This first release includes:
 • Firebase-secured data storage
 • Works offline with automatic sync
 
-Ready to simplify your poker nights? Let's deal! 🃏
+Ready to simplify your game nights? Let's deal! 🃏
 ```
 
 ---
@@ -175,17 +175,17 @@ Ready to simplify your poker nights? Let's deal! 🃏
 
 **Primary Keywords:**
 ```
-poker, tracker, home game, buy-in, settlement, poker night, cash game, tournament, game tracker, poker statistics
+game, tracker, home game, buy-in, settlement, game night, cash game, tournament, game tracker, game statistics
 ```
 
 **Secondary Keywords:**
 ```
-poker calculator, game management, player tracker, debt settlement, poker host, home poker, friendly games, card game tracker, poker ledger, game history
+game calculator, game management, player tracker, debt settlement, game host, home games, friendly games, card game tracker, game ledger, game history
 ```
 
 **Long-tail Keywords:**
 ```
-home poker game tracker, poker buy-in manager, poker settlement calculator, track poker games, poker night organizer
+home game tracker, game buy-in manager, game settlement calculator, track games, game night organizer
 ```
 
 ### Category
@@ -240,7 +240,7 @@ Suggested screenshots:
 - 1024 x 500 px
 - Use app colors (blue #1E88E5)
 - Include app name and tagline
-- Suggestion: "Track. Settle. Play. | Poker Tracker"
+- Suggestion: "Track. Settle. Win. | Game buy in tracker"
 
 #### Apple App Store
 
@@ -274,12 +274,12 @@ Minimum 3 screenshots, maximum 10 per device size.
 
 **Primary:**
 ```
-Track. Settle. Play.
+Track. Settle. Win.
 ```
 
 **Alternatives:**
 ```
-Home Poker Games Made Simple
+Home Games Made Simple
 Your Poker Night Companion
 Smart Settlements for Home Games
 Track Every Hand, Settle Every Game
@@ -290,14 +290,14 @@ Poker Tracking Perfected
 
 **Twitter/X (280 characters):**
 ```
-🎴 Hosting poker night? Poker Tracker makes it easy! Track buy-ins, calculate optimized settlements & keep game history—all for free. No ads, no hassle. Download now! #PokerNight #HomeGames
+🎴 Hosting game night? Game buy in tracker makes it easy! Track buy-ins, calculate optimized settlements & keep game history—all for free. No ads, no hassle. Download now! #GameNight #HomeGames
 ```
 
 **Instagram Caption:**
 ```
-🃏 Tired of messy poker night settlements?
+🃏 Tired of messy game night settlements?
 
-Introducing Poker Tracker—the ultimate home game companion!
+Introducing Game buy in tracker—the ultimate home game companion!
 
 ✅ Real-time buy-in tracking
 ✅ Smart settlement calculator
@@ -313,7 +313,7 @@ Download today and simplify your poker nights! Link in bio 🎴
 
 **Hero Section:**
 ```
-Home Poker Games Made Simple
+Home Games Made Simple
 
 Track buy-ins, calculate settlements, and manage your poker nights with ease. 
 Free, fast, and built for home game hosts.
@@ -425,9 +425,9 @@ FOR IMMEDIATE RELEASE
 
 New Mobile App Simplifies Home Poker Game Management
 
-[Your City, Date] – Poker Tracker, a new mobile application for iOS and Android, launches today to help home poker game hosts easily track buy-ins, calculate settlements, and manage player statistics.
+[Your City, Date] – Game buy in tracker, a new mobile application for iOS and Android, launches today to help home game hosts easily track buy-ins, calculate settlements, and manage player statistics.
 
-"Hosting poker nights should be fun, not stressful," said [Your Name], developer of Poker Tracker. "We built this app to eliminate the confusion around settlements and tracking, so hosts can focus on enjoying the game with friends."
+"Hosting game nights should be fun, not stressful," said [Your Name], developer of Game buy in tracker. "We built this app to eliminate the confusion around settlements and tracking, so hosts can focus on enjoying the game with friends."
 
 Key features include:
 • Real-time buy-in tracking
@@ -436,7 +436,7 @@ Key features include:
 • Cloud sync across devices
 • Free with no ads or in-app purchases
 
-Poker Tracker is designed exclusively for friendly home games and does not facilitate real money online gambling.
+Game buy in tracker is designed exclusively for friendly home games and does not facilitate real money online gambling.
 
 The app is available now as a free download on the Apple App Store and Google Play Store.
 

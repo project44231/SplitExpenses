@@ -834,7 +834,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            'Poker Tracker',
+                            'Game buy in tracker',
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 24,
