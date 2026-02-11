@@ -1,5 +1,14 @@
 {
   "projects": {
     "default": "gametracker-a834b"
+  },
+  "targets": {
+    "gametracker-a834b": {
+      "hosting": {
+        "splitpot": [
+          "splitpot"
+        ]
+      }
+    }
   }
 }

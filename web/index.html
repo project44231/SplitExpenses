@@ -1,38 +1,488 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitPot - Smart Game Tracking & Settlement Calculator</title>
+    <meta name="description" content="Track buy-ins, calculate smart settlements, and manage your home games with ease. Free, fast, and built for game hosts.">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #fff;
+        }
 
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
 
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
+        .logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            animation: fadeIn 1s ease-in;
+        }
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="poker_tracker">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+        .hero p {
+            font-size: 1.3em;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
 
-  <title>poker_tracker</title>
-  <link rel="manifest" href="manifest.json">
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary {
+            background-color: white;
+            color: #1E88E5;
+        }
+
+        .btn-secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px;
+        }
+
+        /* Features Section */
+        .features {
+            background-color: #f8f9fa;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 50px;
+            color: #1E88E5;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            color: #1E88E5;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.7;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            background-color: white;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .step {
+            text-align: center;
+        }
+
+        .step-number {
+            display: inline-block;
+            width: 60px;
+            height: 60px;
+            background-color: #1E88E5;
+            color: white;
+            border-radius: 50%;
+            line-height: 60px;
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .step h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .step p {
+            color: #666;
+        }
+
+        /* Why Choose */
+        .why-choose {
+            background-color: #f8f9fa;
+        }
+
+        .benefits {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .benefit {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .benefit-icon {
+            font-size: 2em;
+            color: #1E88E5;
+            flex-shrink: 0;
+        }
+
+        .benefit-content h4 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .benefit-content p {
+            color: #666;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1E88E5;
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.9;
+        }
+
+        .footer-links a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2em;
+            }
+
+            .hero p {
+                font-size: 1.1em;
+            }
+
+            .section-title {
+                font-size: 2em;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+    <!-- Hero Section -->
+    <section class="hero">
+        <img src="/logo.png" alt="SplitPot Logo" class="logo">
+        <h1>SplitPot</h1>
+        <p>Smart Game Tracking & Settlement Calculator</p>
+        <p style="font-size: 1.1em; margin-bottom: 40px;">Track buy-ins, calculate settlements, and manage your home games with ease. Free, fast, and built for game hosts.</p>
+        <div class="cta-buttons">
+            <a href="#features" class="btn btn-primary">Learn More</a>
+            <a href="/support" class="btn btn-secondary">Get Support</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Everything You Need for Perfect Game Nights</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Real-Time Tracking</h3>
+                    <p>Track buy-ins instantly as the game progresses. Live game timer, total pot tracking, and expandable player cards with detailed transaction history.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Smart Settlements</h3>
+                    <p>Automatic settlement calculations with debt optimization. Minimizes transactions needed—instead of 12 transfers, get it done in just 2-3 payments.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Complete History</h3>
+                    <p>Never lose track of past games. View game archives, player leaderboards, hosting statistics, and ROI tracking. Filter by date, player, or pot size.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Player Management</h3>
+                    <p>Persistent player contacts database with quick favorites. Profile pictures, player stats, and effortless search. Add players once, use them forever.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Live Game Sharing</h3>
+                    <p>Share live game standings via web link. Real-time updates viewers can follow along. Perfect for remote players or just showing off the action.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Lightning Fast</h3>
+                    <p>Customizable quick buy-in amounts for any stakes. One-tap entry gets you straight to the game. No extra screens, no delays.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">💸</div>
+                    <h3>Cash-Out Tracking</h3>
+                    <p>Intelligent mismatch handling and reconciliation. Clear profit/loss breakdown for each player. Share settlement summaries instantly.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure & Private</h3>
+                    <p>End-to-end encrypted data transmission. Firebase security rules protect your information. Optional cloud sync or local-only storage.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Works Offline</h3>
+                    <p>Full functionality without internet. Automatic sync when back online. Your data is always accessible, even with no connection.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Add Players</h3>
+                    <p>Search your contacts or add new players to the game</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Track Buy-Ins</h3>
+                    <p>Record buy-ins and rebuys with one tap as you play</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Enter Cash-Outs</h3>
+                    <p>Record final chip counts or cash-out amounts</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Get Settlements</h3>
+                    <p>View optimized settlement calculations instantly</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose SplitPot -->
+    <section class="why-choose">
+        <div class="container">
+            <h2 class="section-title">Why SplitPot?</h2>
+            <div class="benefits">
+                <div class="benefit">
+                    <div class="benefit-icon">✓</div>
+                    <div class="benefit-content">
+                        <h4>100% Free</h4>
+                        <p>No hidden costs, no premium features, no in-app purchases. Completely free forever.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">✓</div>
+                    <div class="benefit-content">
+                        <h4>No Ads</h4>
+                        <p>Focus on the game, not distractions. Clean interface with no advertisements.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">✓</div>
+                    <div class="benefit-content">
+                        <h4>Privacy First</h4>
+                        <p>Your data belongs to you. We never touch your money, just track it.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">✓</div>
+                    <div class="benefit-content">
+                        <h4>Optimized Math</h4>
+                        <p>Mathematical algorithms minimize settlement transactions. Less confusion, faster payouts.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">✓</div>
+                    <div class="benefit-content">
+                        <h4>Cross-Platform</h4>
+                        <p>Available on iOS and Android. Cloud sync keeps your data in sync across all devices.</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">✓</div>
+                    <div class="benefit-content">
+                        <h4>Always Improving</h4>
+                        <p>Regular updates based on user feedback. We're constantly making it better.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Perfect For -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Perfect For</h2>
+            <div class="benefits">
+                <div class="benefit">
+                    <div class="benefit-icon">🎮</div>
+                    <div class="benefit-content">
+                        <h4>Weekly Game Nights</h4>
+                        <p>Regular games with friends need consistent tracking</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">🏆</div>
+                    <div class="benefit-content">
+                        <h4>Home Tournaments</h4>
+                        <p>Track multiple games and player performance over time</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">💵</div>
+                    <div class="benefit-content">
+                        <h4>Casual Cash Games</h4>
+                        <p>Simple tracking for informal games with friends</p>
+                    </div>
+                </div>
+
+                <div class="benefit">
+                    <div class="benefit-icon">👥</div>
+                    <div class="benefit-content">
+                        <h4>Social Game Clubs</h4>
+                        <p>Manage multiple players and track long-term statistics</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="hero" style="padding: 60px 20px;">
+        <h2 style="font-size: 2.5em; margin-bottom: 20px;">Ready to Simplify Your Game Nights?</h2>
+        <p style="margin-bottom: 30px;">Download SplitPot today and never worry about messy settlements again</p>
+        <div class="cta-buttons">
+            <a href="#" class="btn btn-primary">Download on iOS</a>
+            <a href="#" class="btn btn-primary">Get it on Android</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-links">
+            <a href="/privacy-policy">Privacy Policy</a>
+            <a href="/delete-data">Delete Data</a>
+            <a href="/support">Support</a>
+            <a href="mailto:project44231@gmail.com">Contact</a>
+        </div>
+        <p>&copy; 2026 SplitPot. All rights reserved.</p>
+        <p style="margin-top: 10px; opacity: 0.8; font-size: 0.9em;">Not a gambling app. For tracking friendly home games only.</p>
+    </footer>
 </body>
 </html>

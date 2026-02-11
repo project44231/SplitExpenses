@@ -4,6 +4,7 @@
     "indexes": "firestore.indexes.json"
   },
   "hosting": {
+    "target": "splitpot",
     "public": "web",
     "ignore": [
       "firebase.json",
@@ -18,6 +19,14 @@
       {
         "source": "/privacy-policy",
         "destination": "/privacy-policy.html"
+      },
+      {
+        "source": "/delete-data",
+        "destination": "/delete-data.html"
+      },
+      {
+        "source": "/support",
+        "destination": "/support.html"
       }
     ],
     "headers": [
