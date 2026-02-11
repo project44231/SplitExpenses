@@ -2,9 +2,10 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "images/app_icon.png"
+  background_color_ios: "#FFFFFF"
   
   # Android adaptive icon (optional, for Android 8.0+)
-  adaptive_icon_background: "#1E88E5"
+  adaptive_icon_background: "#FFFFFF"
   adaptive_icon_foreground: "images/app_icon.png"
   
   # Remove old launcher icons

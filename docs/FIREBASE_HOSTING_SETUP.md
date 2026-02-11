@@ -30,7 +30,7 @@ firebase deploy --only hosting
 
 This command will:
 - Upload the `web/share/` folder contents to Firebase Hosting
-- Make the web viewer accessible at: `https://gametracker-a834b.web.app/share/{gameId}/{shareToken}`
+- Make the web viewer accessible at: `https://splitpot.web.app/share/{gameId}/{shareToken}`
 
 ### 3. Test the Deployment
 
@@ -45,7 +45,7 @@ After deployment, you can test by:
 ### URL Structure
 
 ```
-https://gametracker-a834b.web.app/share/{gameId}/{shareToken}
+https://splitpot.web.app/share/{gameId}/{shareToken}
 ```
 
 - `gameId`: The unique ID of the active game

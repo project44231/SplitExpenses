@@ -149,7 +149,7 @@ This document summarizes the authenticated user features that have been implemen
 
 **Share URL Format:**
 ```
-https://gametracker-a834b.web.app/share/{gameId}/{shareToken}
+https://splitpot.web.app/share/{gameId}/{shareToken}
 ```
 
 ---

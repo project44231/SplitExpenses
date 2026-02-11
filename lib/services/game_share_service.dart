@@ -4,8 +4,8 @@ import 'package:flutter/services.dart';
 import '../models/game.dart';
 
 class GameShareService {
-  // Firebase Hosting domain (update this after deploying)
-  static const String _webAppDomain = 'gametracker-a834b.web.app';
+  // Firebase Hosting domain
+  static const String _webAppDomain = 'splitpot.web.app';
 
   /// Generate a unique share token for a game
   String generateShareToken() {
@@ -25,11 +25,11 @@ class GameShareService {
   }) async {
     final url = buildShareUrl(game.id, shareToken);
     final shareMessage = message ??
-        'Join our live poker game!\n\nView real-time standings:\n$url';
+        'Join our live game!\n\nView real-time standings:\n$url';
 
     await Share.share(
       shareMessage,
-      subject: 'Live Poker Game',
+      subject: 'Live Game - SplitPot',
     );
   }
 
