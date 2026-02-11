@@ -1,6 +1,6 @@
-# Game buy-in tracker
+# SplitPot
 
-Track game buy-ins for home games with ease. Manage players, settlements, and view game history all in one place.
+Smart game tracking and settlement calculator for home games. Track buy-ins, calculate optimized settlements, and share live game standings.
 
 ## Features
 
@@ -73,20 +73,18 @@ firebase deploy
 
 ## Documentation
 
-### Setup Guides
-- [Firebase Setup](docs/FIREBASE_SETUP.md) - Firebase configuration guide
-- [Google Auth Setup](docs/QUICK_START_GOOGLE_AUTH.md) - Google Sign-In setup
-- [Firebase Hosting Setup](docs/FIREBASE_HOSTING_SETUP.md) - Deploy web viewer for live sharing
-- [Firestore Security Rules](docs/FIRESTORE_SECURITY_RULES.md) - Security rules and deployment
+📚 **[Complete Documentation](docs/README.md)** - Full documentation index
 
-### Feature Documentation
-- [Features](docs/FEATURES.md) - Detailed feature list
-- [Game Flow](docs/GAME_FLOW.md) - Game lifecycle and user flow
-- [Cash-Out Handling](docs/CASH_OUT_HANDLING.md) - Cash-out reconciliation system
-- [Authenticated Features](docs/AUTHENTICATED_FEATURES_IMPLEMENTATION.md) - Comprehensive guide to authenticated user features
-- [Project Status](docs/STATUS.md) - Implementation status
-- [Testing](docs/TESTING.md) - Testing guide
-- [Color Theme](docs/COLOR_THEME.md) - App theme details
+**Quick Links:**
+- [Features](docs/FEATURES.md) - App features and specifications
+- [Store Submission](docs/STORE_SUBMISSION_CHECKLIST.md) - Complete submission guide
+- [Firebase Hosting](docs/FIREBASE_HOSTING_SETUP.md) - Deploy web viewer
+- [Release Signing](docs/ANDROID_RELEASE_SIGNING.md) - Android & iOS signing setup
+
+**Live Links:**
+- 🌐 **Website:** https://splitpot.web.app
+- 📧 **Support:** project44231@gmail.com
+- 🔒 **Privacy:** https://splitpot.web.app/privacy-policy
 
 ## Project Structure
 
@@ -133,6 +131,13 @@ flutter test
 # Run with coverage
 flutter test --coverage
 ```
+
+## App Store
+
+- **App Name:** SplitPot
+- **Platforms:** iOS, Android
+- **Category:** Entertainment
+- **Price:** Free
 
 ## License
 

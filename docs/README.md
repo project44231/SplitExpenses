@@ -1,129 +1,60 @@
-# Game buy-in tracker - Documentation
+# SplitPot Documentation
 
-Flutter app for tracking poker home games with buy-ins, settlements, and statistics.
+Complete documentation for the SplitPot app - a smart game tracking and settlement calculator.
 
-## Quick Links
+## 📱 App Information
 
-- **[Status](STATUS.md)** - Current progress & next steps
-- **[Setup](SETUP.md)** - Firebase configuration (when ready)
-- **[Features](FEATURES.md)** - All planned features
-- **[Game Flow](GAME_FLOW.md)** - Complete game lifecycle and navigation
-- **[Cash-Out Handling](CASH_OUT_HANDLING.md)** - Mismatch detection and resolution
-- **[Color Theme](COLOR_THEME.md)** - 🎨 Modern blue color scheme & design guidelines
-- **[Firebase Integration](FIREBASE_INTEGRATION.md)** - Cloud storage and sync architecture
-- **[Guest Data Cleanup](GUEST_DATA_CLEANUP.md)** - 🧹 Managing and cleaning up guest data
-- **[Google Sign-In Setup](GOOGLE_SIGNIN_SETUP.md)** - 🔐 Complete Google authentication configuration
-- **[Quick Start: Google Auth](QUICK_START_GOOGLE_AUTH.md)** - ⚡ Get Google Sign-In working in 10 minutes
-
-## Quick Start
-
-```bash
-# Install & run
-flutter pub get
-flutter run
-
-# Test the STREAMLINED flow (NEW!)
-1. Splash → Auth screen
-2. Click "Continue as Guest"
-3. **Lands directly on Active Game!**
-4. Click "Add Player" → Add 3-4 players
-5. **Click "+" next to any player** → Enter amount → Done! ⚡
-6. Add rebuys (click "+" again or use bottom "Add Buy-In" button)
-7. Watch live timer & total pot
-8. Click "End Game" (top right)
-9. Enter cash-out amounts for each player
-10. View optimized settlements (who owes whom)
-11. Share results via text/messaging!
-
-**Super Fast:** No extra screens! 2-click buy-ins with "+" buttons!
-```
-
-## Tech Stack
-
-- **Flutter** 3.27.0
-- **State**: Riverpod
-- **Storage**: Hive (local), Firebase (cloud)
-- **Models**: Freezed
-- **Nav**: go_router
-- **Algorithm**: Debt simplification (minimizes transactions)
-
-## Features
-
-### Working Now ✅ (MVP v0.1)
-- ✅ Guest mode with persistence
-- ✅ Streamlined UX (Auth → Active Game directly)
-- ✅ Quick buy-ins: "+" button on each player (2-click workflow!)
-- ✅ Active Game tracking (live timer, buy-ins, rebuys)
-- ✅ Settlement screen (cash-outs, profit/loss, optimized transfers)
-- ✅ Share game results
-- ✅ Local data storage
-- ✅ Professional UI
-- ✅ Zero linter errors
-
-### Next Up 🚧
-- Game history & statistics
-- Firebase integration (optional)
-- Player leaderboards
-
-## Project Structure
-
-```
-lib/
-├── core/           # Config, theme, utils
-├── features/       # Auth, game, history, profile
-├── models/         # Data models
-├── services/       # Business logic
-└── shared/         # Shared widgets
-```
-
-## Development
-
-```bash
-# Hot reload
-Press 'r' in terminal
-
-# Hot restart
-Press 'R' in terminal
-
-# Analyze
-flutter analyze
-
-# Test
-flutter test
-```
-
-## Key Files
-
-**Services**:
-- `lib/services/local_storage_service.dart` - Hive storage
-- `lib/services/settlement_service.dart` - Debt algorithm
-
-**Auth**:
-- `lib/features/auth/services/auth_service.dart`
-- `lib/features/auth/providers/auth_provider.dart`
-
-**Models** (all in `lib/models/`):
-- `game.dart`, `player.dart`, `buy_in.dart`, `cash_out.dart`
-- `settlement.dart`, `expense.dart`, `game_group.dart`
-
-## Current Status
-
-**Phase 1**: ✅ Foundation complete  
-**Guest Mode**: ✅ Working  
-**Streamlined UX**: ✅ Complete  
-**Settlement**: ✅ Complete  
-**MVP Progress**: 88%  
-
-**Next**: Game history & statistics (3-4 hrs)
-
-## Need Help?
-
-- Current status → [STATUS.md](STATUS.md)
-- Firebase setup → [SETUP.md](SETUP.md)
-- Feature list → [FEATURES.md](FEATURES.md)
+**App Name:** SplitPot  
+**Platforms:** iOS, Android  
+**Website:** https://splitpot.web.app  
+**Support:** project44231@gmail.com
 
 ---
 
-**Last Updated**: Feb 7, 2026  
-**Version**: 0.1.0  
-**Status**: 88% to MVP - Quick Buy-In Ready! ⚡
+## 📚 Documentation Index
+
+### App Features & Description
+- **[FEATURES.md](FEATURES.md)** - Complete feature list and specifications
+- **[APP_DESCRIPTION.md](APP_DESCRIPTION.md)** - App store descriptions and marketing copy
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history and release notes
+
+### Store Submission
+- **[STORE_SUBMISSION_CHECKLIST.md](STORE_SUBMISSION_CHECKLIST.md)** - Complete checklist for app store submission
+- **[APP_STORE_METADATA.md](APP_STORE_METADATA.md)** - Marketing materials, descriptions, keywords
+- **[SCREENSHOT_GUIDE.md](SCREENSHOT_GUIDE.md)** - How to capture and prepare screenshots
+
+### Release & Deployment
+- **[ANDROID_RELEASE_SIGNING.md](ANDROID_RELEASE_SIGNING.md)** - Android keystore and signing setup
+- **[IOS_RELEASE_SIGNING.md](IOS_RELEASE_SIGNING.md)** - iOS certificates and provisioning
+- **[FIREBASE_HOSTING_SETUP.md](FIREBASE_HOSTING_SETUP.md)** - Deploy web viewer for live game sharing
+- **[FIRESTORE_SECURITY_RULES.md](FIRESTORE_SECURITY_RULES.md)** - Database security rules and deployment
+
+---
+
+## 🚀 Quick Start
+
+1. **Clone the repository**
+2. **Install dependencies:** `flutter pub get`
+3. **Run code generation:** `dart run build_runner build --delete-conflicting-outputs`
+4. **Run the app:** `flutter run`
+
+See main [README.md](../README.md) in the root directory for detailed setup instructions.
+
+---
+
+## 🔗 Important Links
+
+- **Privacy Policy:** https://splitpot.web.app/privacy-policy
+- **Support Page:** https://splitpot.web.app/support
+- **Data Deletion:** https://splitpot.web.app/delete-data
+- **Live Game Sharing:** https://splitpot.web.app/share
+
+---
+
+## 📧 Support
+
+For questions or issues, contact: **project44231@gmail.com**
+
+---
+
+*Last updated: February 2026*
