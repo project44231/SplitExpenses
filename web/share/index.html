@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Poker Game - Standings</title>
+    <title>Live Event - Expense Tracking</title>
     <style>
         * {
             margin: 0;
@@ -220,23 +220,23 @@
     <div class="container">
         <div id="loading" class="loading">
             <div class="loading-spinner"></div>
-            <p>Loading game data...</p>
+            <p>Loading event data...</p>
         </div>
 
         <div id="content" style="display: none;">
             <div class="header">
-                <h1><span class="live-indicator"></span>Live Game</h1>
-                <p class="subtitle" id="gameTime">Loading...</p>
+                <h1><span class="live-indicator"></span>Live Event</h1>
+                <p class="subtitle" id="eventTime">Loading...</p>
             </div>
 
             <div class="game-info">
                 <div class="game-info-row">
-                    <span class="game-info-label">Total Pot</span>
-                    <span class="game-info-value" id="totalPot">$0</span>
+                    <span class="game-info-label">Total Expenses</span>
+                    <span class="game-info-value" id="totalExpenses">$0</span>
                 </div>
                 <div class="game-info-row">
-                    <span class="game-info-label">Players</span>
-                    <span class="game-info-value" id="playerCount">0</span>
+                    <span class="game-info-label">Participants</span>
+                    <span class="game-info-value" id="participantCount">0</span>
                 </div>
                 <div class="game-info-row">
                     <span class="game-info-label">Duration</span>
@@ -245,8 +245,8 @@
             </div>
 
             <div class="players-section">
-                <div class="players-title">Current Standings</div>
-                <div id="playersList"></div>
+                <div class="players-title">Expense Summary</div>
+                <div id="participantsList"></div>
                 <button id="refreshBtn" class="refresh-btn" onclick="manualRefresh()">🔄 Refresh</button>
                 <div class="last-updated">
                     Last updated: <span id="lastUpdated">Just now</span>

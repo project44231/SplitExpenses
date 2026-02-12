@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Service for cleaning up guest user data
-/// Allows batch deletion of old guest game data
+/// Allows batch deletion of old guest event data
 class GuestCleanupService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   
@@ -13,45 +13,18 @@ class GuestCleanupService {
     final cutoffTimestamp = Timestamp.fromDate(cutoffDate);
 
     try {
-      // Clean up games
+      // Clean up events
       await _deleteCollection(
-        'games',
+        'events',
         where: [
           {'field': 'userId', 'isEqualTo': guestUserId},
           {'field': 'updatedAt', 'isLessThan': cutoffTimestamp},
         ],
       );
 
-      // Clean up players
+      // Clean up participants
       await _deleteCollection(
-        'players',
-        where: [
-          {'field': 'userId', 'isEqualTo': guestUserId},
-          {'field': 'updatedAt', 'isLessThan': cutoffTimestamp},
-        ],
-      );
-
-      // Clean up buy-ins
-      await _deleteCollection(
-        'buy_ins',
-        where: [
-          {'field': 'userId', 'isEqualTo': guestUserId},
-          {'field': 'updatedAt', 'isLessThan': cutoffTimestamp},
-        ],
-      );
-
-      // Clean up cash-outs
-      await _deleteCollection(
-        'cash_outs',
-        where: [
-          {'field': 'userId', 'isEqualTo': guestUserId},
-          {'field': 'updatedAt', 'isLessThan': cutoffTimestamp},
-        ],
-      );
-
-      // Clean up settlements
-      await _deleteCollection(
-        'settlements',
+        'participants',
         where: [
           {'field': 'userId', 'isEqualTo': guestUserId},
           {'field': 'updatedAt', 'isLessThan': cutoffTimestamp},
@@ -67,9 +40,18 @@ class GuestCleanupService {
         ],
       );
 
-      // Clean up game groups
+      // Clean up settlements
       await _deleteCollection(
-        'game_groups',
+        'settlements',
+        where: [
+          {'field': 'userId', 'isEqualTo': guestUserId},
+          {'field': 'updatedAt', 'isLessThan': cutoffTimestamp},
+        ],
+      );
+
+      // Clean up event groups
+      await _deleteCollection(
+        'event_groups',
         where: [
           {'field': 'userId', 'isEqualTo': guestUserId},
           {'field': 'updatedAt', 'isLessThan': cutoffTimestamp},
@@ -84,25 +66,19 @@ class GuestCleanupService {
   Future<void> deleteAllGuestData() async {
     try {
       // Clean up all collections
-      await _deleteCollection('games', where: [
+      await _deleteCollection('events', where: [
         {'field': 'userId', 'isEqualTo': guestUserId},
       ]);
-      await _deleteCollection('players', where: [
-        {'field': 'userId', 'isEqualTo': guestUserId},
-      ]);
-      await _deleteCollection('buy_ins', where: [
-        {'field': 'userId', 'isEqualTo': guestUserId},
-      ]);
-      await _deleteCollection('cash_outs', where: [
-        {'field': 'userId', 'isEqualTo': guestUserId},
-      ]);
-      await _deleteCollection('settlements', where: [
+      await _deleteCollection('participants', where: [
         {'field': 'userId', 'isEqualTo': guestUserId},
       ]);
       await _deleteCollection('expenses', where: [
         {'field': 'userId', 'isEqualTo': guestUserId},
       ]);
-      await _deleteCollection('game_groups', where: [
+      await _deleteCollection('settlements', where: [
+        {'field': 'userId', 'isEqualTo': guestUserId},
+      ]);
+      await _deleteCollection('event_groups', where: [
         {'field': 'userId', 'isEqualTo': guestUserId},
       ]);
     } catch (e) {
@@ -123,13 +99,11 @@ class GuestCleanupService {
   /// Get total size estimate of guest data (in documents)
   Future<Map<String, int>> getGuestDataStats() async {
     return {
-      'games': await getGuestDataCount('games'),
-      'players': await getGuestDataCount('players'),
-      'buy_ins': await getGuestDataCount('buy_ins'),
-      'cash_outs': await getGuestDataCount('cash_outs'),
-      'settlements': await getGuestDataCount('settlements'),
+      'events': await getGuestDataCount('events'),
+      'participants': await getGuestDataCount('participants'),
       'expenses': await getGuestDataCount('expenses'),
-      'game_groups': await getGuestDataCount('game_groups'),
+      'settlements': await getGuestDataCount('settlements'),
+      'event_groups': await getGuestDataCount('event_groups'),
     };
   }
 

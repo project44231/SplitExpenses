@@ -15,8 +15,10 @@ class NewGameScreen extends ConsumerStatefulWidget {
 }
 
 class _NewGameScreenState extends ConsumerState<NewGameScreen> {
+  final _formKey = GlobalKey<FormState>();
   final Set<String> _selectedPlayerIds = {};
-  final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _groupNameController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _playerSearchController = TextEditingController();
   final TextEditingController _newPlayerNameController = TextEditingController();
   Currency _selectedCurrency = AppCurrencies.usd;
@@ -25,7 +27,8 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
 
   @override
   void dispose() {
-    _notesController.dispose();
+    _groupNameController.dispose();
+    _descriptionController.dispose();
     _playerSearchController.dispose();
     _newPlayerNameController.dispose();
     super.dispose();
@@ -47,12 +50,12 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add New Player'),
+        title: const Text('Add New Participant'),
         content: TextField(
           controller: _newPlayerNameController,
           decoration: const InputDecoration(
-            labelText: 'Player Name',
-            hintText: 'Enter player name',
+            labelText: 'Participant Name',
+            hintText: 'Enter participant name',
           ),
           autofocus: true,
           textCapitalization: TextCapitalization.words,
@@ -87,10 +90,14 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
     }
   }
 
-  Future<void> _createGame() async {
-    if (_selectedPlayerIds.isEmpty) {
+  Future<void> _createGroup() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_selectedPlayerIds.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one player')),
+        const SnackBar(content: Text('Please add at least 2 participants')),
       );
       return;
     }
@@ -100,27 +107,29 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
     });
 
     try {
-      final game = await ref.read(gameProvider.notifier).createGame(
-            playerIds: _selectedPlayerIds.toList(),
-            currency: _selectedCurrency.code,
-            notes: _notesController.text.trim().isEmpty 
+      final group = await ref.read(gameProvider.notifier).createEvent(
+            participantIds: _selectedPlayerIds.toList(),
+            name: _groupNameController.text.trim(),
+            description: _descriptionController.text.trim().isEmpty 
                 ? null 
-                : _notesController.text.trim(),
+                : _descriptionController.text.trim(),
+            currency: _selectedCurrency.code,
           );
 
-      if (game != null && mounted) {
-        // Set as active game
-        ref.read(activeGameProvider.notifier).state = game;
+      if (group != null && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Group expense created successfully!')),
+        );
         
-        // Navigate to Active Game screen
-        context.go('${AppConstants.activeGameRoute}/${game.id}');
+        // Navigate to Group Expense detail screen
+        context.go('${AppConstants.groupExpenseDetailRoute}/${group.id}');
       } else {
-        throw Exception('Failed to create game');
+        throw Exception('Failed to create group expense');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error creating game: $e')),
+          SnackBar(content: Text('Error creating group expense: $e')),
         );
       }
     } finally {
@@ -138,7 +147,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Game'),
+        title: const Text('Create Group Expense'),
       ),
       body: playersAsync.when(
         data: (allPlayers) {
@@ -149,10 +158,54 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
                   p.name.toLowerCase().contains(_searchQuery.toLowerCase())
                 ).toList();
 
-          return Column(
-            children: [
-              // Currency Selection
-              Container(
+          return Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                // Group Name and Description
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: Theme.of(context).cardColor,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _groupNameController,
+                        decoration: const InputDecoration(
+                          labelText: 'Group Name',
+                          hintText: 'e.g., Weekend Trip, Roommate Expenses',
+                          prefixIcon: Icon(Icons.group_work),
+                          border: OutlineInputBorder(),
+                        ),
+                        textCapitalization: TextCapitalization.words,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter a group name';
+                          }
+                          if (value.length > AppConstants.maxGroupNameLength) {
+                            return 'Name too long (max ${AppConstants.maxGroupNameLength} characters)';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _descriptionController,
+                        decoration: const InputDecoration(
+                          labelText: 'Description (Optional)',
+                          hintText: 'e.g., Shared expenses for Bali trip',
+                          prefixIcon: Icon(Icons.description),
+                          border: OutlineInputBorder(),
+                        ),
+                        maxLength: AppConstants.maxDescriptionLength,
+                        maxLines: 2,
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+
+                // Currency Selection
+                Container(
                 padding: const EdgeInsets.all(16),
                 color: Theme.of(context).cardColor,
                 child: Row(
@@ -192,7 +245,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
               
               const Divider(height: 1),
 
-              // Player Search
+              // Participant Search
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -201,7 +254,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
                       child: TextField(
                         controller: _playerSearchController,
                         decoration: InputDecoration(
-                          hintText: 'Search players...',
+                          hintText: 'Search participants...',
                           prefixIcon: const Icon(Icons.search),
                           suffixIcon: _searchQuery.isNotEmpty
                               ? IconButton(
@@ -331,7 +384,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
                       ),
               ),
 
-              // Notes (Optional)
+              // Bottom Bar with Create Button
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -344,50 +397,51 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
                     ),
                   ],
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                child: Row(
                   children: [
-                    TextField(
-                      controller: _notesController,
-                      decoration: const InputDecoration(
-                        labelText: 'Notes (optional)',
-                        hintText: 'Add game notes...',
-                        prefixIcon: Icon(Icons.note),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          const Icon(Icons.people, color: AppTheme.primaryColor),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${_selectedPlayerIds.length} ${_selectedPlayerIds.length == 1 ? 'participant' : 'participants'} selected',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                      maxLines: 2,
                     ),
-                    const SizedBox(height: 16),
-                    
-                    // Start Game Button
-                    ElevatedButton(
-                      onPressed: _isCreating || _selectedPlayerIds.isEmpty
-                          ? null
-                          : _createGame,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        backgroundColor: AppTheme.primaryColor,
-                      ),
-                      child: _isCreating
+                    const SizedBox(width: 16),
+                    ElevatedButton.icon(
+                      onPressed: _isCreating ? null : _createGroup,
+                      icon: _isCreating
                           ? const SizedBox(
-                              height: 20,
                               width: 20,
+                              height: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                               ),
                             )
-                          : Text(
-                              'Start Game (${_selectedPlayerIds.length} ${_selectedPlayerIds.length == 1 ? 'Player' : 'Players'})',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                          : const Icon(Icons.check),
+                      label: Text(_isCreating ? 'Creating...' : 'Create Group'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
             ],
+            ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),

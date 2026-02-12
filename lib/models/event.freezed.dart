@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'game.dart';
+part of 'event.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -14,82 +14,88 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-Game _$GameFromJson(Map<String, dynamic> json) {
-  return _Game.fromJson(json);
+Event _$EventFromJson(Map<String, dynamic> json) {
+  return _Event.fromJson(json);
 }
 
 /// @nodoc
-mixin _$Game {
+mixin _$Event {
   String get id => throw _privateConstructorUsedError;
+  String get userId => throw _privateConstructorUsedError;
   String? get name => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
   String get groupId => throw _privateConstructorUsedError;
-  GameStatus get status => throw _privateConstructorUsedError;
+  EventStatus get status => throw _privateConstructorUsedError;
   String get currency => throw _privateConstructorUsedError;
-  List<String> get playerIds => throw _privateConstructorUsedError;
-  List<double> get customBuyInAmounts => throw _privateConstructorUsedError;
+  List<String> get participantIds => throw _privateConstructorUsedError;
   DateTime get startTime => throw _privateConstructorUsedError;
   DateTime? get endTime => throw _privateConstructorUsedError;
   String? get notes => throw _privateConstructorUsedError;
   String? get shareToken => throw _privateConstructorUsedError;
+  List<String> get categoryTags => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this Game to a JSON map.
+  /// Serializes this Event to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of Game
+  /// Create a copy of Event
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $GameCopyWith<Game> get copyWith => throw _privateConstructorUsedError;
+  $EventCopyWith<Event> get copyWith => throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $GameCopyWith<$Res> {
-  factory $GameCopyWith(Game value, $Res Function(Game) then) =
-      _$GameCopyWithImpl<$Res, Game>;
+abstract class $EventCopyWith<$Res> {
+  factory $EventCopyWith(Event value, $Res Function(Event) then) =
+      _$EventCopyWithImpl<$Res, Event>;
   @useResult
   $Res call(
       {String id,
+      String userId,
       String? name,
+      String? description,
       String groupId,
-      GameStatus status,
+      EventStatus status,
       String currency,
-      List<String> playerIds,
-      List<double> customBuyInAmounts,
+      List<String> participantIds,
       DateTime startTime,
       DateTime? endTime,
       String? notes,
       String? shareToken,
+      List<String> categoryTags,
       DateTime createdAt,
       DateTime? updatedAt});
 }
 
 /// @nodoc
-class _$GameCopyWithImpl<$Res, $Val extends Game>
-    implements $GameCopyWith<$Res> {
-  _$GameCopyWithImpl(this._value, this._then);
+class _$EventCopyWithImpl<$Res, $Val extends Event>
+    implements $EventCopyWith<$Res> {
+  _$EventCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of Game
+  /// Create a copy of Event
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? id = null,
+    Object? userId = null,
     Object? name = freezed,
+    Object? description = freezed,
     Object? groupId = null,
     Object? status = null,
     Object? currency = null,
-    Object? playerIds = null,
-    Object? customBuyInAmounts = null,
+    Object? participantIds = null,
     Object? startTime = null,
     Object? endTime = freezed,
     Object? notes = freezed,
     Object? shareToken = freezed,
+    Object? categoryTags = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
@@ -98,9 +104,17 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
               as String?,
       groupId: null == groupId
           ? _value.groupId
@@ -109,19 +123,15 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as GameStatus,
+              as EventStatus,
       currency: null == currency
           ? _value.currency
           : currency // ignore: cast_nullable_to_non_nullable
               as String,
-      playerIds: null == playerIds
-          ? _value.playerIds
-          : playerIds // ignore: cast_nullable_to_non_nullable
+      participantIds: null == participantIds
+          ? _value.participantIds
+          : participantIds // ignore: cast_nullable_to_non_nullable
               as List<String>,
-      customBuyInAmounts: null == customBuyInAmounts
-          ? _value.customBuyInAmounts
-          : customBuyInAmounts // ignore: cast_nullable_to_non_nullable
-              as List<double>,
       startTime: null == startTime
           ? _value.startTime
           : startTime // ignore: cast_nullable_to_non_nullable
@@ -138,6 +148,10 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
           ? _value.shareToken
           : shareToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      categoryTags: null == categoryTags
+          ? _value.categoryTags
+          : categoryTags // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -151,62 +165,75 @@ class _$GameCopyWithImpl<$Res, $Val extends Game>
 }
 
 /// @nodoc
-abstract class _$$GameImplCopyWith<$Res> implements $GameCopyWith<$Res> {
-  factory _$$GameImplCopyWith(
-          _$GameImpl value, $Res Function(_$GameImpl) then) =
-      __$$GameImplCopyWithImpl<$Res>;
+abstract class _$$EventImplCopyWith<$Res> implements $EventCopyWith<$Res> {
+  factory _$$EventImplCopyWith(
+          _$EventImpl value, $Res Function(_$EventImpl) then) =
+      __$$EventImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
       {String id,
+      String userId,
       String? name,
+      String? description,
       String groupId,
-      GameStatus status,
+      EventStatus status,
       String currency,
-      List<String> playerIds,
-      List<double> customBuyInAmounts,
+      List<String> participantIds,
       DateTime startTime,
       DateTime? endTime,
       String? notes,
       String? shareToken,
+      List<String> categoryTags,
       DateTime createdAt,
       DateTime? updatedAt});
 }
 
 /// @nodoc
-class __$$GameImplCopyWithImpl<$Res>
-    extends _$GameCopyWithImpl<$Res, _$GameImpl>
-    implements _$$GameImplCopyWith<$Res> {
-  __$$GameImplCopyWithImpl(_$GameImpl _value, $Res Function(_$GameImpl) _then)
+class __$$EventImplCopyWithImpl<$Res>
+    extends _$EventCopyWithImpl<$Res, _$EventImpl>
+    implements _$$EventImplCopyWith<$Res> {
+  __$$EventImplCopyWithImpl(
+      _$EventImpl _value, $Res Function(_$EventImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of Game
+  /// Create a copy of Event
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
     Object? id = null,
+    Object? userId = null,
     Object? name = freezed,
+    Object? description = freezed,
     Object? groupId = null,
     Object? status = null,
     Object? currency = null,
-    Object? playerIds = null,
-    Object? customBuyInAmounts = null,
+    Object? participantIds = null,
     Object? startTime = null,
     Object? endTime = freezed,
     Object? notes = freezed,
     Object? shareToken = freezed,
+    Object? categoryTags = null,
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
-    return _then(_$GameImpl(
+    return _then(_$EventImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
+      userId: null == userId
+          ? _value.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
       name: freezed == name
           ? _value.name
           : name // ignore: cast_nullable_to_non_nullable
+              as String?,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
               as String?,
       groupId: null == groupId
           ? _value.groupId
@@ -215,19 +242,15 @@ class __$$GameImplCopyWithImpl<$Res>
       status: null == status
           ? _value.status
           : status // ignore: cast_nullable_to_non_nullable
-              as GameStatus,
+              as EventStatus,
       currency: null == currency
           ? _value.currency
           : currency // ignore: cast_nullable_to_non_nullable
               as String,
-      playerIds: null == playerIds
-          ? _value._playerIds
-          : playerIds // ignore: cast_nullable_to_non_nullable
+      participantIds: null == participantIds
+          ? _value._participantIds
+          : participantIds // ignore: cast_nullable_to_non_nullable
               as List<String>,
-      customBuyInAmounts: null == customBuyInAmounts
-          ? _value._customBuyInAmounts
-          : customBuyInAmounts // ignore: cast_nullable_to_non_nullable
-              as List<double>,
       startTime: null == startTime
           ? _value.startTime
           : startTime // ignore: cast_nullable_to_non_nullable
@@ -244,6 +267,10 @@ class __$$GameImplCopyWithImpl<$Res>
           ? _value.shareToken
           : shareToken // ignore: cast_nullable_to_non_nullable
               as String?,
+      categoryTags: null == categoryTags
+          ? _value._categoryTags
+          : categoryTags // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       createdAt: null == createdAt
           ? _value.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
@@ -258,54 +285,50 @@ class __$$GameImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$GameImpl implements _Game {
-  const _$GameImpl(
+class _$EventImpl implements _Event {
+  const _$EventImpl(
       {required this.id,
+      required this.userId,
       this.name,
+      this.description,
       required this.groupId,
       required this.status,
       required this.currency,
-      final List<String> playerIds = const [],
-      final List<double> customBuyInAmounts = const [10, 50, 100],
+      final List<String> participantIds = const [],
       required this.startTime,
       this.endTime,
       this.notes,
       this.shareToken,
+      final List<String> categoryTags = const [],
       required this.createdAt,
       this.updatedAt})
-      : _playerIds = playerIds,
-        _customBuyInAmounts = customBuyInAmounts;
+      : _participantIds = participantIds,
+        _categoryTags = categoryTags;
 
-  factory _$GameImpl.fromJson(Map<String, dynamic> json) =>
-      _$$GameImplFromJson(json);
+  factory _$EventImpl.fromJson(Map<String, dynamic> json) =>
+      _$$EventImplFromJson(json);
 
   @override
   final String id;
   @override
+  final String userId;
+  @override
   final String? name;
+  @override
+  final String? description;
   @override
   final String groupId;
   @override
-  final GameStatus status;
+  final EventStatus status;
   @override
   final String currency;
-  final List<String> _playerIds;
+  final List<String> _participantIds;
   @override
   @JsonKey()
-  List<String> get playerIds {
-    if (_playerIds is EqualUnmodifiableListView) return _playerIds;
+  List<String> get participantIds {
+    if (_participantIds is EqualUnmodifiableListView) return _participantIds;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_playerIds);
-  }
-
-  final List<double> _customBuyInAmounts;
-  @override
-  @JsonKey()
-  List<double> get customBuyInAmounts {
-    if (_customBuyInAmounts is EqualUnmodifiableListView)
-      return _customBuyInAmounts;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_customBuyInAmounts);
+    return EqualUnmodifiableListView(_participantIds);
   }
 
   @override
@@ -316,6 +339,15 @@ class _$GameImpl implements _Game {
   final String? notes;
   @override
   final String? shareToken;
+  final List<String> _categoryTags;
+  @override
+  @JsonKey()
+  List<String> get categoryTags {
+    if (_categoryTags is EqualUnmodifiableListView) return _categoryTags;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_categoryTags);
+  }
+
   @override
   final DateTime createdAt;
   @override
@@ -323,30 +355,33 @@ class _$GameImpl implements _Game {
 
   @override
   String toString() {
-    return 'Game(id: $id, name: $name, groupId: $groupId, status: $status, currency: $currency, playerIds: $playerIds, customBuyInAmounts: $customBuyInAmounts, startTime: $startTime, endTime: $endTime, notes: $notes, shareToken: $shareToken, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'Event(id: $id, userId: $userId, name: $name, description: $description, groupId: $groupId, status: $status, currency: $currency, participantIds: $participantIds, startTime: $startTime, endTime: $endTime, notes: $notes, shareToken: $shareToken, categoryTags: $categoryTags, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GameImpl &&
+            other is _$EventImpl &&
             (identical(other.id, id) || other.id == id) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.name, name) || other.name == name) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
             (identical(other.groupId, groupId) || other.groupId == groupId) &&
             (identical(other.status, status) || other.status == status) &&
             (identical(other.currency, currency) ||
                 other.currency == currency) &&
             const DeepCollectionEquality()
-                .equals(other._playerIds, _playerIds) &&
-            const DeepCollectionEquality()
-                .equals(other._customBuyInAmounts, _customBuyInAmounts) &&
+                .equals(other._participantIds, _participantIds) &&
             (identical(other.startTime, startTime) ||
                 other.startTime == startTime) &&
             (identical(other.endTime, endTime) || other.endTime == endTime) &&
             (identical(other.notes, notes) || other.notes == notes) &&
             (identical(other.shareToken, shareToken) ||
                 other.shareToken == shareToken) &&
+            const DeepCollectionEquality()
+                .equals(other._categoryTags, _categoryTags) &&
             (identical(other.createdAt, createdAt) ||
                 other.createdAt == createdAt) &&
             (identical(other.updatedAt, updatedAt) ||
@@ -358,67 +393,73 @@ class _$GameImpl implements _Game {
   int get hashCode => Object.hash(
       runtimeType,
       id,
+      userId,
       name,
+      description,
       groupId,
       status,
       currency,
-      const DeepCollectionEquality().hash(_playerIds),
-      const DeepCollectionEquality().hash(_customBuyInAmounts),
+      const DeepCollectionEquality().hash(_participantIds),
       startTime,
       endTime,
       notes,
       shareToken,
+      const DeepCollectionEquality().hash(_categoryTags),
       createdAt,
       updatedAt);
 
-  /// Create a copy of Game
+  /// Create a copy of Event
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$GameImplCopyWith<_$GameImpl> get copyWith =>
-      __$$GameImplCopyWithImpl<_$GameImpl>(this, _$identity);
+  _$$EventImplCopyWith<_$EventImpl> get copyWith =>
+      __$$EventImplCopyWithImpl<_$EventImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GameImplToJson(
+    return _$$EventImplToJson(
       this,
     );
   }
 }
 
-abstract class _Game implements Game {
-  const factory _Game(
+abstract class _Event implements Event {
+  const factory _Event(
       {required final String id,
+      required final String userId,
       final String? name,
+      final String? description,
       required final String groupId,
-      required final GameStatus status,
+      required final EventStatus status,
       required final String currency,
-      final List<String> playerIds,
-      final List<double> customBuyInAmounts,
+      final List<String> participantIds,
       required final DateTime startTime,
       final DateTime? endTime,
       final String? notes,
       final String? shareToken,
+      final List<String> categoryTags,
       required final DateTime createdAt,
-      final DateTime? updatedAt}) = _$GameImpl;
+      final DateTime? updatedAt}) = _$EventImpl;
 
-  factory _Game.fromJson(Map<String, dynamic> json) = _$GameImpl.fromJson;
+  factory _Event.fromJson(Map<String, dynamic> json) = _$EventImpl.fromJson;
 
   @override
   String get id;
   @override
+  String get userId;
+  @override
   String? get name;
+  @override
+  String? get description;
   @override
   String get groupId;
   @override
-  GameStatus get status;
+  EventStatus get status;
   @override
   String get currency;
   @override
-  List<String> get playerIds;
-  @override
-  List<double> get customBuyInAmounts;
+  List<String> get participantIds;
   @override
   DateTime get startTime;
   @override
@@ -428,14 +469,16 @@ abstract class _Game implements Game {
   @override
   String? get shareToken;
   @override
+  List<String> get categoryTags;
+  @override
   DateTime get createdAt;
   @override
   DateTime? get updatedAt;
 
-  /// Create a copy of Game
+  /// Create a copy of Event
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GameImplCopyWith<_$GameImpl> get copyWith =>
+  _$$EventImplCopyWith<_$EventImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

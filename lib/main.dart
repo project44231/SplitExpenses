@@ -15,10 +15,17 @@ void main() async {
   final localStorage = LocalStorageService();
   await localStorage.initialize();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase (with error handling for hot restart)
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    // Firebase already initialized (hot restart), ignore error
+    if (!e.toString().contains('duplicate-app')) {
+      rethrow;
+    }
+  }
 
   runApp(
     ProviderScope(
@@ -26,13 +33,13 @@ void main() async {
         // Provide local storage service
         localStorageServiceProvider.overrideWithValue(localStorage),
       ],
-      child: const PokerTrackerApp(),
+      child: const SplitExpensesApp(),
     ),
   );
 }
 
-class PokerTrackerApp extends StatelessWidget {
-  const PokerTrackerApp({super.key});
+class SplitExpensesApp extends StatelessWidget {
+  const SplitExpensesApp({super.key});
 
   @override
   Widget build(BuildContext context) {

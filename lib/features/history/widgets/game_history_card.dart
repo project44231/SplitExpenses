@@ -3,16 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/constants/currency.dart';
-import '../../../models/game.dart';
-import '../../../models/buy_in.dart';
-import '../../../models/cash_out.dart';
-import '../../../models/player.dart';
+import '../../../models/compat.dart';
 import '../../players/providers/player_provider.dart';
+
 
 class GameHistoryCard extends ConsumerWidget {
   final Game game;
   final List<BuyIn> buyIns;
-  final List<CashOut> cashOuts;
+  final List<dynamic> cashOuts; // Removed CashOut model
   final VoidCallback onTap;
 
   const GameHistoryCard({
@@ -64,11 +62,13 @@ class GameHistoryCard extends ConsumerWidget {
       for (final entry in playerProfits.entries) {
         if (entry.value > biggestWin) {
           biggestWin = entry.value;
-          final player = gamePlayers.firstWhere(
+          final player = gamePlayers.cast<Participant>().firstWhere(
             (p) => p.id == entry.key,
-            orElse: () => Player(
+            orElse: () => Participant(
               id: entry.key,
               name: 'Unknown',
+              userId: 'guest',
+              eventsAttended: 0,
               createdAt: DateTime.now(),
             ),
           );

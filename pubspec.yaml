@@ -1,8 +1,8 @@
-name: poker_tracker
-description: "Home game buy-in tracker with buy-in management, settlements, and statistics"
+name: split_expenses
+description: "Expense splitting app for groups, trips, and events with smart settlement calculations"
 publish_to: 'none'
 
-version: 1.0.0+3
+version: 1.0.0+1
 
 environment:
   sdk: ^3.6.0

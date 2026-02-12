@@ -1,23 +1,23 @@
-# SplitPot
+# SplitExpenses
 
-Smart game tracking and settlement calculator for home games. Track buy-ins, calculate optimized settlements, and share live game standings.
+Smart expense splitting app for groups, trips, and events. Track expenses, calculate optimized settlements, and share live expense summaries.
 
 ## Features
 
 ### Core Features
-- 🎮 **Active Game Tracking** - Real-time buy-in management with live game updates
-- 💰 **Smart Settlements** - Automatic settlement calculations with debt optimization
-- 📊 **Game History** - Complete game history with filters and leaderboards
-- 👥 **Player Contacts** - Persistent player list with favorites and statistics
-- 💸 **Cash-Out Tracking** - Intelligent mismatch handling and reconciliation
+- 💰 **Expense Tracking** - Real-time expense management with categories
+- 🎯 **Smart Settlements** - Automatic settlement calculations with debt optimization
+- 📊 **Event History** - Complete event history with filters and statistics
+- 👥 **Participant Contacts** - Persistent participant list with favorites
+- 💸 **Split Methods** - Equal, percentage, exact amount, and shares-based splitting
 - 🔄 **Optimized Settlements** - Minimized transaction suggestions
 
 ### Authenticated User Features
-- 📈 **Statistics Dashboard** - Hosting statistics, player leaderboards, ROI tracking
-- 🌐 **Live Game Sharing** - Share game standings via web link with real-time updates
-- ⭐ **Player Favorites** - Quick access to frequently played contacts
-- 🔍 **Advanced Filters** - Filter history by date, player, pot size, and more
-- 📱 **Profile Management** - User info, hosting stats, and app settings
+- 📈 **Statistics Dashboard** - Event statistics, participant summaries, expense tracking
+- 🌐 **Live Event Sharing** - Share event expenses via web link with real-time updates
+- ⭐ **Participant Favorites** - Quick access to frequent contacts
+- 🔍 **Advanced Filters** - Filter history by date, participant, category, and more
+- 📱 **Profile Management** - User info, event stats, and app settings
 - 🔒 **Secure Data** - Firestore security rules for data protection
 
 ### Platform Support

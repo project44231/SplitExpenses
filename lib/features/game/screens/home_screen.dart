@@ -3,7 +3,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../history/screens/history_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../feedback/screens/contact_feedback_screen.dart';
-import 'active_game_screen.dart';
+import 'group_expenses_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,7 +16,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _pages = [
-    const ActiveGameScreen(gameId: 'current'),
+    const GroupExpensesListScreen(),
     const ContactFeedbackScreen(),
     const HistoryScreen(),
     const ProfileScreen(),
@@ -41,8 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.casino),
-            label: 'Game',
+            icon: Icon(Icons.group_work),
+            label: 'Group Expenses',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.feedback),

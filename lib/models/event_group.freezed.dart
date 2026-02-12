@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'game_group.dart';
+part of 'event_group.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -14,12 +14,12 @@ T _$identity<T>(T value) => value;
 final _privateConstructorUsedError = UnsupportedError(
     'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
 
-GameGroup _$GameGroupFromJson(Map<String, dynamic> json) {
-  return _GameGroup.fromJson(json);
+EventGroup _$EventGroupFromJson(Map<String, dynamic> json) {
+  return _EventGroup.fromJson(json);
 }
 
 /// @nodoc
-mixin _$GameGroup {
+mixin _$EventGroup {
   String get id => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get ownerId => throw _privateConstructorUsedError;
@@ -29,20 +29,21 @@ mixin _$GameGroup {
   DateTime get createdAt => throw _privateConstructorUsedError;
   DateTime? get updatedAt => throw _privateConstructorUsedError;
 
-  /// Serializes this GameGroup to a JSON map.
+  /// Serializes this EventGroup to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
-  /// Create a copy of GameGroup
+  /// Create a copy of EventGroup
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $GameGroupCopyWith<GameGroup> get copyWith =>
+  $EventGroupCopyWith<EventGroup> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
 /// @nodoc
-abstract class $GameGroupCopyWith<$Res> {
-  factory $GameGroupCopyWith(GameGroup value, $Res Function(GameGroup) then) =
-      _$GameGroupCopyWithImpl<$Res, GameGroup>;
+abstract class $EventGroupCopyWith<$Res> {
+  factory $EventGroupCopyWith(
+          EventGroup value, $Res Function(EventGroup) then) =
+      _$EventGroupCopyWithImpl<$Res, EventGroup>;
   @useResult
   $Res call(
       {String id,
@@ -56,16 +57,16 @@ abstract class $GameGroupCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$GameGroupCopyWithImpl<$Res, $Val extends GameGroup>
-    implements $GameGroupCopyWith<$Res> {
-  _$GameGroupCopyWithImpl(this._value, this._then);
+class _$EventGroupCopyWithImpl<$Res, $Val extends EventGroup>
+    implements $EventGroupCopyWith<$Res> {
+  _$EventGroupCopyWithImpl(this._value, this._then);
 
   // ignore: unused_field
   final $Val _value;
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of GameGroup
+  /// Create a copy of EventGroup
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -117,11 +118,11 @@ class _$GameGroupCopyWithImpl<$Res, $Val extends GameGroup>
 }
 
 /// @nodoc
-abstract class _$$GameGroupImplCopyWith<$Res>
-    implements $GameGroupCopyWith<$Res> {
-  factory _$$GameGroupImplCopyWith(
-          _$GameGroupImpl value, $Res Function(_$GameGroupImpl) then) =
-      __$$GameGroupImplCopyWithImpl<$Res>;
+abstract class _$$EventGroupImplCopyWith<$Res>
+    implements $EventGroupCopyWith<$Res> {
+  factory _$$EventGroupImplCopyWith(
+          _$EventGroupImpl value, $Res Function(_$EventGroupImpl) then) =
+      __$$EventGroupImplCopyWithImpl<$Res>;
   @override
   @useResult
   $Res call(
@@ -136,14 +137,14 @@ abstract class _$$GameGroupImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$GameGroupImplCopyWithImpl<$Res>
-    extends _$GameGroupCopyWithImpl<$Res, _$GameGroupImpl>
-    implements _$$GameGroupImplCopyWith<$Res> {
-  __$$GameGroupImplCopyWithImpl(
-      _$GameGroupImpl _value, $Res Function(_$GameGroupImpl) _then)
+class __$$EventGroupImplCopyWithImpl<$Res>
+    extends _$EventGroupCopyWithImpl<$Res, _$EventGroupImpl>
+    implements _$$EventGroupImplCopyWith<$Res> {
+  __$$EventGroupImplCopyWithImpl(
+      _$EventGroupImpl _value, $Res Function(_$EventGroupImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of GameGroup
+  /// Create a copy of EventGroup
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -157,7 +158,7 @@ class __$$GameGroupImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = freezed,
   }) {
-    return _then(_$GameGroupImpl(
+    return _then(_$EventGroupImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
@@ -196,8 +197,8 @@ class __$$GameGroupImplCopyWithImpl<$Res>
 
 /// @nodoc
 @JsonSerializable()
-class _$GameGroupImpl implements _GameGroup {
-  const _$GameGroupImpl(
+class _$EventGroupImpl implements _EventGroup {
+  const _$EventGroupImpl(
       {required this.id,
       required this.name,
       required this.ownerId,
@@ -208,8 +209,8 @@ class _$GameGroupImpl implements _GameGroup {
       this.updatedAt})
       : _memberIds = memberIds;
 
-  factory _$GameGroupImpl.fromJson(Map<String, dynamic> json) =>
-      _$$GameGroupImplFromJson(json);
+  factory _$EventGroupImpl.fromJson(Map<String, dynamic> json) =>
+      _$$EventGroupImplFromJson(json);
 
   @override
   final String id;
@@ -237,14 +238,14 @@ class _$GameGroupImpl implements _GameGroup {
 
   @override
   String toString() {
-    return 'GameGroup(id: $id, name: $name, ownerId: $ownerId, memberIds: $memberIds, description: $description, defaultCurrency: $defaultCurrency, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'EventGroup(id: $id, name: $name, ownerId: $ownerId, memberIds: $memberIds, description: $description, defaultCurrency: $defaultCurrency, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$GameGroupImpl &&
+            other is _$EventGroupImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.ownerId, ownerId) || other.ownerId == ownerId) &&
@@ -273,24 +274,24 @@ class _$GameGroupImpl implements _GameGroup {
       createdAt,
       updatedAt);
 
-  /// Create a copy of GameGroup
+  /// Create a copy of EventGroup
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   @pragma('vm:prefer-inline')
-  _$$GameGroupImplCopyWith<_$GameGroupImpl> get copyWith =>
-      __$$GameGroupImplCopyWithImpl<_$GameGroupImpl>(this, _$identity);
+  _$$EventGroupImplCopyWith<_$EventGroupImpl> get copyWith =>
+      __$$EventGroupImplCopyWithImpl<_$EventGroupImpl>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
-    return _$$GameGroupImplToJson(
+    return _$$EventGroupImplToJson(
       this,
     );
   }
 }
 
-abstract class _GameGroup implements GameGroup {
-  const factory _GameGroup(
+abstract class _EventGroup implements EventGroup {
+  const factory _EventGroup(
       {required final String id,
       required final String name,
       required final String ownerId,
@@ -298,10 +299,10 @@ abstract class _GameGroup implements GameGroup {
       final String? description,
       final String? defaultCurrency,
       required final DateTime createdAt,
-      final DateTime? updatedAt}) = _$GameGroupImpl;
+      final DateTime? updatedAt}) = _$EventGroupImpl;
 
-  factory _GameGroup.fromJson(Map<String, dynamic> json) =
-      _$GameGroupImpl.fromJson;
+  factory _EventGroup.fromJson(Map<String, dynamic> json) =
+      _$EventGroupImpl.fromJson;
 
   @override
   String get id;
@@ -320,10 +321,10 @@ abstract class _GameGroup implements GameGroup {
   @override
   DateTime? get updatedAt;
 
-  /// Create a copy of GameGroup
+  /// Create a copy of EventGroup
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GameGroupImplCopyWith<_$GameGroupImpl> get copyWith =>
+  _$$EventGroupImplCopyWith<_$EventGroupImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

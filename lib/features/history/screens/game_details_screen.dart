@@ -6,13 +6,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../models/game.dart';
-import '../../../models/player.dart';
-import '../../../models/buy_in.dart';
 import '../../../models/settlement.dart';
+import '../../../models/compat.dart';
 import '../../../services/firestore_service.dart';
 import '../../players/providers/player_provider.dart';
 import '../../auth/providers/auth_provider.dart';
+
 
 class GameDetailsScreen extends ConsumerStatefulWidget {
   final String gameId;
@@ -58,15 +57,15 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
       await ref.read(playerProvider.notifier).loadPlayers();
       
       final firestoreService = FirestoreService();
-      final game = await firestoreService.getGame(widget.gameId);
+      final game = await firestoreService.getEvent(widget.gameId);
       
       if (game == null || !mounted) {
         setState(() => _isLoading = false);
         return;
       }
 
-      final buyIns = await firestoreService.getBuyIns(widget.gameId);
-      final cashOuts = await firestoreService.getCashOuts(widget.gameId);
+      final buyIns = await firestoreService.getExpenses(widget.gameId);
+      // final cashOuts = await firestoreService.getCashOuts(widget.gameId); // Removed
       final settlements = await firestoreService.getSettlements(widget.gameId);
 
       // Get players
@@ -97,9 +96,9 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
         buyInCounts[buyIn.playerId] = (buyInCounts[buyIn.playerId] ?? 0) + 1;
       }
 
-      for (final cashOut in cashOuts) {
-        cashOutTotals[cashOut.playerId] = (cashOutTotals[cashOut.playerId] ?? 0) + cashOut.amount;
-      }
+      // for (final cashOut in cashOuts) {
+      //   cashOutTotals[cashOut.playerId] = (cashOutTotals[cashOut.playerId] ?? 0) + cashOut.amount;
+      // } // Removed - not used in expense model
 
       if (mounted) {
         setState(() {
@@ -589,8 +588,8 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
                 const Divider(),
                 ...allTransactions.asMap().entries.map((entry) {
                   final transaction = entry.value;
-                  final fromName = playerMap[transaction.fromPlayerId] ?? 'Unknown';
-                  final toName = playerMap[transaction.toPlayerId] ?? 'Unknown';
+                  final fromName = playerMap[transaction.fromParticipantId] ?? 'Unknown';
+                  final toName = playerMap[transaction.toParticipantId] ?? 'Unknown';
                   
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
@@ -729,7 +728,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
         );
         
         final firestoreService = FirestoreService();
-        await firestoreService.saveGame(updatedGame, ref.read(authServiceProvider).currentUserId ?? 'guest');
+        await firestoreService.saveEvent(updatedGame, ref.read(authServiceProvider).currentUserId ?? 'guest');
         
         setState(() {
           _game = updatedGame;
@@ -794,8 +793,8 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
       
       for (final settlement in _settlements) {
         for (final transaction in settlement.transactions) {
-          final fromName = playerMap[transaction.fromPlayerId] ?? 'Unknown';
-          final toName = playerMap[transaction.toPlayerId] ?? 'Unknown';
+          final fromName = playerMap[transaction.fromParticipantId] ?? 'Unknown';
+          final toName = playerMap[transaction.toParticipantId] ?? 'Unknown';
           buffer.writeln('$fromName → $toName: ${Formatters.formatCurrency(transaction.amount, currency)}');
         }
       }

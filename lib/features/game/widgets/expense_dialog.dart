@@ -23,7 +23,7 @@ class _ExpenseDialogState extends State<ExpenseDialog> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
-  ExpenseCategory _selectedCategory = ExpenseCategory.tips;
+  ExpenseCategory _selectedCategory = ExpenseCategory.other;
 
   @override
   void initState() {
@@ -207,10 +207,22 @@ class _ExpenseDialogState extends State<ExpenseDialog> {
 
   IconData _getCategoryIcon(ExpenseCategory category) {
     switch (category) {
-      case ExpenseCategory.tips:
-        return Icons.volunteer_activism;
       case ExpenseCategory.food:
         return Icons.restaurant;
+      case ExpenseCategory.transport:
+        return Icons.directions_car;
+      case ExpenseCategory.accommodation:
+        return Icons.hotel;
+      case ExpenseCategory.utilities:
+        return Icons.bolt;
+      case ExpenseCategory.groceries:
+        return Icons.shopping_cart;
+      case ExpenseCategory.entertainment:
+        return Icons.movie;
+      case ExpenseCategory.shopping:
+        return Icons.shopping_bag;
+      case ExpenseCategory.healthcare:
+        return Icons.local_hospital;
       case ExpenseCategory.other:
         return Icons.more_horiz;
     }

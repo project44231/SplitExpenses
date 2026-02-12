@@ -21,8 +21,8 @@ SettlementTransaction _$SettlementTransactionFromJson(
 
 /// @nodoc
 mixin _$SettlementTransaction {
-  String get fromPlayerId => throw _privateConstructorUsedError;
-  String get toPlayerId => throw _privateConstructorUsedError;
+  String get fromParticipantId => throw _privateConstructorUsedError;
+  String get toParticipantId => throw _privateConstructorUsedError;
   double get amount => throw _privateConstructorUsedError;
 
   /// Serializes this SettlementTransaction to a JSON map.
@@ -41,7 +41,7 @@ abstract class $SettlementTransactionCopyWith<$Res> {
           $Res Function(SettlementTransaction) then) =
       _$SettlementTransactionCopyWithImpl<$Res, SettlementTransaction>;
   @useResult
-  $Res call({String fromPlayerId, String toPlayerId, double amount});
+  $Res call({String fromParticipantId, String toParticipantId, double amount});
 }
 
 /// @nodoc
@@ -60,18 +60,18 @@ class _$SettlementTransactionCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? fromPlayerId = null,
-    Object? toPlayerId = null,
+    Object? fromParticipantId = null,
+    Object? toParticipantId = null,
     Object? amount = null,
   }) {
     return _then(_value.copyWith(
-      fromPlayerId: null == fromPlayerId
-          ? _value.fromPlayerId
-          : fromPlayerId // ignore: cast_nullable_to_non_nullable
+      fromParticipantId: null == fromParticipantId
+          ? _value.fromParticipantId
+          : fromParticipantId // ignore: cast_nullable_to_non_nullable
               as String,
-      toPlayerId: null == toPlayerId
-          ? _value.toPlayerId
-          : toPlayerId // ignore: cast_nullable_to_non_nullable
+      toParticipantId: null == toParticipantId
+          ? _value.toParticipantId
+          : toParticipantId // ignore: cast_nullable_to_non_nullable
               as String,
       amount: null == amount
           ? _value.amount
@@ -90,7 +90,7 @@ abstract class _$$SettlementTransactionImplCopyWith<$Res>
       __$$SettlementTransactionImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String fromPlayerId, String toPlayerId, double amount});
+  $Res call({String fromParticipantId, String toParticipantId, double amount});
 }
 
 /// @nodoc
@@ -107,18 +107,18 @@ class __$$SettlementTransactionImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? fromPlayerId = null,
-    Object? toPlayerId = null,
+    Object? fromParticipantId = null,
+    Object? toParticipantId = null,
     Object? amount = null,
   }) {
     return _then(_$SettlementTransactionImpl(
-      fromPlayerId: null == fromPlayerId
-          ? _value.fromPlayerId
-          : fromPlayerId // ignore: cast_nullable_to_non_nullable
+      fromParticipantId: null == fromParticipantId
+          ? _value.fromParticipantId
+          : fromParticipantId // ignore: cast_nullable_to_non_nullable
               as String,
-      toPlayerId: null == toPlayerId
-          ? _value.toPlayerId
-          : toPlayerId // ignore: cast_nullable_to_non_nullable
+      toParticipantId: null == toParticipantId
+          ? _value.toParticipantId
+          : toParticipantId // ignore: cast_nullable_to_non_nullable
               as String,
       amount: null == amount
           ? _value.amount
@@ -132,23 +132,23 @@ class __$$SettlementTransactionImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$SettlementTransactionImpl implements _SettlementTransaction {
   const _$SettlementTransactionImpl(
-      {required this.fromPlayerId,
-      required this.toPlayerId,
+      {required this.fromParticipantId,
+      required this.toParticipantId,
       required this.amount});
 
   factory _$SettlementTransactionImpl.fromJson(Map<String, dynamic> json) =>
       _$$SettlementTransactionImplFromJson(json);
 
   @override
-  final String fromPlayerId;
+  final String fromParticipantId;
   @override
-  final String toPlayerId;
+  final String toParticipantId;
   @override
   final double amount;
 
   @override
   String toString() {
-    return 'SettlementTransaction(fromPlayerId: $fromPlayerId, toPlayerId: $toPlayerId, amount: $amount)';
+    return 'SettlementTransaction(fromParticipantId: $fromParticipantId, toParticipantId: $toParticipantId, amount: $amount)';
   }
 
   @override
@@ -156,17 +156,17 @@ class _$SettlementTransactionImpl implements _SettlementTransaction {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$SettlementTransactionImpl &&
-            (identical(other.fromPlayerId, fromPlayerId) ||
-                other.fromPlayerId == fromPlayerId) &&
-            (identical(other.toPlayerId, toPlayerId) ||
-                other.toPlayerId == toPlayerId) &&
+            (identical(other.fromParticipantId, fromParticipantId) ||
+                other.fromParticipantId == fromParticipantId) &&
+            (identical(other.toParticipantId, toParticipantId) ||
+                other.toParticipantId == toParticipantId) &&
             (identical(other.amount, amount) || other.amount == amount));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, fromPlayerId, toPlayerId, amount);
+      Object.hash(runtimeType, fromParticipantId, toParticipantId, amount);
 
   /// Create a copy of SettlementTransaction
   /// with the given fields replaced by the non-null parameter values.
@@ -187,17 +187,17 @@ class _$SettlementTransactionImpl implements _SettlementTransaction {
 
 abstract class _SettlementTransaction implements SettlementTransaction {
   const factory _SettlementTransaction(
-      {required final String fromPlayerId,
-      required final String toPlayerId,
+      {required final String fromParticipantId,
+      required final String toParticipantId,
       required final double amount}) = _$SettlementTransactionImpl;
 
   factory _SettlementTransaction.fromJson(Map<String, dynamic> json) =
       _$SettlementTransactionImpl.fromJson;
 
   @override
-  String get fromPlayerId;
+  String get fromParticipantId;
   @override
-  String get toPlayerId;
+  String get toParticipantId;
   @override
   double get amount;
 
@@ -216,7 +216,7 @@ Settlement _$SettlementFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Settlement {
   String get id => throw _privateConstructorUsedError;
-  String get gameId => throw _privateConstructorUsedError;
+  String get eventId => throw _privateConstructorUsedError;
   @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
   List<SettlementTransaction> get transactions =>
       throw _privateConstructorUsedError;
@@ -240,7 +240,7 @@ abstract class $SettlementCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String gameId,
+      String eventId,
       @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
       List<SettlementTransaction> transactions,
       DateTime generatedAt});
@@ -262,7 +262,7 @@ class _$SettlementCopyWithImpl<$Res, $Val extends Settlement>
   @override
   $Res call({
     Object? id = null,
-    Object? gameId = null,
+    Object? eventId = null,
     Object? transactions = null,
     Object? generatedAt = null,
   }) {
@@ -271,9 +271,9 @@ class _$SettlementCopyWithImpl<$Res, $Val extends Settlement>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      gameId: null == gameId
-          ? _value.gameId
-          : gameId // ignore: cast_nullable_to_non_nullable
+      eventId: null == eventId
+          ? _value.eventId
+          : eventId // ignore: cast_nullable_to_non_nullable
               as String,
       transactions: null == transactions
           ? _value.transactions
@@ -297,7 +297,7 @@ abstract class _$$SettlementImplCopyWith<$Res>
   @useResult
   $Res call(
       {String id,
-      String gameId,
+      String eventId,
       @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
       List<SettlementTransaction> transactions,
       DateTime generatedAt});
@@ -317,7 +317,7 @@ class __$$SettlementImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? gameId = null,
+    Object? eventId = null,
     Object? transactions = null,
     Object? generatedAt = null,
   }) {
@@ -326,9 +326,9 @@ class __$$SettlementImplCopyWithImpl<$Res>
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      gameId: null == gameId
-          ? _value.gameId
-          : gameId // ignore: cast_nullable_to_non_nullable
+      eventId: null == eventId
+          ? _value.eventId
+          : eventId // ignore: cast_nullable_to_non_nullable
               as String,
       transactions: null == transactions
           ? _value._transactions
@@ -347,7 +347,7 @@ class __$$SettlementImplCopyWithImpl<$Res>
 class _$SettlementImpl implements _Settlement {
   const _$SettlementImpl(
       {required this.id,
-      required this.gameId,
+      required this.eventId,
       @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
       required final List<SettlementTransaction> transactions,
       required this.generatedAt})
@@ -359,7 +359,7 @@ class _$SettlementImpl implements _Settlement {
   @override
   final String id;
   @override
-  final String gameId;
+  final String eventId;
   final List<SettlementTransaction> _transactions;
   @override
   @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
@@ -374,7 +374,7 @@ class _$SettlementImpl implements _Settlement {
 
   @override
   String toString() {
-    return 'Settlement(id: $id, gameId: $gameId, transactions: $transactions, generatedAt: $generatedAt)';
+    return 'Settlement(id: $id, eventId: $eventId, transactions: $transactions, generatedAt: $generatedAt)';
   }
 
   @override
@@ -383,7 +383,7 @@ class _$SettlementImpl implements _Settlement {
         (other.runtimeType == runtimeType &&
             other is _$SettlementImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.gameId, gameId) || other.gameId == gameId) &&
+            (identical(other.eventId, eventId) || other.eventId == eventId) &&
             const DeepCollectionEquality()
                 .equals(other._transactions, _transactions) &&
             (identical(other.generatedAt, generatedAt) ||
@@ -392,7 +392,7 @@ class _$SettlementImpl implements _Settlement {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, id, gameId,
+  int get hashCode => Object.hash(runtimeType, id, eventId,
       const DeepCollectionEquality().hash(_transactions), generatedAt);
 
   /// Create a copy of Settlement
@@ -414,7 +414,7 @@ class _$SettlementImpl implements _Settlement {
 abstract class _Settlement implements Settlement {
   const factory _Settlement(
       {required final String id,
-      required final String gameId,
+      required final String eventId,
       @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
       required final List<SettlementTransaction> transactions,
       required final DateTime generatedAt}) = _$SettlementImpl;
@@ -425,7 +425,7 @@ abstract class _Settlement implements Settlement {
   @override
   String get id;
   @override
-  String get gameId;
+  String get eventId;
   @override
   @JsonKey(toJson: _transactionsToJson, fromJson: _transactionsFromJson)
   List<SettlementTransaction> get transactions;

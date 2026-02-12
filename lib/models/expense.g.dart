@@ -9,25 +9,51 @@ part of 'expense.dart';
 _$ExpenseImpl _$$ExpenseImplFromJson(Map<String, dynamic> json) =>
     _$ExpenseImpl(
       id: json['id'] as String,
-      gameId: json['gameId'] as String,
+      eventId: json['eventId'] as String,
+      paidByParticipantId: json['paidByParticipantId'] as String,
       amount: (json['amount'] as num).toDouble(),
-      category: $enumDecode(_$ExpenseCategoryEnumMap, json['category']),
-      note: json['note'] as String?,
+      description: json['description'] as String,
       timestamp: DateTime.parse(json['timestamp'] as String),
+      category: $enumDecode(_$ExpenseCategoryEnumMap, json['category']),
+      splitMethod: $enumDecode(_$SplitMethodEnumMap, json['splitMethod']),
+      splitDetails: (json['splitDetails'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, (e as num).toDouble()),
+          ) ??
+          const {},
+      receipt: json['receipt'] as String?,
+      notes: json['notes'] as String?,
     );
 
 Map<String, dynamic> _$$ExpenseImplToJson(_$ExpenseImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'gameId': instance.gameId,
+      'eventId': instance.eventId,
+      'paidByParticipantId': instance.paidByParticipantId,
       'amount': instance.amount,
-      'category': _$ExpenseCategoryEnumMap[instance.category]!,
-      'note': instance.note,
+      'description': instance.description,
       'timestamp': instance.timestamp.toIso8601String(),
+      'category': _$ExpenseCategoryEnumMap[instance.category]!,
+      'splitMethod': _$SplitMethodEnumMap[instance.splitMethod]!,
+      'splitDetails': instance.splitDetails,
+      'receipt': instance.receipt,
+      'notes': instance.notes,
     };
 
 const _$ExpenseCategoryEnumMap = {
-  ExpenseCategory.tips: 'tips',
   ExpenseCategory.food: 'food',
+  ExpenseCategory.transport: 'transport',
+  ExpenseCategory.accommodation: 'accommodation',
+  ExpenseCategory.utilities: 'utilities',
+  ExpenseCategory.groceries: 'groceries',
+  ExpenseCategory.entertainment: 'entertainment',
+  ExpenseCategory.shopping: 'shopping',
+  ExpenseCategory.healthcare: 'healthcare',
   ExpenseCategory.other: 'other',
+};
+
+const _$SplitMethodEnumMap = {
+  SplitMethod.equal: 'equal',
+  SplitMethod.percentage: 'percentage',
+  SplitMethod.exactAmount: 'exactAmount',
+  SplitMethod.shares: 'shares',
 };

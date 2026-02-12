@@ -4,10 +4,11 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../models/game.dart';
+import '../../../models/compat.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../services/firestore_service.dart';
 import '../widgets/edit_profile_dialog.dart';
+
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -41,7 +42,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
       // Load games directly from Firebase only (not local storage)
       final firestoreService = FirestoreService();
-      final allGames = await firestoreService.getGames(userId);
+      final allGames = await firestoreService.getEvents(userId);
 
       final stats = _calculateHostingStats(allGames);
 
@@ -59,7 +60,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   HostingStats _calculateHostingStats(List<Game> games) {
-    final endedGames = games.where((g) => g.status == GameStatus.ended).toList();
+    final endedGames = games.where((g) => g.status == EventStatus.settled || g.status == EventStatus.archived).toList();
     
     if (endedGames.isEmpty) {
       return HostingStats(
@@ -77,7 +78,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     DateTime? lastGameDate;
 
     for (final game in endedGames) {
-      totalPlayers += game.playerIds.length;
+      totalPlayers += game.playerIds.length.toInt();
       
       // Calculate duration
       if (game.endTime != null) {

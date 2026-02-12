@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'game_group.dart';
+part of 'event_group.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$GameGroupImpl _$$GameGroupImplFromJson(Map<String, dynamic> json) =>
-    _$GameGroupImpl(
+_$EventGroupImpl _$$EventGroupImplFromJson(Map<String, dynamic> json) =>
+    _$EventGroupImpl(
       id: json['id'] as String,
       name: json['name'] as String,
       ownerId: json['ownerId'] as String,
@@ -23,7 +23,7 @@ _$GameGroupImpl _$$GameGroupImplFromJson(Map<String, dynamic> json) =>
           : DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$$GameGroupImplToJson(_$GameGroupImpl instance) =>
+Map<String, dynamic> _$$EventGroupImplToJson(_$EventGroupImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,

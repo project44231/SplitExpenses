@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../models/settlement.dart';
-import '../../../models/player.dart';
+import '../../../models/compat.dart';
 import '../providers/game_provider.dart';
 import '../../players/providers/player_provider.dart';
+
 
 /// Dialog showing settlement history for a game
 /// 
@@ -38,7 +38,7 @@ class SettlementHistoryDialog extends ConsumerStatefulWidget {
 class _SettlementHistoryDialogState
     extends ConsumerState<SettlementHistoryDialog> {
   List<Settlement> _settlements = [];
-  Map<String, Player> _playerMap = {};
+  Map<String, Participant> _playerMap = {};
   bool _isLoading = true;
 
   @override
@@ -66,7 +66,7 @@ class _SettlementHistoryDialogState
 
       setState(() {
         _settlements = settlements;
-        _playerMap = {for (var p in players) p.id: p};
+        _playerMap = <String, Participant>{for (var p in players) p.id: p};
         _isLoading = false;
       });
     } catch (e) {
@@ -217,8 +217,8 @@ class _SettlementHistoryDialogState
             children: [
               const Divider(height: 1),
               ...settlement.transactions.map((transaction) {
-                final fromPlayer = _playerMap[transaction.fromPlayerId];
-                final toPlayer = _playerMap[transaction.toPlayerId];
+                final fromPlayer = _playerMap[transaction.fromParticipantId];
+                final toPlayer = _playerMap[transaction.toParticipantId];
 
                 return ListTile(
                   dense: true,

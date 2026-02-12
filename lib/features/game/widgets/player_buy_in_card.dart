@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../models/player.dart';
-import '../../../models/buy_in.dart';
+import '../../../models/compat.dart';
 
-/// Card displaying player's buy-in information
+
+/// Card displaying player's expense information
 class PlayerBuyInCard extends StatefulWidget {
-  final Player player;
+  final Participant player;
   final double totalBuyIn;
   final int buyInCount;
-  final List<BuyIn> buyIns;
+  final List<Expense> buyIns;
   final Currency currency;
   final VoidCallback? onAddBuyIn;
-  final Function(BuyIn)? onEditBuyIn;
-  final Function(BuyIn)? onDeleteBuyIn;
+  final Function(Expense)? onEditBuyIn;
+  final Function(Expense)? onDeleteBuyIn;
   final VoidCallback? onEditPlayer;
   final VoidCallback? onDeletePlayer;
 
@@ -84,7 +84,7 @@ class _PlayerBuyInCardState extends State<PlayerBuyInCard> {
                     ),
                     if (widget.totalBuyIn == 0)
                       Text(
-                        'No buy-in',
+                        'No expenses',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade600,

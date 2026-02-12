@@ -6,8 +6,8 @@ part 'settlement.g.dart';
 @freezed
 class SettlementTransaction with _$SettlementTransaction {
   const factory SettlementTransaction({
-    required String fromPlayerId,
-    required String toPlayerId,
+    required String fromParticipantId,
+    required String toParticipantId,
     required double amount,
   }) = _SettlementTransaction;
 
@@ -19,7 +19,7 @@ class SettlementTransaction with _$SettlementTransaction {
 class Settlement with _$Settlement {
   const factory Settlement({
     required String id,
-    required String gameId,
+    required String eventId,
     @JsonKey(
       toJson: _transactionsToJson,
       fromJson: _transactionsFromJson,

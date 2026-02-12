@@ -1,10 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../../models/game.dart';
-import '../../../models/game_group.dart';
-import '../../../models/buy_in.dart';
-import '../../../models/cash_out.dart';
-import '../../../models/settlement.dart';
+// Using Event/Expense models with backward compatibility
+import '../../../models/compat.dart'; // This includes all models and compatibility typedefs
 import '../../../services/local_storage_service.dart';
 import '../../../services/firestore_service.dart';
 import '../../../features/auth/providers/auth_provider.dart';
@@ -15,25 +12,25 @@ final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   return FirestoreService();
 });
 
-/// Provider for managing games
-final gameProvider = StateNotifierProvider<GameNotifier, AsyncValue<List<Game>>>((ref) {
+/// Provider for managing events (keeping name as gameProvider for backward compatibility)
+final gameProvider = StateNotifierProvider<EventNotifier, AsyncValue<List<Event>>>((ref) {
   final localStorage = ref.watch(localStorageServiceProvider);
   final firestoreService = ref.watch(firestoreServiceProvider);
   final authService = ref.watch(authServiceProvider);
-  return GameNotifier(localStorage, firestoreService, authService);
+  return EventNotifier(localStorage, firestoreService, authService);
 });
 
-/// Provider for the current active game
-final activeGameProvider = StateProvider<Game?>((ref) => null);
+/// Provider for the current active event (keeping name as activeGameProvider for backward compatibility)
+final activeGameProvider = StateProvider<Event?>((ref) => null);
 
-/// Notifier for game state management
-class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
+/// Notifier for event state management
+class EventNotifier extends StateNotifier<AsyncValue<List<Event>>> {
   final LocalStorageService _localStorage;
   final FirestoreService _firestoreService;
   final dynamic _authService;
   final _uuid = const Uuid();
 
-  GameNotifier(this._localStorage, this._firestoreService, this._authService) 
+  EventNotifier(this._localStorage, this._firestoreService, this._authService) 
       : super(const AsyncValue.loading()) {
     loadGames();
   }
@@ -41,33 +38,51 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
   /// Get current user ID (returns 'guest' for guest mode, Firebase UID for logged in)
   String get _userId => _authService.currentUserId ?? 'guest';
 
-  /// Load all games from storage (Firestore + local cache for both guest and authenticated)
+  /// Load all events from storage (Firestore + local cache for both guest and authenticated)
+  /// Keeping method name as loadGames for backward compatibility
   Future<void> loadGames() async {
     state = const AsyncValue.loading();
     try {
       // Load from Firestore and cache locally (both guest and authenticated)
-      final games = await _firestoreService.getGames(_userId);
+      final events = await _firestoreService.getEvents(_userId);
       
       // Cache locally for offline access
-      for (final game in games) {
-        await _localStorage.saveGame(game);
+      for (final event in events) {
+        await _localStorage.saveEvent(event);
       }
       
-      state = AsyncValue.data(games);
+      state = AsyncValue.data(events);
     } catch (e, stack) {
       // Fallback to local storage on error (offline mode)
       try {
-        final games = await _localStorage.getAllGames();
-        state = AsyncValue.data(games);
+        final events = await _localStorage.getAllEvents();
+        state = AsyncValue.data(events);
       } catch (localError, _) {
         state = AsyncValue.error(e, stack);
       }
     }
   }
 
-  /// Create a new game
-  Future<Game?> createGame({
+  /// Create a new game (event) - backward compatibility
+  Future<Event?> createGame({
     required List<String> playerIds,
+    String? groupId,
+    String currency = 'USD',
+    String? notes,
+  }) async {
+    return createEvent(
+      participantIds: playerIds,
+      groupId: groupId,
+      currency: currency,
+      notes: notes,
+    );
+  }
+
+  /// Create a new event
+  Future<Event?> createEvent({
+    required List<String> participantIds,
+    String? name,
+    String? description,
     String? groupId,
     String currency = 'USD',
     String? notes,
@@ -76,74 +91,77 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       // Ensure we have a group (create default if needed)
       final actualGroupId = groupId ?? await _ensureDefaultGroup();
 
-      final game = Game(
+      final event = Event(
         id: _uuid.v4(),
+        userId: _userId,
+        name: name,
+        description: description,
         groupId: actualGroupId,
-        status: GameStatus.active,
+        status: EventStatus.active,
         currency: currency,
-        playerIds: playerIds,
+        participantIds: participantIds,
         startTime: DateTime.now(),
         notes: notes,
         createdAt: DateTime.now(),
       );
 
       // Save to local storage
-      await _localStorage.saveGame(game);
+      await _localStorage.saveEvent(event);
       
       // Save to Firestore (both guest and authenticated users)
-      await _firestoreService.saveGame(game, _userId);
+      await _firestoreService.saveEvent(event, _userId);
       
       await loadGames();
 
-      return game;
+      return event;
     } catch (e) {
       // Handle error
       rethrow;
     }
   }
 
-  /// Ensure default "Quick Games" group exists
+  /// Ensure default "Quick Events" group exists
   Future<String> _ensureDefaultGroup() async {
-    final groups = await _localStorage.getAllGameGroups();
+    final groups = await _localStorage.getAllEventGroups();
     
     // Check if default group exists
-    final defaultGroup = groups.where((g) => g.name == 'Quick Games').firstOrNull;
+    final defaultGroup = groups.where((g) => g.name == 'Quick Events').firstOrNull;
     if (defaultGroup != null) {
       return defaultGroup.id;
     }
 
     // Create default group
-    final newGroup = GameGroup(
+    final newGroup = EventGroup(
       id: _uuid.v4(),
-      name: 'Quick Games',
+      name: 'Quick Events',
       ownerId: _userId,
       createdAt: DateTime.now(),
     );
 
-    await _localStorage.saveGameGroup(newGroup);
+    await _localStorage.saveEventGroup(newGroup);
     
     // Save to Firestore (both guest and authenticated users)
-    await _firestoreService.saveGameGroup(newGroup, _userId);
+    await _firestoreService.saveEventGroup(newGroup, _userId);
     
     return newGroup.id;
   }
 
-  /// End a game
-  Future<void> endGame(String gameId) async {
+  /// Settle an event
+  Future<void> settleEvent(String eventId) async {
     try {
-      final game = await _localStorage.getGame(gameId);
-      if (game == null) return;
+      final event = await _localStorage.getEvent(eventId);
+      if (event == null) return;
 
-      final updatedGame = game.copyWith(
-        status: GameStatus.ended,
+      final updatedEvent = event.copyWith(
+        status: EventStatus.settled,
         endTime: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      await _localStorage.saveGame(updatedGame);
+      await _localStorage.saveEvent(updatedEvent);
       
       // Save to Firestore (both guest and authenticated users)
-      await _firestoreService.saveGame(updatedGame, _userId);
+      await _firestoreService.saveEvent(updatedEvent, _userId);
       
       await loadGames();
     } catch (e) {
@@ -151,13 +169,19 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     }
   }
 
-  /// Delete a game
-  Future<void> deleteGame(String gameId) async {
+  /// End a game (alias for settleEvent)
+  Future<void> endGame(String eventId) async {
+    await settleEvent(eventId);
+  }
+
+  /// Delete an event
+  /// Keeping method name as deleteGame for backward compatibility
+  Future<void> deleteGame(String eventId) async {
     try {
-      await _localStorage.deleteGame(gameId);
+      await _localStorage.deleteEvent(eventId);
       
       // Delete from Firestore (both guest and authenticated users)
-      await _firestoreService.deleteGame(gameId);
+      await _firestoreService.deleteEvent(eventId);
       
       await loadGames();
     } catch (e) {
@@ -165,205 +189,226 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     }
   }
 
-  /// Get game by ID
-  Future<Game?> getGame(String gameId) async {
+  /// Get event by ID
+  /// Keeping method name as getGame for backward compatibility
+  Future<Event?> getGame(String eventId) async {
     try {
       // Try Firestore first (both guest and authenticated)
-      final game = await _firestoreService.getGame(gameId);
-      if (game != null) {
-        await _localStorage.saveGame(game);
-        return game;
+      final event = await _firestoreService.getEvent(eventId);
+      if (event != null) {
+        await _localStorage.saveEvent(event);
+        return event;
       }
-      return await _localStorage.getGame(gameId);
+      return await _localStorage.getEvent(eventId);
     } catch (e) {
       // Fallback to local storage
-      return await _localStorage.getGame(gameId);
+      return await _localStorage.getEvent(eventId);
     }
   }
 
-  /// Get buy-ins for a game
-  Future<List<BuyIn>> getBuyIns(String gameId) async {
+  /// Get expenses for an event
+  Future<List<Expense>> getExpenses(String eventId) async {
     try {
       // Try Firestore first (both guest and authenticated)
-      final buyIns = await _firestoreService.getBuyIns(gameId);
-      for (final buyIn in buyIns) {
-        await _localStorage.saveBuyIn(buyIn);
+      final expenses = await _firestoreService.getExpenses(eventId);
+      for (final expense in expenses) {
+        await _localStorage.saveExpense(expense);
       }
-      return buyIns;
+      return expenses;
     } catch (e) {
       // Fallback to local storage
-      return await _localStorage.getBuyInsByGame(gameId);
+      return await _localStorage.getExpensesByEvent(eventId);
     }
   }
 
-  /// Get cash-outs for a game
-  Future<List<CashOut>> getCashOuts(String gameId) async {
-    try {
-      // Try Firestore first (both guest and authenticated)
-      final cashOuts = await _firestoreService.getCashOuts(gameId);
-      for (final cashOut in cashOuts) {
-        await _localStorage.saveCashOut(cashOut);
-      }
-      return cashOuts;
-    } catch (e) {
-      // Fallback to local storage
-      return await _localStorage.getCashOutsByGame(gameId);
-    }
+  /// Get buy-ins (expenses) for backward compatibility
+  Future<List<Expense>> getBuyIns(String gameId) async {
+    return await getExpenses(gameId);
   }
 
-  /// Add a buy-in
-  Future<void> addBuyIn({
-    required String gameId,
-    required String playerId,
-    required double amount,
-    BuyInType type = BuyInType.initial,
-    String? notes,
-  }) async {
-    try {
-      final buyIn = BuyIn(
-        id: _uuid.v4(),
-        gameId: gameId,
-        playerId: playerId,
-        amount: amount,
-        type: type,
-        timestamp: DateTime.now(),
-        notes: notes,
-      );
-
-      print('DEBUG GameProvider: Saving buy-in locally: ${buyIn.id} - \$${buyIn.amount}');
-      await _localStorage.saveBuyIn(buyIn);
-      print('DEBUG GameProvider: Saved locally ✓');
-      
-      // Save to Firestore (both guest and authenticated users)
-      print('DEBUG GameProvider: Saving buy-in to Firestore with userId: $_userId');
-      await _firestoreService.saveBuyIn(buyIn, _userId);
-      print('DEBUG GameProvider: Saved to Firestore ✓');
-    } catch (e, stack) {
-      // Handle error
-      print('DEBUG GameProvider ERROR adding buy-in: $e');
-      print('DEBUG Stack: $stack');
-      rethrow;
-    }
+  /// Get cash-outs for backward compatibility (returns empty list - not used in expense model)
+  Future<List<dynamic>> getCashOuts(String gameId) async {
+    return [];
   }
 
-  /// Update a buy-in
-  Future<void> updateBuyIn(BuyIn buyIn) async {
-    try {
-      // Save locally
-      await _localStorage.saveBuyIn(buyIn);
-      
-      // Save to Firestore (both guest and authenticated users)
-      await _firestoreService.saveBuyIn(buyIn, _userId);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Delete a buy-in
-  Future<void> deleteBuyIn(String buyInId) async {
-    try {
-      await _localStorage.deleteBuyIn(buyInId);
-      
-      // Delete from Firestore (both guest and authenticated users)
-      await _firestoreService.deleteBuyIn(buyInId);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  /// Add a cash-out
+  /// Add cash-out for backward compatibility (no-op in expense model)
   Future<void> addCashOut({
     required String gameId,
     required String playerId,
     required double amount,
     String? notes,
   }) async {
+    // No-op in expense model
+  }
+
+  /// Clear cash-outs for backward compatibility (no-op in expense model)
+  Future<void> clearCashOuts(String gameId) async {
+    // No-op in expense model
+  }
+
+  /// Add a buy-in (expense) for backward compatibility
+  Future<void> addBuyIn({
+    required String gameId,
+    required String playerId,
+    required double amount,
+    String? notes,
+    String? description,
+    ExpenseCategory? category,
+  }) async {
+    // Convert to expense with equal split (only payer owes)
+    await addExpense(
+      eventId: gameId,
+      paidByParticipantId: playerId,
+      amount: amount,
+      description: description ?? notes ?? 'Expense',
+      category: category ?? ExpenseCategory.other,
+      splitMethod: SplitMethod.equal,
+      splitDetails: {playerId: 1.0},
+      notes: notes,
+    );
+  }
+
+  /// Add an expense
+  Future<void> addExpense({
+    required String eventId,
+    required String paidByParticipantId,
+    required double amount,
+    required String description,
+    required ExpenseCategory category,
+    required SplitMethod splitMethod,
+    required Map<String, double> splitDetails,
+    String? receipt,
+    String? notes,
+  }) async {
     try {
-      final cashOut = CashOut(
+      final expense = Expense(
         id: _uuid.v4(),
-        gameId: gameId,
-        playerId: playerId,
+        eventId: eventId,
+        paidByParticipantId: paidByParticipantId,
         amount: amount,
+        description: description,
         timestamp: DateTime.now(),
+        category: category,
+        splitMethod: splitMethod,
+        splitDetails: splitDetails,
+        receipt: receipt,
         notes: notes,
       );
 
-      await _localStorage.saveCashOut(cashOut);
+      await _localStorage.saveExpense(expense);
       
       // Save to Firestore (both guest and authenticated users)
-      await _firestoreService.saveCashOut(cashOut, _userId);
+      await _firestoreService.saveExpense(expense, _userId);
     } catch (e) {
-      // Handle error
+      rethrow;
     }
   }
 
-  /// Clear all cash-outs for a game (used when editing)
-  Future<void> clearCashOuts(String gameId) async {
+  /// Update a buy-in (expense) - backward compatibility
+  Future<void> updateBuyIn(Expense expense) async {
+    await updateExpense(expense);
+  }
+
+  /// Update an expense
+  Future<void> updateExpense(Expense expense) async {
     try {
-      await _localStorage.deleteCashOutsByGame(gameId);
+      // Save locally
+      await _localStorage.saveExpense(expense);
+      
+      // Save to Firestore (both guest and authenticated users)
+      await _firestoreService.saveExpense(expense, _userId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Delete a buy-in (expense) - backward compatibility
+  Future<void> deleteBuyIn(String expenseId) async {
+    await deleteExpense(expenseId);
+  }
+
+  /// Delete an expense
+  Future<void> deleteExpense(String expenseId) async {
+    try {
+      await _localStorage.deleteExpense(expenseId);
       
       // Delete from Firestore (both guest and authenticated users)
-      await _firestoreService.deleteCashOutsByGame(gameId);
+      await _firestoreService.deleteExpense(expenseId);
     } catch (e) {
-      // Handle error
+      rethrow;
     }
   }
 
-  /// Get active games
-  List<Game> getActiveGames() {
+  /// Get active games (events) - backward compatibility
+  List<Event> getActiveGames() {
+    return getActiveEvents();
+  }
+
+  /// Get active events
+  List<Event> getActiveEvents() {
     return state.when(
-      data: (games) => games.where((g) => g.status == GameStatus.active).toList(),
+      data: (events) => events.where((e) => e.status == EventStatus.active).toList(),
       loading: () => [],
       error: (_, __) => [],
     );
   }
 
-  /// Get ended games
-  List<Game> getEndedGames() {
+  /// Get ended games (events) - backward compatibility
+  List<Event> getEndedGames() {
+    return getSettledEvents();
+  }
+
+  /// Get settled events
+  List<Event> getSettledEvents() {
     return state.when(
-      data: (games) => games.where((g) => g.status == GameStatus.ended).toList(),
+      data: (events) => events.where((e) => e.status == EventStatus.settled).toList(),
       loading: () => [],
       error: (_, __) => [],
     );
   }
 
-  /// Get or create current active game
-  Future<Game> getOrCreateCurrentGame() async {
+  /// Get or create current active game (event)
+  Future<Event> getOrCreateCurrentGame() async {
     // Force reload to ensure we have the latest state
     await loadGames();
     
-    // Check if there's an active game
-    final activeGames = getActiveGames();
-    if (activeGames.isNotEmpty) {
-      return activeGames.first;
+    // Check if there's an active event
+    final activeEvents = getActiveEvents();
+    if (activeEvents.isNotEmpty) {
+      return activeEvents.first;
     }
 
-    // No active game, create a new one with no players
+    // No active event, create a new one with no participants
     try {
-      final game = await createGame(
-        playerIds: [], // Start with no players
-        notes: 'Quick game',
+      final event = await createEvent(
+        participantIds: [], // Start with no participants
+        notes: 'Quick event',
       );
 
-      if (game == null) {
-        throw Exception('Failed to create new game - createGame returned null');
+      if (event == null) {
+        throw Exception('Failed to create new event - createEvent returned null');
       }
 
-      return game;
+      return event;
     } catch (e) {
       // Handle error
       rethrow;
     }
   }
 
-  /// Update an existing game
-  Future<void> updateGame(Game game) async {
+  /// Update a game (event) - backward compatibility
+  Future<void> updateGame(Event event) async {
+    await updateEvent(event);
+  }
+
+  /// Update an existing event
+  Future<void> updateEvent(Event event) async {
     try {
       // Save to local storage
-      await _localStorage.saveGame(game);
+      await _localStorage.saveEvent(event);
       
       // Save to Firestore (both guest and authenticated users)
-      await _firestoreService.saveGame(game, _userId);
+      await _firestoreService.saveEvent(event, _userId);
       
       await loadGames();
     } catch (e) {
@@ -372,15 +417,20 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
     }
   }
 
-  /// Save settlement for a game
+  /// Get event - internal method
+  Future<Event?> getEvent(String eventId) async {
+    return await getGame(eventId);
+  }
+
+  /// Save settlement for an event
   Future<void> saveSettlement({
-    required String gameId,
+    required String eventId,
     required List<SettlementTransaction> transactions,
   }) async {
     try {
       final settlement = Settlement(
         id: _uuid.v4(),
-        gameId: gameId,
+        eventId: eventId,
         transactions: transactions,
         generatedAt: DateTime.now(),
       );
@@ -390,18 +440,16 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       
       // Save to Firestore (both guest and authenticated users)
       await _firestoreService.saveSettlement(settlement, _userId);
-      print('Settlement saved: ${settlement.id} with ${transactions.length} transactions');
     } catch (e) {
-      print('ERROR saving settlement: $e');
       rethrow;
     }
   }
 
-  /// Get settlements for a game
-  Future<List<Settlement>> getSettlements(String gameId) async {
+  /// Get settlements for an event
+  Future<List<Settlement>> getSettlements(String eventId) async {
     try {
       // Try Firestore first (both guest and authenticated)
-      final settlements = await _firestoreService.getSettlements(gameId);
+      final settlements = await _firestoreService.getSettlements(eventId);
       
       // Cache locally
       for (final settlement in settlements) {
@@ -411,70 +459,141 @@ class GameNotifier extends StateNotifier<AsyncValue<List<Game>>> {
       return settlements;
     } catch (e) {
       // Fallback to local storage
-      print('Firestore error, falling back to local storage: $e');
-      return await _localStorage.getSettlementsByGame(gameId);
+      return await _localStorage.getSettlementsByEvent(eventId);
     }
   }
 
-  /// Update game notes
-  Future<Game?> updateGameNotes(String gameId, String notes) async {
+  /// Update game notes - backward compatibility
+  Future<Event?> updateGameNotes(String eventId, String notes) async {
     try {
-      final game = await getGame(gameId);
-      if (game == null) return null;
+      final event = await getGame(eventId);
+      if (event == null) return null;
 
-      final updatedGame = game.copyWith(
+      final updatedEvent = event.copyWith(
         notes: notes,
         updatedAt: DateTime.now(),
       );
 
       // Save to local storage
-      await _localStorage.saveGame(updatedGame);
+      await _localStorage.saveEvent(updatedEvent);
       
       // Save to Firestore (both guest and authenticated users)
-      await _firestoreService.saveGame(updatedGame, _userId);
+      await _firestoreService.saveEvent(updatedEvent, _userId);
 
-      // Reload games to update state
+      // Reload events to update state
       await loadGames();
 
-      return updatedGame;
+      return updatedEvent;
     } catch (e) {
-      print('ERROR updating game notes: $e');
       rethrow;
     }
   }
 
-  /// Update game name
-  Future<Game?> updateGameName(String gameId, String name) async {
+  /// Update game name - backward compatibility  
+  Future<Event?> updateGameName(String eventId, String name) async {
     try {
-      final game = await getGame(gameId);
-      if (game == null) return null;
+      final event = await getGame(eventId);
+      if (event == null) return null;
 
-      final updatedGame = game.copyWith(
+      final updatedEvent = event.copyWith(
         name: name.trim().isEmpty ? null : name.trim(),
         updatedAt: DateTime.now(),
       );
 
       // Save to local storage
-      await _localStorage.saveGame(updatedGame);
+      await _localStorage.saveEvent(updatedEvent);
       
       // Save to Firestore (both guest and authenticated users)
-      await _firestoreService.saveGame(updatedGame, _userId);
+      await _firestoreService.saveEvent(updatedEvent, _userId);
 
-      // Reload games to update state
+      // Reload events to update state
       await loadGames();
 
-      return updatedGame;
+      return updatedEvent;
     } catch (e) {
-      print('ERROR updating game name: $e');
       rethrow;
+    }
+  }
+
+  /// Calculate participant results from expenses
+  Future<List<ParticipantResult>> calculateParticipantResults(String eventId) async {
+    final expenses = await getExpenses(eventId);
+    final event = await getGame(eventId);
+    if (event == null) return [];
+
+    // Calculate totals for each participant
+    final participantTotals = <String, Map<String, double>>{};
+    
+    for (final participantId in event.participantIds) {
+      participantTotals[participantId] = {
+        'paid': 0.0,
+        'owed': 0.0,
+      };
+    }
+
+    // Calculate what each participant paid and owes
+    for (final expense in expenses) {
+      // Add to payer's total paid
+      participantTotals[expense.paidByParticipantId]?['paid'] =
+          (participantTotals[expense.paidByParticipantId]?['paid'] ?? 0) + expense.amount;
+
+      // Calculate owed amounts based on split method
+      final splitAmounts = _calculateSplitAmounts(expense);
+      splitAmounts.forEach((participantId, owedAmount) {
+        participantTotals[participantId]?['owed'] =
+            (participantTotals[participantId]?['owed'] ?? 0) + owedAmount;
+      });
+    }
+
+    // Create results
+    return participantTotals.entries.map((entry) {
+      return ParticipantResult(
+        participantId: entry.key,
+        totalPaid: entry.value['paid'] ?? 0,
+        totalOwed: entry.value['owed'] ?? 0,
+        expenseCount: expenses.where((e) => e.paidByParticipantId == entry.key).length,
+      );
+    }).toList();
+  }
+
+  /// Calculate split amounts for an expense
+  Map<String, double> _calculateSplitAmounts(Expense expense) {
+    switch (expense.splitMethod) {
+      case SplitMethod.equal:
+        // Split equally among all participants in splitDetails
+        final participantCount = expense.splitDetails.length;
+        if (participantCount == 0) return {};
+        final amountPerPerson = expense.amount / participantCount;
+        return Map.fromEntries(
+          expense.splitDetails.keys.map((id) => MapEntry(id, amountPerPerson)),
+        );
+
+      case SplitMethod.percentage:
+        // Split by percentage
+        return expense.splitDetails.map(
+          (id, percentage) => MapEntry(id, expense.amount * (percentage / 100)),
+        );
+
+      case SplitMethod.exactAmount:
+        // Exact amounts already specified
+        return expense.splitDetails;
+
+      case SplitMethod.shares:
+        // Split by shares
+        final totalShares = expense.splitDetails.values.fold(0.0, (sum, shares) => sum + shares);
+        if (totalShares == 0) return {};
+        final amountPerShare = expense.amount / totalShares;
+        return expense.splitDetails.map(
+          (id, shares) => MapEntry(id, amountPerShare * shares),
+        );
     }
   }
 }
 
-/// Provider for game groups
-final gameGroupProvider = FutureProvider<List<GameGroup>>((ref) async {
+/// Provider for event groups (keeping name as gameGroupProvider for backward compatibility)
+final gameGroupProvider = FutureProvider<List<EventGroup>>((ref) async {
   final localStorage = ref.watch(localStorageServiceProvider);
-  return await localStorage.getAllGameGroups();
+  return await localStorage.getAllEventGroups();
 });
 
 /// Provider for default currency

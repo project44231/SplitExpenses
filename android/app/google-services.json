@@ -1,48 +1,48 @@
 {
   "project_info": {
-    "project_number": "393328283698",
-    "project_id": "gametracker-a834b",
-    "storage_bucket": "gametracker-a834b.firebasestorage.app"
+    "project_number": "719860996232",
+    "project_id": "splitexpenses-4c618",
+    "storage_bucket": "splitexpenses-4c618.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:393328283698:android:36f5135ea09c90601f6c2b",
+        "mobilesdk_app_id": "1:719860996232:android:99e12273a801d1191ba73d",
         "android_client_info": {
-          "package_name": "com.gametracker.poker_tracker"
+          "package_name": "com.splitexpenses.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "393328283698-h46rdjsbrmi1313p0o0f0cfiel3ni811.apps.googleusercontent.com",
+          "client_id": "719860996232-5bhp12bq4gmfed0t93baap13jgngtts0.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.gametracker.poker_tracker",
+            "package_name": "com.splitexpenses.app",
             "certificate_hash": "a01d11f7c7fe3f3cc6ea5160e7a242e44290f30c"
           }
         },
         {
-          "client_id": "393328283698-jci6cr0gb6jl4uoatsfq24vai94ilgn7.apps.googleusercontent.com",
+          "client_id": "719860996232-86kibaeittsqi4djp0ct0h349med67no.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyC5S9P-pRbp80AlkfJ28kVgHZNqu18rg7s"
+          "current_key": "AIzaSyC_2h4ia-q8ELQp0z8KzFTli_LxxMwd_yU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "393328283698-jci6cr0gb6jl4uoatsfq24vai94ilgn7.apps.googleusercontent.com",
+              "client_id": "719860996232-86kibaeittsqi4djp0ct0h349med67no.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "393328283698-842bf04numlhqa64glfpntj5tej41qc0.apps.googleusercontent.com",
+              "client_id": "719860996232-tktg47dqc343q8naq3hb2dndapb81aua.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.gametracker.pokerTracker"
+                "bundle_id": "com.splitexpenses.app"
               }
             }
           ]

@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../models/game.dart';
-import '../../../models/buy_in.dart';
-import '../../../models/cash_out.dart';
+import '../../../models/compat.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../services/firestore_service.dart';
 import '../widgets/game_history_card.dart';
 import '../widgets/leaderboard_tab.dart';
 import '../widgets/history_filter_dialog.dart';
+
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
@@ -25,7 +24,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
   List<Game> _endedGames = [];
   List<Game> _filteredGames = [];
   Map<String, List<BuyIn>> _gamesBuyIns = {};
-  Map<String, List<CashOut>> _gamesCashOuts = {};
+  Map<String, List<dynamic>> _gamesCashOuts = {}; // Removed CashOut model
   HistoryFilters _filters = HistoryFilters();
 
   @override
@@ -63,23 +62,23 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
 
       // Load games directly from Firebase only (not local storage)
       final firestoreService = FirestoreService();
-      final allGames = await firestoreService.getGames(userId);
+      final allGames = await firestoreService.getEvents(userId);
 
       // Filter ended games and sort by end time
       final endedGames = allGames
-          .where((g) => g.status == GameStatus.ended && g.endTime != null)
+          .where((g) => g.status == EventStatus.settled && g.endTime != null)
           .toList()
         ..sort((a, b) => b.endTime!.compareTo(a.endTime!));
 
       // Load buy-ins and cash-outs for each game from Firebase only
       final gamesBuyIns = <String, List<BuyIn>>{};
-      final gamesCashOuts = <String, List<CashOut>>{};
+      final gamesCashOuts = <String, List<dynamic>>{}; // Removed CashOut model
 
       for (final game in endedGames) {
-        final buyIns = await firestoreService.getBuyIns(game.id);
-        final cashOuts = await firestoreService.getCashOuts(game.id);
+        final buyIns = await firestoreService.getExpenses(game.id);
+        // final cashOuts = await firestoreService.getCashOuts(game.id); // Removed
         gamesBuyIns[game.id] = buyIns;
-        gamesCashOuts[game.id] = cashOuts;
+        // gamesCashOuts[game.id] = cashOuts; // Removed
       }
 
       if (mounted) {
@@ -134,33 +133,41 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
 
     // Apply player filter
     if (_filters.selectedPlayerId != null) {
-      filtered = filtered.where((g) => g.playerIds.contains(_filters.selectedPlayerId)).toList();
+      filtered = filtered.where((g) => (g as Event).playerIds.contains(_filters.selectedPlayerId)).toList();
     }
 
     // Apply sorting
     switch (_filters.sortOption) {
       case SortOption.dateNewest:
-        filtered.sort((a, b) => b.endTime!.compareTo(a.endTime!));
+        filtered.sort((a, b) => (b as Event).endTime!.compareTo((a as Event).endTime!));
         break;
       case SortOption.dateOldest:
-        filtered.sort((a, b) => a.endTime!.compareTo(b.endTime!));
+        filtered.sort((a, b) => (a as Event).endTime!.compareTo((b as Event).endTime!));
         break;
       case SortOption.potSize:
         filtered.sort((a, b) {
-          final aPot = (_gamesBuyIns[a.id] ?? []).fold<double>(0, (sum, bi) => sum + bi.amount);
-          final bPot = (_gamesBuyIns[b.id] ?? []).fold<double>(0, (sum, bi) => sum + bi.amount);
+          final aEvent = a as Event;
+          final bEvent = b as Event;
+          final aPot = (_gamesBuyIns[aEvent.id] ?? []).fold<double>(0, (sum, bi) => sum + (bi as Expense).amount);
+          final bPot = (_gamesBuyIns[bEvent.id] ?? []).fold<double>(0, (sum, bi) => sum + (bi as Expense).amount);
           return bPot.compareTo(aPot);
         });
         break;
       case SortOption.duration:
         filtered.sort((a, b) {
-          final aDuration = a.endTime!.difference(a.startTime);
-          final bDuration = b.endTime!.difference(b.startTime);
+          final aEvent = a as Event;
+          final bEvent = b as Event;
+          final aDuration = aEvent.endTime!.difference(aEvent.startTime);
+          final bDuration = bEvent.endTime!.difference(bEvent.startTime);
           return bDuration.compareTo(aDuration);
         });
         break;
       case SortOption.playerCount:
-        filtered.sort((a, b) => b.playerIds.length.compareTo(a.playerIds.length));
+        filtered.sort((a, b) {
+          final aEvent = a as Event;
+          final bEvent = b as Event;
+          return bEvent.playerIds.length.compareTo(aEvent.playerIds.length);
+        });
         break;
     }
 
@@ -421,7 +428,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
 
           return GameHistoryCard(
             game: game,
-            buyIns: buyIns,
+            buyIns: List<BuyIn>.from(buyIns),
             cashOuts: cashOuts,
             onTap: () {
               // Navigate to game details

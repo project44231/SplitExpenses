@@ -19,31 +19,27 @@ service cloud.firestore {
              (request.auth != null && request.auth.uid == userId);
     }
     
-    // Games collection
-    match /games/{gameId} {
-      // Allow read if owner OR if game has a shareToken (for public sharing)
+    // Events collection
+    match /events/{eventId} {
+      // Allow read if owner OR if event has a shareToken (for public sharing)
       allow read: if isOwnData(resource.data.userId) || 
                      (resource.data.shareToken != null && resource.data.shareToken != '');
       allow create: if canCreateAsUser(request.resource.data.userId);
       allow update, delete: if isOwnData(resource.data.userId);
     }
     
-    // Players collection
-    match /players/{playerId} {
-      // Allow public read for players (needed for shared game views)
-      // Players only contain names, no sensitive data
+    // Participants collection
+    match /participants/{participantId} {
+      // Allow public read for participants (needed for shared event views)
+      // Participants only contain names, no sensitive data
       allow read: if true;
       allow create: if canCreateAsUser(request.resource.data.userId);
       allow update, delete: if isOwnData(resource.data.userId);
     }
     
-    // Buy-ins, Cash-outs, Settlements, Expenses, Reconciliations
-    // Allow all read/write for now (accessed via gameId from owned games)
-    match /buy_ins/{buyInId} {
-      allow read, write: if true;
-    }
-    
-    match /cash_outs/{cashOutId} {
+    // Expenses and Settlements
+    // Allow all read/write for now (accessed via eventId from owned events)
+    match /expenses/{expenseId} {
       allow read, write: if true;
     }
     
@@ -51,16 +47,8 @@ service cloud.firestore {
       allow read, write: if true;
     }
     
-    match /expenses/{expenseId} {
-      allow read, write: if true;
-    }
-    
-    match /reconciliations/{reconciliationId} {
-      allow read, write: if true;
-    }
-    
-    // Game groups collection
-    match /game_groups/{groupId} {
+    // Event groups collection
+    match /event_groups/{groupId} {
       allow read: if isOwnData(resource.data.userId);
       allow create: if canCreateAsUser(request.resource.data.userId);
       allow update, delete: if isOwnData(resource.data.userId);

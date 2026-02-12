@@ -16,7 +16,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.gametracker.poker_tracker"
+    namespace = "com.splitexpenses.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"  // Required by Firebase plugins
 
@@ -30,7 +30,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.gametracker.poker_tracker"
+        applicationId = "com.splitexpenses.app"
         minSdk = 23  // Firebase requires API 23+
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

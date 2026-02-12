@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/constants/currency.dart';
-import '../../../models/game.dart';
-import '../../../models/buy_in.dart';
-import '../../../models/cash_out.dart';
-import '../../../models/player.dart';
+import '../../../models/compat.dart';
 import '../../players/providers/player_provider.dart';
+
 
 class LeaderboardTab extends ConsumerWidget {
   final List<Game> games;
   final Map<String, List<BuyIn>> gamesBuyIns;
-  final Map<String, List<CashOut>> gamesCashOuts;
+  final Map<String, List<dynamic>> gamesCashOuts; // Removed CashOut model
 
   const LeaderboardTab({
     super.key,
@@ -87,7 +85,7 @@ class LeaderboardTab extends ConsumerWidget {
     );
   }
 
-  Map<String, PlayerStats> _calculatePlayerStats(List<Player> allPlayers) {
+  Map<String, PlayerStats> _calculatePlayerStats(List<Participant> allPlayers) {
     final stats = <String, PlayerStats>{};
 
     // Calculate stats for each player across all games
@@ -112,11 +110,13 @@ class LeaderboardTab extends ConsumerWidget {
         final profit = entry.value;
 
         if (!stats.containsKey(playerId)) {
-          final player = allPlayers.firstWhere(
+          final player = allPlayers.cast<Participant>().firstWhere(
             (p) => p.id == playerId,
-            orElse: () => Player(
+            orElse: () => Participant(
               id: playerId,
               name: 'Unknown',
+              userId: 'guest',
+              eventsAttended: 0,
               createdAt: DateTime.now(),
             ),
           );

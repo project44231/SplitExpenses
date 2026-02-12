@@ -3,9 +3,10 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/screens/auth_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../../features/game/screens/home_screen.dart';
+import '../../features/game/screens/group_expenses_list_screen.dart';
 import '../../features/game/screens/new_game_screen.dart';
 import '../../features/game/screens/active_game_screen.dart';
-import '../../features/game/screens/cash_out_screen.dart';
+// import '../../features/game/screens/cash_out_screen.dart'; // Cash-outs not used in expense model
 import '../../features/game/screens/settlement_screen.dart';
 import '../../features/history/screens/history_screen.dart';
 import '../../features/history/screens/game_details_screen.dart';
@@ -37,42 +38,50 @@ class AppRouter {
         builder: (context, state) => const HomeScreen(),
       ),
 
-      // New Game
+      // Group Expenses List
       GoRoute(
-        path: AppConstants.newGameRoute,
+        path: AppConstants.groupExpensesRoute,
+        builder: (context, state) => const GroupExpensesListScreen(),
+      ),
+
+      // Create Group Expense
+      GoRoute(
+        path: AppConstants.createGroupExpenseRoute,
         builder: (context, state) => const NewGameScreen(),
       ),
 
-      // Current/Active Game (no ID - will auto-create or load current)
+      // Group Expense Detail (with specific ID)
       GoRoute(
-        path: '/game',
-        builder: (context, state) => const ActiveGameScreen(gameId: 'current'),
-      ),
-
-      // Active Game (with specific ID)
-      GoRoute(
-        path: '${AppConstants.activeGameRoute}/:gameId',
+        path: '${AppConstants.groupExpenseDetailRoute}/:groupId',
         builder: (context, state) {
-          final gameId = state.pathParameters['gameId']!;
-          return ActiveGameScreen(gameId: gameId);
+          final groupId = state.pathParameters['groupId']!;
+          return ActiveGameScreen(gameId: groupId);
         },
       ),
 
-      // Cash-Out Screen
+      // Legacy routes for backward compatibility
       GoRoute(
-        path: '/cash-out/:gameId',
+        path: AppConstants.newEventRoute,
+        builder: (context, state) => const NewGameScreen(),
+      ),
+      GoRoute(
+        path: '/event',
+        builder: (context, state) => const ActiveGameScreen(gameId: 'current'),
+      ),
+      GoRoute(
+        path: '${AppConstants.activeEventRoute}/:eventId',
         builder: (context, state) {
-          final gameId = state.pathParameters['gameId']!;
-          return CashOutScreen(gameId: gameId);
+          final eventId = state.pathParameters['eventId']!;
+          return ActiveGameScreen(gameId: eventId);
         },
       ),
 
       // Settlement
       GoRoute(
-        path: '${AppConstants.settlementRoute}/:gameId',
+        path: '${AppConstants.settlementRoute}/:eventId',
         builder: (context, state) {
-          final gameId = state.pathParameters['gameId']!;
-          return SettlementScreen(gameId: gameId);
+          final eventId = state.pathParameters['eventId']!;
+          return SettlementScreen(gameId: eventId); // Will update parameter name
         },
       ),
 
@@ -82,12 +91,12 @@ class AppRouter {
         builder: (context, state) => const HistoryScreen(),
       ),
 
-      // Game Details
+      // Event Details
       GoRoute(
-        path: '${AppConstants.gameDetailsRoute}/:gameId',
+        path: '${AppConstants.eventDetailsRoute}/:eventId',
         builder: (context, state) {
-          final gameId = state.pathParameters['gameId']!;
-          return GameDetailsScreen(gameId: gameId);
+          final eventId = state.pathParameters['eventId']!;
+          return GameDetailsScreen(gameId: eventId); // Will be renamed to EventDetailsScreen
         },
       ),
 
@@ -103,10 +112,10 @@ class AppRouter {
         builder: (context, state) => const GroupsScreen(),
       ),
 
-      // Player Contacts
+      // Participant Contacts
       GoRoute(
-        path: AppConstants.playerContactsRoute,
-        builder: (context, state) => const PlayerContactsScreen(),
+        path: AppConstants.participantContactsRoute,
+        builder: (context, state) => const PlayerContactsScreen(), // Will be renamed to ParticipantContactsScreen
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

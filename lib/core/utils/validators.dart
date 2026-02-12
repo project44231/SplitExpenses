@@ -32,7 +32,7 @@ class Validators {
     return null;
   }
 
-  /// Validate name (player name, group name, etc.)
+  /// Validate name (participant name, group name, etc.)
   static String? validateName(String? value, {int? maxLength}) {
     if (value == null || value.isEmpty) {
       return 'Name is required';
@@ -42,7 +42,7 @@ class Validators {
       return 'Name cannot be empty';
     }
     
-    final length = maxLength ?? AppConstants.maxPlayerNameLength;
+    final length = maxLength ?? AppConstants.maxParticipantNameLength;
     if (value.length > length) {
       return 'Name must be less than $length characters';
     }
@@ -50,8 +50,8 @@ class Validators {
     return null;
   }
 
-  /// Validate buy-in amount
-  static String? validateBuyInAmount(String? value) {
+  /// Validate expense amount
+  static String? validateExpenseAmount(String? value) {
     if (value == null || value.isEmpty) {
       return 'Amount is required';
     }
@@ -62,40 +62,42 @@ class Validators {
       return 'Please enter a valid number';
     }
     
-    if (amount < AppConstants.minBuyInAmount) {
-      return 'Amount must be at least ${AppConstants.minBuyInAmount}';
+    if (amount < AppConstants.minExpenseAmount) {
+      return 'Amount must be at least ${AppConstants.minExpenseAmount}';
     }
     
-    if (amount > AppConstants.maxBuyInAmount) {
-      return 'Amount cannot exceed ${AppConstants.maxBuyInAmount}';
+    if (amount > AppConstants.maxExpenseAmount) {
+      return 'Amount cannot exceed ${AppConstants.maxExpenseAmount}';
     }
     
     return null;
   }
 
-  /// Validate cash-out amount
-  static String? validateCashOutAmount(String? value) {
-    // Require explicit input
+  /// Validate description
+  static String? validateDescription(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Amount is required';
+      return 'Description is required';
     }
     
-    final amount = double.tryParse(value);
-    
-    if (amount == null) {
-      return 'Please enter a valid number';
+    if (value.trim().isEmpty) {
+      return 'Description cannot be empty';
     }
     
-    // Allow any amount including 0
-    if (amount < 0) {
-      return 'Amount cannot be negative';
-    }
-    
-    if (amount > AppConstants.maxBuyInAmount) {
-      return 'Amount cannot exceed ${AppConstants.maxBuyInAmount}';
+    if (value.length > AppConstants.maxDescriptionLength) {
+      return 'Description must be less than ${AppConstants.maxDescriptionLength} characters';
     }
     
     return null;
+  }
+
+  /// Validate cash-out amount (for backward compatibility)
+  static String? validateCashOutAmount(String? value) {
+    return validateExpenseAmount(value);
+  }
+
+  /// Validate buy-in amount (for backward compatibility)
+  static String? validateBuyInAmount(String? value) {
+    return validateExpenseAmount(value);
   }
 
   /// Validate notes

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../models/player.dart';
+import '../../../models/participant.dart';
+
 
 /// Dialog for editing player name
 class EditPlayerDialog extends StatefulWidget {
-  final Player player;
+  final Participant player;
 
   const EditPlayerDialog({
     super.key,

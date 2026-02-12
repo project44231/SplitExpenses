@@ -3,11 +3,12 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
-import '../../../models/buy_in.dart';
+import '../../../models/expense.dart';
+
 
 /// Dialog for editing a buy-in
 class EditBuyInDialog extends StatefulWidget {
-  final BuyIn buyIn;
+  final Expense buyIn;
   final Currency currency;
   final String playerName;
   final List<double> quickAmounts;

@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/validators.dart';
-import '../../../models/player.dart';
-import '../../../models/buy_in.dart';
+import '../../../models/compat.dart';
+
 
 /// Dialog for adding a buy-in
 class AddBuyInDialog extends StatefulWidget {
-  final List<Player> players;
+  final List<Participant> players;
   final Currency currency;
   final String? preselectedPlayerId;
   final List<double> quickAmounts;
@@ -54,7 +54,7 @@ class _AddBuyInDialogState extends State<AddBuyInDialog> {
       Navigator.pop(context, {
         'playerId': _selectedPlayerId,
         'amount': amount,
-        'type': BuyInType.initial, // All buy-ins are the same now
+        // type field removed - not used in expense model
       });
     }
   }

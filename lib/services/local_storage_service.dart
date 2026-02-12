@@ -1,28 +1,22 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import '../models/game.dart';
-import '../models/player.dart';
-import '../models/buy_in.dart';
-import '../models/cash_out.dart';
+import '../models/event.dart';
+import '../models/participant.dart';
 import '../models/expense.dart';
 import '../models/settlement.dart';
-import '../models/game_group.dart';
+import '../models/event_group.dart';
 
-/// Local storage service using Hive for guest mode
+/// Local storage service using Hive for guest mode and caching
 class LocalStorageService {
-  static const String _gamesBoxName = 'games';
-  static const String _playersBoxName = 'players';
-  static const String _buyInsBoxName = 'buy_ins';
-  static const String _cashOutsBoxName = 'cash_outs';
+  static const String _eventsBoxName = 'events';
+  static const String _participantsBoxName = 'participants';
   static const String _expensesBoxName = 'expenses';
   static const String _settlementsBoxName = 'settlements';
-  static const String _groupsBoxName = 'game_groups';
+  static const String _groupsBoxName = 'event_groups';
   static const String _prefsBoxName = 'preferences';
 
   // Boxes
-  late Box<Map> _gamesBox;
-  late Box<Map> _playersBox;
-  late Box<Map> _buyInsBox;
-  late Box<Map> _cashOutsBox;
+  late Box<Map> _eventsBox;
+  late Box<Map> _participantsBox;
   late Box<Map> _expensesBox;
   late Box<Map> _settlementsBox;
   late Box<Map> _groupsBox;
@@ -33,148 +27,72 @@ class LocalStorageService {
     await Hive.initFlutter();
 
     // Open boxes
-    _gamesBox = await Hive.openBox<Map>(_gamesBoxName);
-    _playersBox = await Hive.openBox<Map>(_playersBoxName);
-    _buyInsBox = await Hive.openBox<Map>(_buyInsBoxName);
-    _cashOutsBox = await Hive.openBox<Map>(_cashOutsBoxName);
+    _eventsBox = await Hive.openBox<Map>(_eventsBoxName);
+    _participantsBox = await Hive.openBox<Map>(_participantsBoxName);
     _expensesBox = await Hive.openBox<Map>(_expensesBoxName);
     _settlementsBox = await Hive.openBox<Map>(_settlementsBoxName);
     _groupsBox = await Hive.openBox<Map>(_groupsBoxName);
     _prefsBox = await Hive.openBox(_prefsBoxName);
   }
 
-  // ==================== Games ====================
+  // ==================== Events ====================
 
-  Future<void> saveGame(Game game) async {
-    await _gamesBox.put(game.id, game.toJson());
+  Future<void> saveEvent(Event event) async {
+    await _eventsBox.put(event.id, event.toJson());
   }
 
-  Future<Game?> getGame(String id) async {
-    final json = _gamesBox.get(id);
+  Future<Event?> getEvent(String id) async {
+    final json = _eventsBox.get(id);
     if (json == null) return null;
-    return Game.fromJson(Map<String, dynamic>.from(json));
+    return Event.fromJson(Map<String, dynamic>.from(json));
   }
 
-  Future<List<Game>> getAllGames() async {
-    final games = <Game>[];
-    for (var json in _gamesBox.values) {
-      games.add(Game.fromJson(Map<String, dynamic>.from(json)));
+  Future<List<Event>> getAllEvents() async {
+    final events = <Event>[];
+    for (var json in _eventsBox.values) {
+      events.add(Event.fromJson(Map<String, dynamic>.from(json)));
     }
     // Sort by start time, most recent first
-    games.sort((a, b) => b.startTime.compareTo(a.startTime));
-    return games;
+    events.sort((a, b) => b.startTime.compareTo(a.startTime));
+    return events;
   }
 
-  Future<List<Game>> getGamesByGroup(String groupId) async {
-    final allGames = await getAllGames();
-    return allGames.where((game) => game.groupId == groupId).toList();
+  Future<List<Event>> getEventsByGroup(String groupId) async {
+    final allEvents = await getAllEvents();
+    return allEvents.where((event) => event.groupId == groupId).toList();
   }
 
-  Future<void> deleteGame(String id) async {
-    await _gamesBox.delete(id);
+  Future<void> deleteEvent(String id) async {
+    await _eventsBox.delete(id);
     // Also delete associated data
-    await _deleteBuyInsByGame(id);
-    await _deleteCashOutsByGame(id);
-    await _deleteExpensesByGame(id);
-    await _deleteSettlementsByGame(id);
+    await _deleteExpensesByEvent(id);
+    await _deleteSettlementsByEvent(id);
   }
 
-  // ==================== Players ====================
+  // ==================== Participants ====================
 
-  Future<void> savePlayer(Player player) async {
-    await _playersBox.put(player.id, player.toJson());
+  Future<void> saveParticipant(Participant participant) async {
+    await _participantsBox.put(participant.id, participant.toJson());
   }
 
-  Future<Player?> getPlayer(String id) async {
-    final json = _playersBox.get(id);
+  Future<Participant?> getParticipant(String id) async {
+    final json = _participantsBox.get(id);
     if (json == null) return null;
-    return Player.fromJson(Map<String, dynamic>.from(json));
+    return Participant.fromJson(Map<String, dynamic>.from(json));
   }
 
-  Future<List<Player>> getAllPlayers() async {
-    final players = <Player>[];
-    for (var json in _playersBox.values) {
-      players.add(Player.fromJson(Map<String, dynamic>.from(json)));
+  Future<List<Participant>> getAllParticipants() async {
+    final participants = <Participant>[];
+    for (var json in _participantsBox.values) {
+      participants.add(Participant.fromJson(Map<String, dynamic>.from(json)));
     }
     // Sort by name
-    players.sort((a, b) => a.name.compareTo(b.name));
-    return players;
+    participants.sort((a, b) => a.name.compareTo(b.name));
+    return participants;
   }
 
-  Future<void> deletePlayer(String id) async {
-    await _playersBox.delete(id);
-  }
-
-  // ==================== Buy-Ins ====================
-
-  Future<void> saveBuyIn(BuyIn buyIn) async {
-    await _buyInsBox.put(buyIn.id, buyIn.toJson());
-  }
-
-  Future<List<BuyIn>> getBuyInsByGame(String gameId) async {
-    final buyIns = <BuyIn>[];
-    for (var json in _buyInsBox.values) {
-      final buyIn = BuyIn.fromJson(Map<String, dynamic>.from(json));
-      if (buyIn.gameId == gameId) {
-        buyIns.add(buyIn);
-      }
-    }
-    // Sort by timestamp
-    buyIns.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    return buyIns;
-  }
-
-  Future<void> deleteBuyIn(String buyInId) async {
-    await _buyInsBox.delete(buyInId);
-  }
-
-  Future<void> _deleteBuyInsByGame(String gameId) async {
-    final keysToDelete = <String>[];
-    for (var entry in _buyInsBox.toMap().entries) {
-      final buyIn = BuyIn.fromJson(Map<String, dynamic>.from(entry.value));
-      if (buyIn.gameId == gameId) {
-        keysToDelete.add(entry.key);
-      }
-    }
-    for (var key in keysToDelete) {
-      await _buyInsBox.delete(key);
-    }
-  }
-
-  // ==================== Cash-Outs ====================
-
-  Future<void> saveCashOut(CashOut cashOut) async {
-    await _cashOutsBox.put(cashOut.id, cashOut.toJson());
-  }
-
-  Future<List<CashOut>> getCashOutsByGame(String gameId) async {
-    final cashOuts = <CashOut>[];
-    for (var json in _cashOutsBox.values) {
-      final cashOut = CashOut.fromJson(Map<String, dynamic>.from(json));
-      if (cashOut.gameId == gameId) {
-        cashOuts.add(cashOut);
-      }
-    }
-    // Sort by timestamp
-    cashOuts.sort((a, b) => a.timestamp.compareTo(b.timestamp));
-    return cashOuts;
-  }
-
-  Future<void> deleteCashOutsByGame(String gameId) async {
-    final keysToDelete = <String>[];
-    for (var entry in _cashOutsBox.toMap().entries) {
-      final cashOut = CashOut.fromJson(Map<String, dynamic>.from(entry.value));
-      if (cashOut.gameId == gameId) {
-        keysToDelete.add(entry.key);
-      }
-    }
-    for (var key in keysToDelete) {
-      await _cashOutsBox.delete(key);
-    }
-  }
-
-  Future<void> _deleteCashOutsByGame(String gameId) async {
-    await deleteCashOutsByGame(gameId);
+  Future<void> deleteParticipant(String id) async {
+    await _participantsBox.delete(id);
   }
 
   // ==================== Expenses ====================
@@ -183,22 +101,28 @@ class LocalStorageService {
     await _expensesBox.put(expense.id, expense.toJson());
   }
 
-  Future<List<Expense>> getExpensesByGame(String gameId) async {
+  Future<List<Expense>> getExpensesByEvent(String eventId) async {
     final expenses = <Expense>[];
     for (var json in _expensesBox.values) {
       final expense = Expense.fromJson(Map<String, dynamic>.from(json));
-      if (expense.gameId == gameId) {
+      if (expense.eventId == eventId) {
         expenses.add(expense);
       }
     }
+    // Sort by timestamp
+    expenses.sort((a, b) => a.timestamp.compareTo(b.timestamp));
     return expenses;
   }
 
-  Future<void> _deleteExpensesByGame(String gameId) async {
+  Future<void> deleteExpense(String expenseId) async {
+    await _expensesBox.delete(expenseId);
+  }
+
+  Future<void> _deleteExpensesByEvent(String eventId) async {
     final keysToDelete = <String>[];
     for (var entry in _expensesBox.toMap().entries) {
       final expense = Expense.fromJson(Map<String, dynamic>.from(entry.value));
-      if (expense.gameId == gameId) {
+      if (expense.eventId == eventId) {
         keysToDelete.add(entry.key);
       }
     }
@@ -213,21 +137,21 @@ class LocalStorageService {
     await _settlementsBox.put(settlement.id, settlement.toJson());
   }
 
-  Future<Settlement?> getSettlementByGame(String gameId) async {
+  Future<Settlement?> getSettlementByEvent(String eventId) async {
     for (var json in _settlementsBox.values) {
       final settlement = Settlement.fromJson(Map<String, dynamic>.from(json));
-      if (settlement.gameId == gameId) {
+      if (settlement.eventId == eventId) {
         return settlement;
       }
     }
     return null;
   }
 
-  Future<List<Settlement>> getSettlementsByGame(String gameId) async {
+  Future<List<Settlement>> getSettlementsByEvent(String eventId) async {
     final settlements = <Settlement>[];
     for (var json in _settlementsBox.values) {
       final settlement = Settlement.fromJson(Map<String, dynamic>.from(json));
-      if (settlement.gameId == gameId) {
+      if (settlement.eventId == eventId) {
         settlements.add(settlement);
       }
     }
@@ -236,12 +160,12 @@ class LocalStorageService {
     return settlements;
   }
 
-  Future<void> _deleteSettlementsByGame(String gameId) async {
+  Future<void> _deleteSettlementsByEvent(String eventId) async {
     final keysToDelete = <String>[];
     for (var entry in _settlementsBox.toMap().entries) {
       final settlement =
           Settlement.fromJson(Map<String, dynamic>.from(entry.value));
-      if (settlement.gameId == gameId) {
+      if (settlement.eventId == eventId) {
         keysToDelete.add(entry.key);
       }
     }
@@ -250,29 +174,29 @@ class LocalStorageService {
     }
   }
 
-  // ==================== Game Groups ====================
+  // ==================== Event Groups ====================
 
-  Future<void> saveGameGroup(GameGroup group) async {
+  Future<void> saveEventGroup(EventGroup group) async {
     await _groupsBox.put(group.id, group.toJson());
   }
 
-  Future<GameGroup?> getGameGroup(String id) async {
+  Future<EventGroup?> getEventGroup(String id) async {
     final json = _groupsBox.get(id);
     if (json == null) return null;
-    return GameGroup.fromJson(Map<String, dynamic>.from(json));
+    return EventGroup.fromJson(Map<String, dynamic>.from(json));
   }
 
-  Future<List<GameGroup>> getAllGameGroups() async {
-    final groups = <GameGroup>[];
+  Future<List<EventGroup>> getAllEventGroups() async {
+    final groups = <EventGroup>[];
     for (var json in _groupsBox.values) {
-      groups.add(GameGroup.fromJson(Map<String, dynamic>.from(json)));
+      groups.add(EventGroup.fromJson(Map<String, dynamic>.from(json)));
     }
     // Sort by name
     groups.sort((a, b) => a.name.compareTo(b.name));
     return groups;
   }
 
-  Future<void> deleteGameGroup(String id) async {
+  Future<void> deleteEventGroup(String id) async {
     await _groupsBox.delete(id);
   }
 
@@ -302,10 +226,8 @@ class LocalStorageService {
 
   /// Clear all local data (for testing or logout)
   Future<void> clearAll() async {
-    await _gamesBox.clear();
-    await _playersBox.clear();
-    await _buyInsBox.clear();
-    await _cashOutsBox.clear();
+    await _eventsBox.clear();
+    await _participantsBox.clear();
     await _expensesBox.clear();
     await _settlementsBox.clear();
     await _groupsBox.clear();
@@ -315,10 +237,8 @@ class LocalStorageService {
   /// Get storage statistics
   Map<String, int> getStats() {
     return {
-      'games': _gamesBox.length,
-      'players': _playersBox.length,
-      'buyIns': _buyInsBox.length,
-      'cashOuts': _cashOutsBox.length,
+      'events': _eventsBox.length,
+      'participants': _participantsBox.length,
       'expenses': _expensesBox.length,
       'settlements': _settlementsBox.length,
       'groups': _groupsBox.length,

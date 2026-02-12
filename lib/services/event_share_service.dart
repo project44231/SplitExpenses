@@ -1,52 +1,52 @@
 import 'package:uuid/uuid.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
-import '../models/compat.dart';
+import '../models/event.dart';
 
-class GameShareService {
-  // Firebase Hosting domain
-  static const String _webAppDomain = 'splitpot.web.app';
+class EventShareService {
+  // Firebase Hosting domain - update this with your actual domain
+  static const String _webAppDomain = 'splitexpenses.web.app';
 
-  /// Generate a unique share token for a game
+  /// Generate a unique share token for an event
   String generateShareToken() {
     return const Uuid().v4();
   }
 
-  /// Build shareable URL for a game
-  String buildShareUrl(String gameId, String shareToken) {
-    return 'https://$_webAppDomain/share/$gameId/$shareToken';
+  /// Build shareable URL for an event
+  String buildShareUrl(String eventId, String shareToken) {
+    return 'https://$_webAppDomain/share/$eventId/$shareToken';
   }
 
-  /// Share game via system share dialog
-  Future<void> shareGame({
-    required Game game,
+  /// Share event via system share dialog
+  Future<void> shareEvent({
+    required Event event,
     required String shareToken,
     String? message,
   }) async {
-    final url = buildShareUrl(game.id, shareToken);
+    final url = buildShareUrl(event.id, shareToken);
     final shareMessage = message ??
-        'Join our live game!\n\nView real-time standings:\n$url';
+        'Join our live event!\n\nView real-time expenses:\n$url';
 
     await Share.share(
       shareMessage,
-      subject: 'Live Game - SplitPot',
+      subject: 'Live Event - SplitExpenses',
     );
   }
 
   /// Copy share URL to clipboard
   Future<void> copyShareUrl({
-    required String gameId,
+    required String eventId,
     required String shareToken,
   }) async {
-    final url = buildShareUrl(gameId, shareToken);
+    final url = buildShareUrl(eventId, shareToken);
     await Clipboard.setData(ClipboardData(text: url));
   }
 
   /// Revoke share access by clearing the token
-  Future<void> revokeShareAccess(Game game) async {
-    // This would be handled by the game provider
+  Future<void> revokeShareAccess(Event event) async {
+    // This would be handled by the event provider
     // Clearing the shareToken effectively revokes access
-    // Implementation is in the game provider's updateGame method
+    // Implementation is in the event provider's updateEvent method
   }
 
   /// Validate share token format

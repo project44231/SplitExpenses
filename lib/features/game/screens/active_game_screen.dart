@@ -6,20 +6,22 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../models/buy_in.dart';
-import '../../../models/game.dart';
-import '../../../models/player.dart';
-import '../../../services/game_share_service.dart';
+import '../../../services/event_share_service.dart';
+import '../../../models/compat.dart';
+import '../../../models/expense.dart' show ExpenseCategory;
 import '../providers/game_provider.dart';
 import '../../players/providers/player_provider.dart';
 import '../../players/widgets/player_selection_dialog.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../widgets/game_timer.dart';
 import '../widgets/player_buy_in_card.dart';
-import '../widgets/add_buy_in_dialog.dart';
+import '../widgets/add_expense_dialog.dart';
 import '../widgets/edit_buy_in_dialog.dart';
 import '../widgets/game_settings_dialog.dart';
 import '../widgets/edit_player_dialog.dart';
+
+
+// Type aliases for backward compatibility
 
 class ActiveGameScreen extends ConsumerStatefulWidget {
   final String gameId;
@@ -153,11 +155,11 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
         if (playersToAdd.isEmpty) return;
 
         // Add all selected players to current game
-        final newPlayerIds = playersToAdd.map((p) => p.id).toList();
+        final newPlayerIds = playersToAdd.cast<Participant>().map((p) => p.id).toList();
         final updatedPlayerIds = [..._currentGame!.playerIds, ...newPlayerIds];
         
         final updatedGame = _currentGame!.copyWith(
-          playerIds: updatedPlayerIds,
+          participantIds: updatedPlayerIds,
           updatedAt: DateTime.now(),
         );
         
@@ -172,7 +174,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
               content: Text(
                 playersToAdd.length == 1
                     ? '${playersToAdd[0].name} added to game'
-                    : '${playersToAdd.length} players added to game',
+                    : '${playersToAdd.length} participants added to event',
               ),
             ),
           );
@@ -194,21 +196,21 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     }
   }
 
-  Future<void> _showAddBuyInDialog({String? preselectedPlayerId}) async {
+  Future<void> _showAddExpenseDialog({String? preselectedParticipantId}) async {
     if (_currentGame == null) return;
 
     final playersAsync = ref.read(playerProvider);
-    final players = playersAsync.when(
+    final participants = playersAsync.when(
       data: (allPlayers) =>
-          allPlayers.where((p) => _currentGame!.playerIds.contains(p.id)).toList(),
-      loading: () => <Player>[],
-      error: (_, __) => <Player>[],
+          allPlayers.where((p) => _currentGame!.playerIds.contains(p.id)).toList().cast<Participant>(),
+      loading: () => <Participant>[],
+      error: (_, __) => <Participant>[],
     );
 
-    if (players.isEmpty) {
+    if (participants.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add players first')),
+        const SnackBar(content: Text('Please add participants first')),
       );
       return;
     }
@@ -218,42 +220,45 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     if (!mounted) return;
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
-      builder: (context) => AddBuyInDialog(
-        players: players,
+      builder: (context) => AddExpenseDialog(
+        participants: participants,
         currency: currency,
-        preselectedPlayerId: preselectedPlayerId,
-        quickAmounts: _currentGame!.customBuyInAmounts.isEmpty 
-          ? [10, 50, 100]
-          : _currentGame!.customBuyInAmounts,
+        preselectedParticipantId: preselectedParticipantId,
       ),
     );
 
     if (result != null && mounted) {
       try {
-        print('DEBUG: Adding buy-in - gameId: ${_currentGame!.id}, playerId: ${result['playerId']}, amount: ${result['amount']}');
-        await ref.read(gameProvider.notifier).addBuyIn(
-              gameId: _currentGame!.id,
-              playerId: result['playerId'],
+        print('DEBUG: Adding expense - eventId: ${_currentGame!.id}, paidBy: ${result['paidByParticipantId']}, amount: ${result['amount']}');
+            await ref.read(gameProvider.notifier).addExpense(
+              eventId: _currentGame!.id,
+              paidByParticipantId: result['paidByParticipantId'],
               amount: result['amount'],
-              type: result['type'],
+              description: result['description'],
+              category: result['category'],
+              splitMethod: result['splitMethod'],
+              splitDetails: result['splitDetails'],
+              notes: result['notes'],
             );
-        print('DEBUG: Buy-in added successfully');
+        print('DEBUG: Expense added successfully');
         setState(() {
-          _buyInsRefreshKey++; // Force buy-ins to reload
+          _buyInsRefreshKey++; // Force expenses to reload
         });
+        
+        await _refreshGameData();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Buy-in added successfully')),
+            const SnackBar(content: Text('Expense added successfully')),
           );
         }
       } catch (e, stack) {
-        print('DEBUG ERROR adding buy-in: $e');
+        print('DEBUG ERROR adding expense: $e');
         print('DEBUG Stack: $stack');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error adding buy-in: $e'),
+              content: Text('Error adding expense: $e'),
               backgroundColor: AppTheme.errorColor,
             ),
           );
@@ -308,8 +313,10 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     );
 
     if (newAmounts != null && mounted) {
+      // customBuyInAmounts not stored in Event model - it's a UI-only feature
+      // Store in category tags instead or just use default amounts
       final updatedGame = _currentGame!.copyWith(
-        customBuyInAmounts: newAmounts.isEmpty ? [10, 50, 100] : newAmounts,
+        categoryTags: newAmounts.map((a) => a.toString()).toList(),
         updatedAt: DateTime.now(),
       );
       
@@ -354,7 +361,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Cannot remove ${player.name} - player has buy-ins'),
+          content: Text('Cannot remove ${player.name} - participant has expenses'),
           backgroundColor: AppTheme.errorColor,
         ),
       );
@@ -393,7 +400,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
         ..remove(player.id);
       
       final updatedGame = _currentGame!.copyWith(
-        playerIds: updatedPlayerIds,
+        participantIds: updatedPlayerIds,
         updatedAt: DateTime.now(),
       );
       
@@ -417,9 +424,9 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Buy-In'),
+        title: const Text('Delete Expense'),
         content: Text(
-          'Are you sure you want to delete this buy-in for $playerName?\n\n'
+          'Are you sure you want to delete this expense for $playerName?\n\n'
           'Amount: ${Formatters.formatCurrency(buyIn.amount, AppCurrencies.fromCode(_currentGame!.currency))}\n'
           'Time: ${Formatters.formatDateTime(buyIn.timestamp)}',
         ),
@@ -457,7 +464,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
     if (_currentGame == null) return;
 
     try {
-      final shareService = GameShareService();
+      final shareService = EventShareService();
       
       // Generate share token if not exists
       String shareToken = _currentGame!.shareToken ?? shareService.generateShareToken();
@@ -523,7 +530,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
               TextButton(
                 onPressed: () async {
                   await shareService.copyShareUrl(
-                    gameId: _currentGame!.id,
+                    eventId: _currentGame!.id,
                     shareToken: shareToken,
                   );
                   if (mounted) {
@@ -537,8 +544,8 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
               ElevatedButton(
                 onPressed: () async {
                   Navigator.pop(context);
-                  await shareService.shareGame(
-                    game: _currentGame!,
+                  await shareService.shareEvent(
+                    event: _currentGame!,
                     shareToken: shareToken,
                   );
                 },
@@ -803,7 +810,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                           children: [
                             Icon(Icons.attach_money, size: 20),
                             SizedBox(width: 12),
-                            Text('Buy-In Settings'),
+                            Text('Quick Amount Settings'),
                           ],
                         ),
                       ),
@@ -946,7 +953,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            '${gamePlayers.length} ${gamePlayers.length == 1 ? 'player' : 'players'}',
+                            '${gamePlayers.length} ${gamePlayers.length == 1 ? 'participant' : 'participants'}',
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 11,
@@ -969,12 +976,12 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                     ),
                     child: Row(
                       children: [
-                        // Add Player Button
+                        // Add Participant Button
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: _showAddPlayerDialog,
                             icon: const Icon(Icons.person_add, size: 18),
-                            label: const Text('Add Player'),
+                            label: const Text('Add Participant'),
                             style: OutlinedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 10),
                             ),
@@ -994,15 +1001,15 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // End Game Button
+                        // Settle Expenses Button
                         if (buyIns.isNotEmpty)
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: _endGame,
-                              icon: const Icon(Icons.stop_circle, size: 18, color: Colors.white),
-                              label: const Text('End Game'),
+                              icon: const Icon(Icons.calculate, size: 18, color: Colors.white),
+                              label: const Text('Settle'),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.errorColor,
+                                backgroundColor: Colors.green,
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 10),
                               ),
@@ -1034,7 +1041,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                                 ),
                                 const SizedBox(height: 16),
                                 const Text(
-                                  'No players yet',
+                                  'No participants yet',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
@@ -1042,7 +1049,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Add players to start the game',
+                                  'Add participants to start tracking expenses',
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.grey.shade600,
@@ -1052,7 +1059,7 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                                 ElevatedButton.icon(
                                   onPressed: _showAddPlayerDialog,
                                   icon: const Icon(Icons.person_add),
-                                  label: const Text('Add First Player'),
+                                  label: const Text('Add First Participant'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppTheme.primaryColor,
                                     padding: const EdgeInsets.symmetric(
@@ -1080,10 +1087,10 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
                                   player: player,
                                   totalBuyIn: total,
                                   buyInCount: buyInCount,
-                                  buyIns: playerBuyIns,
+                                  buyIns: playerBuyIns.cast<Expense>(),
                                   currency: currency,
-                                  onAddBuyIn: () => _showAddBuyInDialog(
-                                    preselectedPlayerId: player.id,
+                                  onAddBuyIn: () => _showAddExpenseDialog(
+                                    preselectedParticipantId: player.id,
                                   ),
                                   onEditBuyIn: (buyIn) => _showEditBuyInDialog(buyIn, player.name),
                                   onDeleteBuyIn: (buyIn) => _deleteBuyIn(buyIn, player.name),
@@ -1097,6 +1104,12 @@ class _ActiveGameScreenState extends ConsumerState<ActiveGameScreen> with Automa
 
                 ],
               ),
+              floatingActionButton: gamePlayers.isNotEmpty ? FloatingActionButton.extended(
+                onPressed: () => _showAddExpenseDialog(),
+                icon: const Icon(Icons.add),
+                label: const Text('Add Expense'),
+                backgroundColor: AppTheme.primaryColor,
+              ) : null,
             );
           },
           loading: () => const Scaffold(

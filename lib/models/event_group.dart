@@ -1,11 +1,11 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'game_group.freezed.dart';
-part 'game_group.g.dart';
+part 'event_group.freezed.dart';
+part 'event_group.g.dart';
 
 @freezed
-class GameGroup with _$GameGroup {
-  const factory GameGroup({
+class EventGroup with _$EventGroup {
+  const factory EventGroup({
     required String id,
     required String name,
     required String ownerId,
@@ -14,8 +14,8 @@ class GameGroup with _$GameGroup {
     String? defaultCurrency,
     required DateTime createdAt,
     DateTime? updatedAt,
-  }) = _GameGroup;
+  }) = _EventGroup;
 
-  factory GameGroup.fromJson(Map<String, dynamic> json) =>
-      _$GameGroupFromJson(json);
+  factory EventGroup.fromJson(Map<String, dynamic> json) => 
+      _$EventGroupFromJson(json);
 }

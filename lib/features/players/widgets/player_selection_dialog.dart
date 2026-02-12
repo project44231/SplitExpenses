@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
-import '../../../models/player.dart';
+import '../../../models/compat.dart';
 import '../providers/player_provider.dart';
 import 'add_edit_player_dialog.dart';
+
 
 class PlayerSelectionDialog extends ConsumerStatefulWidget {
   final List<String> excludePlayerIds;
@@ -204,10 +205,10 @@ class _PlayerSelectionDialogState
                                 ],
                               ],
                             ),
-                            subtitle: player.gamesPlayed > 0
+                            subtitle: player.eventsAttended > 0
                                 ? Padding(
                                     padding: const EdgeInsets.only(left: 44),
-                                    child: Text('${player.gamesPlayed} games played'),
+                                    child: Text('${player.eventsAttended} events attended'),
                                   )
                                 : null,
                             trailing: PopupMenuButton<String>(
@@ -460,13 +461,13 @@ class _PlayerSelectionDialogState
 
   Future<void> _deletePlayer(Player player) async {
     // Check if player has been used in any games
-    if (player.gamesPlayed > 0) {
+    if (player.eventsAttended > 0) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Cannot Delete'),
           content: Text(
-            '${player.name} has played ${player.gamesPlayed} game${player.gamesPlayed != 1 ? 's' : ''} and cannot be deleted.\n\n'
+            '${player.name} has attended ${player.eventsAttended} event${player.eventsAttended != 1 ? 's' : ''} and cannot be deleted.\n\n'
             'Players with game history are kept for statistics.',
           ),
           actions: [

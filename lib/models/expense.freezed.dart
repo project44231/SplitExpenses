@@ -21,11 +21,21 @@ Expense _$ExpenseFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Expense {
   String get id => throw _privateConstructorUsedError;
-  String get gameId => throw _privateConstructorUsedError;
+  String get eventId => throw _privateConstructorUsedError;
+  String get paidByParticipantId => throw _privateConstructorUsedError;
   double get amount => throw _privateConstructorUsedError;
-  ExpenseCategory get category => throw _privateConstructorUsedError;
-  String? get note => throw _privateConstructorUsedError;
+  String get description => throw _privateConstructorUsedError;
   DateTime get timestamp => throw _privateConstructorUsedError;
+  ExpenseCategory get category => throw _privateConstructorUsedError;
+  SplitMethod get splitMethod =>
+      throw _privateConstructorUsedError; // For equal: empty or all participants with equal values
+// For percentage: participantId -> percentage (0-100)
+// For exactAmount: participantId -> exact amount
+// For shares: participantId -> number of shares
+  Map<String, double> get splitDetails => throw _privateConstructorUsedError;
+  String? get receipt =>
+      throw _privateConstructorUsedError; // optional photo URL
+  String? get notes => throw _privateConstructorUsedError;
 
   /// Serializes this Expense to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -43,11 +53,16 @@ abstract class $ExpenseCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String gameId,
+      String eventId,
+      String paidByParticipantId,
       double amount,
+      String description,
+      DateTime timestamp,
       ExpenseCategory category,
-      String? note,
-      DateTime timestamp});
+      SplitMethod splitMethod,
+      Map<String, double> splitDetails,
+      String? receipt,
+      String? notes});
 }
 
 /// @nodoc
@@ -66,37 +81,62 @@ class _$ExpenseCopyWithImpl<$Res, $Val extends Expense>
   @override
   $Res call({
     Object? id = null,
-    Object? gameId = null,
+    Object? eventId = null,
+    Object? paidByParticipantId = null,
     Object? amount = null,
-    Object? category = null,
-    Object? note = freezed,
+    Object? description = null,
     Object? timestamp = null,
+    Object? category = null,
+    Object? splitMethod = null,
+    Object? splitDetails = null,
+    Object? receipt = freezed,
+    Object? notes = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      gameId: null == gameId
-          ? _value.gameId
-          : gameId // ignore: cast_nullable_to_non_nullable
+      eventId: null == eventId
+          ? _value.eventId
+          : eventId // ignore: cast_nullable_to_non_nullable
+              as String,
+      paidByParticipantId: null == paidByParticipantId
+          ? _value.paidByParticipantId
+          : paidByParticipantId // ignore: cast_nullable_to_non_nullable
               as String,
       amount: null == amount
           ? _value.amount
           : amount // ignore: cast_nullable_to_non_nullable
               as double,
-      category: null == category
-          ? _value.category
-          : category // ignore: cast_nullable_to_non_nullable
-              as ExpenseCategory,
-      note: freezed == note
-          ? _value.note
-          : note // ignore: cast_nullable_to_non_nullable
-              as String?,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
       timestamp: null == timestamp
           ? _value.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as ExpenseCategory,
+      splitMethod: null == splitMethod
+          ? _value.splitMethod
+          : splitMethod // ignore: cast_nullable_to_non_nullable
+              as SplitMethod,
+      splitDetails: null == splitDetails
+          ? _value.splitDetails
+          : splitDetails // ignore: cast_nullable_to_non_nullable
+              as Map<String, double>,
+      receipt: freezed == receipt
+          ? _value.receipt
+          : receipt // ignore: cast_nullable_to_non_nullable
+              as String?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -110,11 +150,16 @@ abstract class _$$ExpenseImplCopyWith<$Res> implements $ExpenseCopyWith<$Res> {
   @useResult
   $Res call(
       {String id,
-      String gameId,
+      String eventId,
+      String paidByParticipantId,
       double amount,
+      String description,
+      DateTime timestamp,
       ExpenseCategory category,
-      String? note,
-      DateTime timestamp});
+      SplitMethod splitMethod,
+      Map<String, double> splitDetails,
+      String? receipt,
+      String? notes});
 }
 
 /// @nodoc
@@ -131,37 +176,62 @@ class __$$ExpenseImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? id = null,
-    Object? gameId = null,
+    Object? eventId = null,
+    Object? paidByParticipantId = null,
     Object? amount = null,
-    Object? category = null,
-    Object? note = freezed,
+    Object? description = null,
     Object? timestamp = null,
+    Object? category = null,
+    Object? splitMethod = null,
+    Object? splitDetails = null,
+    Object? receipt = freezed,
+    Object? notes = freezed,
   }) {
     return _then(_$ExpenseImpl(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
-      gameId: null == gameId
-          ? _value.gameId
-          : gameId // ignore: cast_nullable_to_non_nullable
+      eventId: null == eventId
+          ? _value.eventId
+          : eventId // ignore: cast_nullable_to_non_nullable
+              as String,
+      paidByParticipantId: null == paidByParticipantId
+          ? _value.paidByParticipantId
+          : paidByParticipantId // ignore: cast_nullable_to_non_nullable
               as String,
       amount: null == amount
           ? _value.amount
           : amount // ignore: cast_nullable_to_non_nullable
               as double,
-      category: null == category
-          ? _value.category
-          : category // ignore: cast_nullable_to_non_nullable
-              as ExpenseCategory,
-      note: freezed == note
-          ? _value.note
-          : note // ignore: cast_nullable_to_non_nullable
-              as String?,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
       timestamp: null == timestamp
           ? _value.timestamp
           : timestamp // ignore: cast_nullable_to_non_nullable
               as DateTime,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as ExpenseCategory,
+      splitMethod: null == splitMethod
+          ? _value.splitMethod
+          : splitMethod // ignore: cast_nullable_to_non_nullable
+              as SplitMethod,
+      splitDetails: null == splitDetails
+          ? _value._splitDetails
+          : splitDetails // ignore: cast_nullable_to_non_nullable
+              as Map<String, double>,
+      receipt: freezed == receipt
+          ? _value.receipt
+          : receipt // ignore: cast_nullable_to_non_nullable
+              as String?,
+      notes: freezed == notes
+          ? _value.notes
+          : notes // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -171,11 +241,17 @@ class __$$ExpenseImplCopyWithImpl<$Res>
 class _$ExpenseImpl implements _Expense {
   const _$ExpenseImpl(
       {required this.id,
-      required this.gameId,
+      required this.eventId,
+      required this.paidByParticipantId,
       required this.amount,
+      required this.description,
+      required this.timestamp,
       required this.category,
-      this.note,
-      required this.timestamp});
+      required this.splitMethod,
+      final Map<String, double> splitDetails = const {},
+      this.receipt,
+      this.notes})
+      : _splitDetails = splitDetails;
 
   factory _$ExpenseImpl.fromJson(Map<String, dynamic> json) =>
       _$$ExpenseImplFromJson(json);
@@ -183,19 +259,45 @@ class _$ExpenseImpl implements _Expense {
   @override
   final String id;
   @override
-  final String gameId;
+  final String eventId;
+  @override
+  final String paidByParticipantId;
   @override
   final double amount;
   @override
-  final ExpenseCategory category;
-  @override
-  final String? note;
+  final String description;
   @override
   final DateTime timestamp;
+  @override
+  final ExpenseCategory category;
+  @override
+  final SplitMethod splitMethod;
+// For equal: empty or all participants with equal values
+// For percentage: participantId -> percentage (0-100)
+// For exactAmount: participantId -> exact amount
+// For shares: participantId -> number of shares
+  final Map<String, double> _splitDetails;
+// For equal: empty or all participants with equal values
+// For percentage: participantId -> percentage (0-100)
+// For exactAmount: participantId -> exact amount
+// For shares: participantId -> number of shares
+  @override
+  @JsonKey()
+  Map<String, double> get splitDetails {
+    if (_splitDetails is EqualUnmodifiableMapView) return _splitDetails;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_splitDetails);
+  }
+
+  @override
+  final String? receipt;
+// optional photo URL
+  @override
+  final String? notes;
 
   @override
   String toString() {
-    return 'Expense(id: $id, gameId: $gameId, amount: $amount, category: $category, note: $note, timestamp: $timestamp)';
+    return 'Expense(id: $id, eventId: $eventId, paidByParticipantId: $paidByParticipantId, amount: $amount, description: $description, timestamp: $timestamp, category: $category, splitMethod: $splitMethod, splitDetails: $splitDetails, receipt: $receipt, notes: $notes)';
   }
 
   @override
@@ -204,19 +306,39 @@ class _$ExpenseImpl implements _Expense {
         (other.runtimeType == runtimeType &&
             other is _$ExpenseImpl &&
             (identical(other.id, id) || other.id == id) &&
-            (identical(other.gameId, gameId) || other.gameId == gameId) &&
+            (identical(other.eventId, eventId) || other.eventId == eventId) &&
+            (identical(other.paidByParticipantId, paidByParticipantId) ||
+                other.paidByParticipantId == paidByParticipantId) &&
             (identical(other.amount, amount) || other.amount == amount) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.timestamp, timestamp) ||
+                other.timestamp == timestamp) &&
             (identical(other.category, category) ||
                 other.category == category) &&
-            (identical(other.note, note) || other.note == note) &&
-            (identical(other.timestamp, timestamp) ||
-                other.timestamp == timestamp));
+            (identical(other.splitMethod, splitMethod) ||
+                other.splitMethod == splitMethod) &&
+            const DeepCollectionEquality()
+                .equals(other._splitDetails, _splitDetails) &&
+            (identical(other.receipt, receipt) || other.receipt == receipt) &&
+            (identical(other.notes, notes) || other.notes == notes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, gameId, amount, category, note, timestamp);
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      eventId,
+      paidByParticipantId,
+      amount,
+      description,
+      timestamp,
+      category,
+      splitMethod,
+      const DeepCollectionEquality().hash(_splitDetails),
+      receipt,
+      notes);
 
   /// Create a copy of Expense
   /// with the given fields replaced by the non-null parameter values.
@@ -237,26 +359,45 @@ class _$ExpenseImpl implements _Expense {
 abstract class _Expense implements Expense {
   const factory _Expense(
       {required final String id,
-      required final String gameId,
+      required final String eventId,
+      required final String paidByParticipantId,
       required final double amount,
+      required final String description,
+      required final DateTime timestamp,
       required final ExpenseCategory category,
-      final String? note,
-      required final DateTime timestamp}) = _$ExpenseImpl;
+      required final SplitMethod splitMethod,
+      final Map<String, double> splitDetails,
+      final String? receipt,
+      final String? notes}) = _$ExpenseImpl;
 
   factory _Expense.fromJson(Map<String, dynamic> json) = _$ExpenseImpl.fromJson;
 
   @override
   String get id;
   @override
-  String get gameId;
+  String get eventId;
+  @override
+  String get paidByParticipantId;
   @override
   double get amount;
   @override
-  ExpenseCategory get category;
-  @override
-  String? get note;
+  String get description;
   @override
   DateTime get timestamp;
+  @override
+  ExpenseCategory get category;
+  @override
+  SplitMethod
+      get splitMethod; // For equal: empty or all participants with equal values
+// For percentage: participantId -> percentage (0-100)
+// For exactAmount: participantId -> exact amount
+// For shares: participantId -> number of shares
+  @override
+  Map<String, double> get splitDetails;
+  @override
+  String? get receipt; // optional photo URL
+  @override
+  String? get notes;
 
   /// Create a copy of Expense
   /// with the given fields replaced by the non-null parameter values.

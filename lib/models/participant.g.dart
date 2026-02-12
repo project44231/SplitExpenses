@@ -1,13 +1,15 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'player.dart';
+part of 'participant.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
+_$ParticipantImpl _$$ParticipantImplFromJson(Map<String, dynamic> json) =>
+    _$ParticipantImpl(
       id: json['id'] as String,
+      userId: json['userId'] as String,
       name: json['name'] as String,
       email: json['email'] as String?,
       phone: json['phone'] as String?,
@@ -18,20 +20,22 @@ _$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
               .toList() ??
           const [],
       isFavorite: json['isFavorite'] as bool? ?? false,
-      gamesPlayed: (json['gamesPlayed'] as num?)?.toInt() ?? 0,
-      lastPlayedAt: json['lastPlayedAt'] == null
+      eventsAttended: (json['eventsAttended'] as num?)?.toInt() ?? 0,
+      lastEventAt: json['lastEventAt'] == null
           ? null
-          : DateTime.parse(json['lastPlayedAt'] as String),
-      totalProfit: (json['totalProfit'] as num?)?.toDouble() ?? 0.0,
+          : DateTime.parse(json['lastEventAt'] as String),
+      totalPaid: (json['totalPaid'] as num?)?.toDouble() ?? 0.0,
+      totalOwed: (json['totalOwed'] as num?)?.toDouble() ?? 0.0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: json['updatedAt'] == null
           ? null
           : DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
+Map<String, dynamic> _$$ParticipantImplToJson(_$ParticipantImpl instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'userId': instance.userId,
       'name': instance.name,
       'email': instance.email,
       'phone': instance.phone,
@@ -39,9 +43,10 @@ Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
       'notes': instance.notes,
       'groupIds': instance.groupIds,
       'isFavorite': instance.isFavorite,
-      'gamesPlayed': instance.gamesPlayed,
-      'lastPlayedAt': instance.lastPlayedAt?.toIso8601String(),
-      'totalProfit': instance.totalProfit,
+      'eventsAttended': instance.eventsAttended,
+      'lastEventAt': instance.lastEventAt?.toIso8601String(),
+      'totalPaid': instance.totalPaid,
+      'totalOwed': instance.totalOwed,
       'createdAt': instance.createdAt.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
     };

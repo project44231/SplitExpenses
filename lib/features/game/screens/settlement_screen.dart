@@ -6,17 +6,15 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../models/buy_in.dart';
-import '../../../models/cash_out.dart';
-import '../../../models/game.dart';
-import '../../../models/player.dart';
 import '../../../models/settlement.dart';
+import '../../../models/compat.dart';
 import '../../../services/settlement_service.dart';
 import '../providers/game_provider.dart';
 import '../../players/providers/player_provider.dart';
-import '../widgets/cash_out_dialog.dart';
+// import '../widgets/cash_out_dialog.dart'; // Removed - not used in expense model
 import '../widgets/settlement_card.dart';
 import '../widgets/settlement_history_dialog.dart';
+
 
 class SettlementScreen extends ConsumerStatefulWidget {
   final String gameId;
@@ -31,11 +29,10 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
   List<SettlementTransaction> _transactions = [];
   Game? _game;
   List<Player> _players = [];
-  List<BuyIn> _buyIns = [];
-  List<CashOut> _cashOuts = [];
-  Map<String, double> _buyInTotals = {};
-  Map<String, double> _cashOutTotals = {};
-  Map<String, double> _profitLoss = {};
+  List<Expense> _expenses = [];
+  Map<String, double> _paidTotals = {};
+  Map<String, double> _owedTotals = {};
+  Map<String, double> _netBalance = {};
   bool _isLoading = true;
   bool _isValidSettlement = true;
   double _mismatchAmount = 0;
@@ -61,12 +58,11 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
       await ref.read(playerProvider.notifier).loadPlayers();
       
       final game = await ref.read(gameProvider.notifier).getGame(widget.gameId);
-      final buyIns = await ref.read(gameProvider.notifier).getBuyIns(widget.gameId);
-      final cashOuts = await ref.read(gameProvider.notifier).getCashOuts(widget.gameId);
+      final expenses = await ref.read(gameProvider.notifier).getExpenses(widget.gameId);
       
       if (game == null) {
         setState(() {
-          _errorMessage = 'Game not found';
+          _errorMessage = 'Event not found';
           _isLoading = false;
         });
         return;
@@ -84,64 +80,68 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
           .where((p) => game.playerIds.contains(p.id))
           .toList();
 
-      // Calculate totals
-      final buyInTotals = <String, double>{};
-      final cashOutTotals = <String, double>{};
+      // Calculate totals for each participant
+      final paidTotals = <String, double>{};
+      final owedTotals = <String, double>{};
       
       for (final playerId in game.playerIds) {
-        buyInTotals[playerId] = 0;
-        cashOutTotals[playerId] = 0;
+        paidTotals[playerId] = 0;
+        owedTotals[playerId] = 0;
       }
 
-      for (final buyIn in buyIns) {
-        buyInTotals[buyIn.playerId] = (buyInTotals[buyIn.playerId] ?? 0) + buyIn.amount;
+      // Calculate how much each person paid and owes
+      for (final expense in expenses) {
+        // The payer's contribution
+        paidTotals[expense.paidByParticipantId] = 
+            (paidTotals[expense.paidByParticipantId] ?? 0) + expense.amount;
+
+        // Split the expense among participants
+        if (expense.splitMethod == SplitMethod.equal) {
+          final sharePerPerson = expense.amount / game.playerIds.length;
+          for (final playerId in game.playerIds) {
+            owedTotals[playerId] = (owedTotals[playerId] ?? 0) + sharePerPerson;
+          }
+        } else {
+          // For other split methods, use splitDetails
+          expense.splitDetails.forEach((participantId, share) {
+            owedTotals[participantId] = (owedTotals[participantId] ?? 0) + share;
+          });
+        }
       }
 
-      for (final cashOut in cashOuts) {
-        cashOutTotals[cashOut.playerId] = (cashOutTotals[cashOut.playerId] ?? 0) + cashOut.amount;
-      }
-
-      // Calculate profit/loss
-      final profitLoss = <String, double>{};
+      // Calculate net balance (positive means others owe them, negative means they owe others)
+      final netBalance = <String, double>{};
       for (final playerId in game.playerIds) {
-        profitLoss[playerId] = (cashOutTotals[playerId] ?? 0) - (buyInTotals[playerId] ?? 0);
+        netBalance[playerId] = (paidTotals[playerId] ?? 0) - (owedTotals[playerId] ?? 0);
       }
 
-      // Calculate settlement if we have cash-outs
+      // Calculate settlement from expenses
       List<SettlementTransaction> transactions = [];
       bool isValid = true;
       double mismatchAmount = 0;
       double mismatchPercent = 0;
       
-      if (cashOuts.isNotEmpty) {
+      if (expenses.isNotEmpty) {
         final service = SettlementService();
-        final totalBuyIn = buyInTotals.values.fold(0.0, (sum, val) => sum + val);
-        final totalCashOut = cashOutTotals.values.fold(0.0, (sum, val) => sum + val);
+        final totalPaid = paidTotals.values.fold(0.0, (sum, val) => sum + val);
+        final totalOwed = owedTotals.values.fold(0.0, (sum, val) => sum + val);
         
-        // Validate settlement
-        isValid = service.validateSettlement(
-          totalBuyIns: totalBuyIn,
-          totalCashOuts: totalCashOut,
-        );
-        
-        if (!isValid) {
-          mismatchAmount = (totalCashOut - totalBuyIn).abs();
-          mismatchPercent = service.calculateMismatchPercent(
-            totalBuyIns: totalBuyIn,
-            totalCashOuts: totalCashOut,
-          );
-        }
+        // Small differences are expected due to rounding
+        mismatchAmount = (totalPaid - totalOwed).abs();
+        mismatchPercent = totalPaid > 0 ? (mismatchAmount / totalPaid) * 100 : 0;
+        isValid = mismatchPercent < 1; // Less than 1% is acceptable
         
         // Calculate transactions
         final playerResults = game.playerIds.map((playerId) {
-          // Count rebuys for this player
-          final rebuys = buyIns.where((b) => b.playerId == playerId && b.type == BuyInType.rebuy).length;
-          
-          return PlayerResult(
-            playerId: playerId,
-            totalBuyIn: buyInTotals[playerId] ?? 0,
-            totalCashOut: cashOutTotals[playerId] ?? 0,
-            rebuyCount: rebuys,
+          final participantExpenses = expenses.where((e) => 
+            e.paidByParticipantId == playerId || 
+            e.splitDetails.containsKey(playerId)
+          ).length;
+          return ParticipantResult(
+            participantId: playerId,
+            totalPaid: paidTotals[playerId] ?? 0,
+            totalOwed: owedTotals[playerId] ?? 0,
+            expenseCount: participantExpenses,
           );
         }).toList();
         
@@ -151,11 +151,10 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
       setState(() {
         _game = game;
         _players = gamePlayers;
-        _buyIns = buyIns;
-        _cashOuts = cashOuts;
-        _buyInTotals = buyInTotals;
-        _cashOutTotals = cashOutTotals;
-        _profitLoss = profitLoss;
+        _expenses = expenses;
+        _paidTotals = paidTotals;
+        _owedTotals = owedTotals;
+        _netBalance = netBalance;
         _transactions = transactions;
         _isValidSettlement = isValid;
         _mismatchAmount = mismatchAmount;
@@ -181,9 +180,9 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
   /// Save settlement transactions to Firestore for tracking
   Future<void> _saveSettlementToFirestore(List<SettlementTransaction> transactions) async {
     try {
-      print('DEBUG: Calling gameProvider.saveSettlement for game ${widget.gameId}');
+      print('DEBUG: Calling gameProvider.saveSettlement for event ${widget.gameId}');
       await ref.read(gameProvider.notifier).saveSettlement(
-        gameId: widget.gameId,
+        eventId: widget.gameId,
         transactions: transactions,
       );
       print('DEBUG: Settlement saved successfully to Firestore! ✓');
@@ -193,81 +192,43 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     }
   }
 
+  // Cash-out dialog not used in expense model
+  // Settlement is automatically calculated from expenses
   Future<void> _showCashOutDialog() async {
-    if (_game == null) return;
-
-    final currency = AppCurrencies.fromCode(_game!.currency);
-
-    // Convert existing cash-outs to map
-    Map<String, double>? existingCashOutsMap;
-    if (_cashOuts.isNotEmpty) {
-      existingCashOutsMap = {};
-      for (final cashOut in _cashOuts) {
-        existingCashOutsMap[cashOut.playerId] = cashOut.amount;
-      }
-    }
-
-    if (!mounted) return;
-    final result = await showDialog<Map<String, double>>(
-      context: context,
-      builder: (context) => CashOutDialog(
-        players: _players,
-        buyInTotals: _buyInTotals,
-        currency: currency,
-        existingCashOuts: existingCashOutsMap,
-      ),
-    );
-
-    if (result != null && mounted) {
-      // If editing, clear existing cash-outs first
-      if (_cashOuts.isNotEmpty) {
-        await ref.read(gameProvider.notifier).clearCashOuts(widget.gameId);
-      }
-
-      // Save new cash-outs
-      for (final entry in result.entries) {
-        if (entry.value > 0) {
-          await ref.read(gameProvider.notifier).addCashOut(
-                gameId: widget.gameId,
-                playerId: entry.key,
-                amount: entry.value,
-              );
-        }
-      }
-
-      // Reload data
-      await _loadGameData();
-    }
+    // No-op - not used in expense tracking model
+    return;
   }
 
   void _shareSettlement() {
     if (_game == null || _transactions.isEmpty) return;
 
     final currency = AppCurrencies.fromCode(_game!.currency);
-    final playerMap = {for (var p in _players) p.id: p.name};
+    final playerMap = <String, String>{for (var p in _players) p.id: p.name};
     
-    final playerResults = _players.map((player) {
-      final rebuys = _buyIns.where((b) => b.playerId == player.id && b.type == BuyInType.rebuy).length;
-      
-      return PlayerResult(
-        playerId: player.id,
-        totalBuyIn: _buyInTotals[player.id] ?? 0,
-        totalCashOut: _cashOutTotals[player.id] ?? 0,
-        rebuyCount: rebuys,
+    final playerResults = _players.map<ParticipantResult>((player) {
+      final participantExpenses = _expenses.where((e) => 
+        e.paidByParticipantId == player.id || 
+        e.splitDetails.containsKey(player.id)
+      ).length;
+      return ParticipantResult(
+        participantId: player.id,
+        totalPaid: _paidTotals[player.id] ?? 0,
+        totalOwed: _owedTotals[player.id] ?? 0,
+        expenseCount: participantExpenses,
       );
     }).toList();
 
     final service = SettlementService();
     final summary = service.generateSettlementText(
-      gameName: 'Poker Game',
-      gameDate: _game!.startTime,
-      playerResults: playerResults,
+      eventName: _game!.name ?? 'Event',
+      eventDate: _game!.startTime,
+      participantResults: playerResults,
       transactions: _transactions,
       currencySymbol: currency.symbol,
-      playerNames: playerMap,
+      participantNames: playerMap,
     );
 
-    Share.share(summary, subject: 'Poker Game Settlement');
+    Share.share(summary, subject: 'Event Settlement - SplitExpenses');
   }
 
   void _showSettlementHistory(Currency currency) {
@@ -281,17 +242,62 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
   }
 
   Future<void> _backToGame() async {
-    // Navigate back to the specific game (to continue or review)
+    // Navigate back to the specific group expense
     if (!mounted) return;
-    context.go('/game/${widget.gameId}');
+    context.go('${AppConstants.groupExpenseDetailRoute}/${widget.gameId}');
   }
 
-  Future<void> _startNewGame() async {
-    // Start a completely new game
-    if (!mounted) return;
-    // Navigate to home which will trigger getOrCreateCurrentGame
-    // Since current game is ended, it will create a new one
-    context.go(AppConstants.homeRoute);
+  Future<void> _markAsSettled() async {
+    if (_game == null) return;
+    
+    // Show confirmation dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Mark as Settled'),
+        content: const Text(
+          'This will move the group expense to history. Are you sure?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+            ),
+            child: const Text('Mark as Settled'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirm != true || !mounted) return;
+    
+    try {
+      // Update game status to settled
+      await ref.read(gameProvider.notifier).endGame(widget.gameId);
+      
+      if (!mounted) return;
+      
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Group expense marked as settled!')),
+      );
+      
+      // Navigate back to group expenses list
+      context.go(AppConstants.groupExpensesRoute);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error settling group: $e'),
+          backgroundColor: AppTheme.errorColor,
+        ),
+      );
+    }
   }
 
   @override
@@ -331,20 +337,24 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     }
 
     final currency = AppCurrencies.fromCode(_game!.currency);
-    final hasCashOuts = _cashOuts.isNotEmpty;
-    final totalBuyIn = _buyInTotals.values.fold(0.0, (sum, val) => sum + val);
-    final totalCashOut = _cashOutTotals.values.fold(0.0, (sum, val) => sum + val);
+    final hasExpenses = _expenses.isNotEmpty;
+    final totalPaid = _paidTotals.values.fold(0.0, (sum, val) => sum + val);
+    final totalOwed = _owedTotals.values.fold(0.0, (sum, val) => sum + val);
 
-    // Sort players by profit/loss
-    final sortedPlayers = List<Player>.from(_players)
-      ..sort((a, b) => (_profitLoss[b.id] ?? 0).compareTo(_profitLoss[a.id] ?? 0));
+    // Sort players by net balance (who is owed the most first)
+    final sortedPlayers = List<Participant>.from(_players)
+      ..sort((a, b) {
+        final aBalance = _netBalance[a.id] ?? 0;
+        final bBalance = _netBalance[b.id] ?? 0;
+        return bBalance.compareTo(aBalance);
+      });
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('Settlement'),
         actions: [
-          if (hasCashOuts) ...[
+          if (hasExpenses) ...[
             IconButton(
               icon: const Icon(Icons.history),
               onPressed: () => _showSettlementHistory(currency),
@@ -390,7 +400,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            Formatters.formatCurrency(totalBuyIn, currency),
+                            Formatters.formatCurrency(totalPaid, currency),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 22,
@@ -399,7 +409,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                           ),
                         ],
                       ),
-                      if (hasCashOuts)
+                      if (hasExpenses)
                         Column(
                           children: [
                             const Text(
@@ -411,7 +421,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              Formatters.formatCurrency(totalCashOut, currency),
+                              Formatters.formatCurrency(totalOwed, currency),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 22,
@@ -503,7 +513,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
               ),
 
             // Validation Warning
-            if (hasCashOuts && !_isValidSettlement)
+            if (hasExpenses && !_isValidSettlement)
               Container(
                 padding: const EdgeInsets.all(16),
                 color: Colors.orange.shade100,
@@ -538,7 +548,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
               ),
 
             // No Cash-Outs State
-            if (!hasCashOuts)
+            if (!hasExpenses)
               Padding(
                 padding: const EdgeInsets.all(32),
                 child: Column(
@@ -566,16 +576,11 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      onPressed: _showCashOutDialog,
-                      icon: const Icon(Icons.add),
-                      label: const Text('Enter Cash-Outs'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 32,
-                          vertical: 16,
-                        ),
+                    Text(
+                      'Add expenses from the group detail screen',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -583,7 +588,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
               ),
 
             // Player Profit/Loss
-            if (hasCashOuts) ...[
+            if (hasExpenses) ...[
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
                 child: Text(
@@ -595,8 +600,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                 ),
               ),
               ...sortedPlayers.map((player) {
-                final profitLoss = _profitLoss[player.id] ?? 0;
-                final isProfit = profitLoss > 0;
+                final netBalance = _netBalance[player.id] ?? 0;
+                final isProfit = netBalance > 0;
                 final color = isProfit ? AppTheme.successColor : AppTheme.errorColor;
 
                 return Card(
@@ -617,8 +622,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                     subtitle: Text(
-                      'Buy-in: ${Formatters.formatCurrency(_buyInTotals[player.id] ?? 0, currency)} • '
-                      'Cash-out: ${Formatters.formatCurrency(_cashOutTotals[player.id] ?? 0, currency)}',
+                      'Paid: ${Formatters.formatCurrency(_paidTotals[player.id] ?? 0, currency)} • '
+                      'Owed: ${Formatters.formatCurrency(_owedTotals[player.id] ?? 0, currency)}',
                       style: const TextStyle(fontSize: 12),
                     ),
                     trailing: Column(
@@ -631,7 +636,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                           size: 20,
                         ),
                         Text(
-                          '${isProfit ? '+' : ''}${Formatters.formatCurrency(profitLoss, currency)}',
+                          '${isProfit ? '+' : ''}${Formatters.formatCurrency(netBalance, currency)}',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -690,8 +695,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
               ),
               const SizedBox(height: 8),
               ..._transactions.map((transaction) {
-                final fromPlayer = _players.firstWhere((p) => p.id == transaction.fromPlayerId);
-                final toPlayer = _players.firstWhere((p) => p.id == transaction.toPlayerId);
+                final fromPlayer = _players.cast<Participant>().firstWhere((p) => p.id == transaction.fromParticipantId);
+                final toPlayer = _players.cast<Participant>().firstWhere((p) => p.id == transaction.toParticipantId);
 
                 return SettlementCard(
                   transaction: transaction,
@@ -710,27 +715,24 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (!hasCashOuts)
+                  if (!hasExpenses)
                     OutlinedButton(
                       onPressed: _backToGame,
                       child: const Text('Back to Game'),
                     ),
-                  if (hasCashOuts) ...[
-                    ElevatedButton(
-                      onPressed: _startNewGame,
+                  if (hasExpenses) ...[
+                    ElevatedButton.icon(
+                      onPressed: _markAsSettled,
+                      icon: const Icon(Icons.check_circle),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primaryColor,
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      child: const Text(
-                        'Start New Game',
+                      label: const Text(
+                        'Mark as Settled',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: _showCashOutDialog,
-                      child: const Text('Edit Cash-Outs'),
                     ),
                   ],
                 ],

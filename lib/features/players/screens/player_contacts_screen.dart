@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/constants/currency.dart';
-import '../../../models/player.dart';
+import '../../../models/compat.dart';
 import '../providers/player_provider.dart';
 import '../widgets/add_edit_player_dialog.dart';
+
 
 class PlayerContactsScreen extends ConsumerStatefulWidget {
   const PlayerContactsScreen({super.key});
@@ -108,7 +109,7 @@ class _PlayerContactsScreenState extends ConsumerState<PlayerContactsScreen> {
         onPressed: () => _showAddPlayerDialog(),
         backgroundColor: AppTheme.primaryColor,
         icon: const Icon(Icons.add),
-        label: const Text('Add Player'),
+        label: const Text('Add Participant'),
       ),
     );
   }
@@ -226,21 +227,16 @@ class _PlayerContactsScreenState extends ConsumerState<PlayerContactsScreen> {
                         ),
                       ),
                     ],
-                    if (player.gamesPlayed > 0) ...[
+                    if (player.eventsAttended > 0) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
                           _buildStatChip(
-                            '${player.gamesPlayed} games',
+                            '${player.eventsAttended} events',
                             Icons.sports_esports,
                             Colors.blue,
                           ),
-                          const SizedBox(width: 8),
-                          _buildStatChip(
-                            '${player.totalProfit >= 0 ? '+' : ''}${Formatters.formatCurrency(player.totalProfit, AppCurrencies.usd)}',
-                            Icons.trending_up,
-                            player.totalProfit >= 0 ? Colors.green : Colors.red,
-                          ),
+                          // Removed totalProfit display - not in new model
                         ],
                       ),
                     ],

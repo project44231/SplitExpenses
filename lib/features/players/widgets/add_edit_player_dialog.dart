@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../models/player.dart';
+import '../../../models/compat.dart';
+
 
 class AddEditPlayerDialog extends StatefulWidget {
   final Player? player;
@@ -63,7 +64,7 @@ class _AddEditPlayerDialogState extends State<AddEditPlayerDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    isEdit ? 'Edit Player' : 'Add Player',
+                    isEdit ? 'Edit Participant' : 'Add Participant',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -219,9 +220,10 @@ class _AddEditPlayerDialogState extends State<AddEditPlayerDialog> {
   void _savePlayer() {
     if (_formKey.currentState!.validate()) {
       final now = DateTime.now();
-      final player = Player(
+      final player = Participant(
         id: widget.player?.id ?? const Uuid().v4(),
         name: _nameController.text.trim(),
+        userId: widget.player?.userId ?? 'guest',
         email: _emailController.text.trim().isEmpty
             ? null
             : _emailController.text.trim(),
@@ -232,9 +234,7 @@ class _AddEditPlayerDialogState extends State<AddEditPlayerDialog> {
             ? null
             : _notesController.text.trim(),
         isFavorite: _isFavorite,
-        gamesPlayed: widget.player?.gamesPlayed ?? 0,
-        lastPlayedAt: widget.player?.lastPlayedAt,
-        totalProfit: widget.player?.totalProfit ?? 0.0,
+        eventsAttended: widget.player?.eventsAttended ?? 0,
         groupIds: widget.player?.groupIds ?? [],
         createdAt: widget.player?.createdAt ?? now,
         updatedAt: now,
