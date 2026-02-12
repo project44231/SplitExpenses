@@ -101,6 +101,12 @@ class LocalStorageService {
     await _expensesBox.put(expense.id, expense.toJson());
   }
 
+  Future<Expense?> getExpense(String expenseId) async {
+    final json = _expensesBox.get(expenseId);
+    if (json == null) return null;
+    return Expense.fromJson(Map<String, dynamic>.from(json));
+  }
+
   Future<List<Expense>> getExpensesByEvent(String eventId) async {
     final expenses = <Expense>[];
     for (var json in _expensesBox.values) {

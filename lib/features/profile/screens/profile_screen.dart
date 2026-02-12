@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/constants/currency.dart';
 import '../../../models/compat.dart';
 import '../../auth/providers/auth_provider.dart';
 import '../../../services/firestore_service.dart';
@@ -19,7 +20,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isLoading = true;
-  HostingStats? _stats;
+  ExpenseStats? _stats;
 
   @override
   void initState() {
@@ -40,11 +41,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         return;
       }
 
-      // Load games directly from Firebase only (not local storage)
+      // Load events directly from Firebase only (not local storage)
       final firestoreService = FirestoreService();
-      final allGames = await firestoreService.getEvents(userId);
+      final allEvents = await firestoreService.getEvents(userId);
 
-      final stats = _calculateHostingStats(allGames);
+      final stats = await _calculateExpenseStats(allEvents, firestoreService);
 
       if (mounted) {
         setState(() {
@@ -59,49 +60,48 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  HostingStats _calculateHostingStats(List<Game> games) {
-    final endedGames = games.where((g) => g.status == EventStatus.settled || g.status == EventStatus.archived).toList();
-    
-    if (endedGames.isEmpty) {
-      return HostingStats(
-        gamesHosted: 0,
-        totalPlayers: 0,
-        totalMoneyMoved: 0.0,
-        avgDuration: Duration.zero,
-        lastGameDate: null,
+  Future<ExpenseStats> _calculateExpenseStats(List<Event> events, FirestoreService firestoreService) async {
+    if (events.isEmpty) {
+      return ExpenseStats(
+        eventsCreated: 0,
+        totalExpenses: 0,
+        totalAmount: 0.0,
+        totalParticipants: 0,
+        lastEventDate: null,
       );
     }
 
-    int totalPlayers = 0;
-    double totalMoneyMoved = 0.0;
-    Duration totalDuration = Duration.zero;
-    DateTime? lastGameDate;
+    int totalExpenses = 0;
+    double totalAmount = 0.0;
+    Set<String> uniqueParticipants = {};
+    DateTime? lastEventDate;
 
-    for (final game in endedGames) {
-      totalPlayers += game.playerIds.length.toInt();
+    for (final event in events) {
+      // Get expenses for this event
+      final expenses = await firestoreService.getExpenses(event.id);
+      totalExpenses += expenses.length;
       
-      // Calculate duration
-      if (game.endTime != null) {
-        totalDuration += game.endTime!.difference(game.startTime);
+      // Sum up all expense amounts
+      for (final expense in expenses) {
+        totalAmount += expense.amount;
         
-        // Track most recent game
-        if (lastGameDate == null || game.endTime!.isAfter(lastGameDate)) {
-          lastGameDate = game.endTime;
-        }
+        // Track unique participants
+        uniqueParticipants.add(expense.paidByParticipantId);
+        uniqueParticipants.addAll(expense.splitDetails.keys);
+      }
+      
+      // Track most recent event
+      if (lastEventDate == null || event.startTime.isAfter(lastEventDate)) {
+        lastEventDate = event.startTime;
       }
     }
 
-    // Average duration
-    final avgDuration = endedGames.isNotEmpty
-        ? Duration(milliseconds: totalDuration.inMilliseconds ~/ endedGames.length)
-        : Duration.zero;
-
-    return HostingStats(
-      gamesHosted: endedGames.length,
-      totalPlayers: totalPlayers,
-      totalMoneyMoved: totalMoneyMoved,
-      avgDuration: avgDuration,
-      lastGameDate: lastGameDate,
+    return ExpenseStats(
+      eventsCreated: events.length,
+      totalExpenses: totalExpenses,
+      totalAmount: totalAmount,
+      totalParticipants: uniqueParticipants.length,
+      lastEventDate: lastEventDate,
     );
   }
 
@@ -139,7 +139,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Access game history, statistics, player contacts, and more by signing in.',
+                  'Access expense history, statistics, participant contacts, and sync your data across devices by signing in.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -190,8 +190,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _buildUserInfoCard(user),
                   const SizedBox(height: 16),
 
-                  // Hosting Statistics Card
-                  _buildHostingStatsCard(),
+                  // Expense Statistics Card
+                  _buildExpenseStatsCard(),
                   const SizedBox(height: 16),
 
                   // App Settings Card
@@ -269,7 +269,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildHostingStatsCard() {
+  Widget _buildExpenseStatsCard() {
     if (_stats == null) {
       return const SizedBox();
     }
@@ -286,7 +286,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 Icon(Icons.bar_chart, color: AppTheme.primaryColor),
                 SizedBox(width: 8),
                 Text(
-                  'Hosting Statistics',
+                  'Expense Statistics',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -297,27 +297,33 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             const SizedBox(height: 16),
 
             _buildStatRow(
-              'Games Hosted',
-              '${_stats!.gamesHosted}',
-              Icons.sports_esports,
+              'Events Created',
+              '${_stats!.eventsCreated}',
+              Icons.event,
             ),
             const Divider(height: 24),
             _buildStatRow(
-              'Total Players',
-              '${_stats!.totalPlayers}',
+              'Total Expenses',
+              '${_stats!.totalExpenses}',
+              Icons.receipt_long,
+            ),
+            const Divider(height: 24),
+            _buildStatRow(
+              'Total Amount Tracked',
+              Formatters.formatCurrency(_stats!.totalAmount, AppCurrencies.usd),
+              Icons.attach_money,
+            ),
+            const Divider(height: 24),
+            _buildStatRow(
+              'Total Participants',
+              '${_stats!.totalParticipants}',
               Icons.people,
             ),
-            const Divider(height: 24),
-            _buildStatRow(
-              'Avg Game Duration',
-              '${_stats!.avgDuration.inHours}h ${_stats!.avgDuration.inMinutes % 60}m',
-              Icons.timer,
-            ),
-            if (_stats!.lastGameDate != null) ...[
+            if (_stats!.lastEventDate != null) ...[
               const Divider(height: 24),
               _buildStatRow(
-                'Last Game',
-                Formatters.formatDate(_stats!.lastGameDate!),
+                'Last Event',
+                Formatters.formatDate(_stats!.lastEventDate!),
                 Icons.calendar_today,
               ),
             ],
@@ -362,8 +368,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         children: [
           ListTile(
             leading: const Icon(Icons.contacts, color: AppTheme.primaryColor),
-            title: const Text('Player Contacts'),
-            subtitle: const Text('Manage your player list'),
+            title: const Text('Participant Contacts'),
+            subtitle: const Text('Manage your participant list'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
               context.push(AppConstants.playerContactsRoute);
@@ -372,10 +378,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.settings, color: AppTheme.primaryColor),
-            title: const Text('Game Settings'),
-            subtitle: const Text('Default currency and buy-in amounts'),
+            title: const Text('App Settings'),
+            subtitle: const Text('Default currency and preferences'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: _showGameSettingsDialog,
+            onTap: _showAppSettingsDialog,
           ),
           const Divider(height: 1),
           ListTile(
@@ -450,13 +456,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  void _showGameSettingsDialog() {
+  void _showAppSettingsDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Game Settings'),
+        title: const Text('App Settings'),
         content: const Text(
-          'Default currency and buy-in amount customization coming soon.',
+          'Default currency and expense preferences customization coming soon.',
         ),
         actions: [
           TextButton(
@@ -498,8 +504,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       ),
       children: [
         const Text(
-          'Track poker buy-ins for home games with ease. '
-          'Manage players, settlements, and view game history all in one place.',
+          'Split expenses with friends and groups effortlessly. '
+          'Track expenses, manage participants, calculate settlements, and view event history all in one place.',
         ),
       ],
     );
@@ -537,18 +543,18 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 }
 
-class HostingStats {
-  final int gamesHosted;
-  final int totalPlayers;
-  final double totalMoneyMoved;
-  final Duration avgDuration;
-  final DateTime? lastGameDate;
+class ExpenseStats {
+  final int eventsCreated;
+  final int totalExpenses;
+  final double totalAmount;
+  final int totalParticipants;
+  final DateTime? lastEventDate;
 
-  HostingStats({
-    required this.gamesHosted,
-    required this.totalPlayers,
-    required this.totalMoneyMoved,
-    required this.avgDuration,
-    required this.lastGameDate,
+  ExpenseStats({
+    required this.eventsCreated,
+    required this.totalExpenses,
+    required this.totalAmount,
+    required this.totalParticipants,
+    required this.lastEventDate,
   });
 }

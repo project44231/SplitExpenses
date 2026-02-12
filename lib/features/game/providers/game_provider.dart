@@ -309,6 +309,43 @@ class EventNotifier extends StateNotifier<AsyncValue<List<Event>>> {
     await updateExpense(expense);
   }
 
+  /// Update an expense with individual parameters
+  Future<void> updateExpenseWithParams({
+    required String expenseId,
+    required String paidByParticipantId,
+    required double amount,
+    required String description,
+    required ExpenseCategory category,
+    required SplitMethod splitMethod,
+    required Map<String, double> splitDetails,
+    String? notes,
+    String? receipt,
+  }) async {
+    try {
+      // Get the existing expense to preserve eventId and timestamp
+      final existingExpense = await _localStorage.getExpense(expenseId);
+      if (existingExpense == null) {
+        throw Exception('Expense not found');
+      }
+
+      // Create updated expense
+      final updatedExpense = existingExpense.copyWith(
+        paidByParticipantId: paidByParticipantId,
+        amount: amount,
+        description: description,
+        category: category,
+        splitMethod: splitMethod,
+        splitDetails: splitDetails,
+        notes: notes,
+        receipt: receipt,
+      );
+
+      await updateExpense(updatedExpense);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   /// Update an expense
   Future<void> updateExpense(Expense expense) async {
     try {

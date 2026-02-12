@@ -2,31 +2,32 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../models/compat.dart';
 
-class AddExpenseDialog extends StatefulWidget {
+class EditExpenseDialog extends StatefulWidget {
+  final Expense expense;
   final List<Participant> participants;
   final Currency currency;
-  final String? preselectedParticipantId;
   final Future<Participant?> Function(String name)? onAddParticipant;
 
-  const AddExpenseDialog({
+  const EditExpenseDialog({
     super.key,
+    required this.expense,
     required this.participants,
     required this.currency,
-    this.preselectedParticipantId,
     this.onAddParticipant,
   });
 
   @override
-  State<AddExpenseDialog> createState() => _AddExpenseDialogState();
+  State<EditExpenseDialog> createState() => _EditExpenseDialogState();
 }
 
-class _AddExpenseDialogState extends State<AddExpenseDialog> {
+class _EditExpenseDialogState extends State<EditExpenseDialog> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
@@ -40,18 +41,55 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   Map<String, double> _calculatedSplits = {};
   List<Participant> _localParticipants = [];
   Set<String> _selectedResponsibleIds = {};
-  File? _selectedReceiptFile;
+  
+  // Receipt handling
+  File? _newReceiptFile;
+  bool _removeExistingReceipt = false;
+  String? _existingReceiptUrl;
 
   @override
   void initState() {
     super.initState();
     _localParticipants = List.from(widget.participants);
-    _selectedParticipantId = widget.preselectedParticipantId ?? 
-        (_localParticipants.isNotEmpty ? _localParticipants.first.id : null);
+    
+    // Pre-populate fields from existing expense
+    _descriptionController.text = widget.expense.description;
+    _amountController.text = widget.expense.amount.toStringAsFixed(2);
+    _selectedParticipantId = widget.expense.paidByParticipantId;
+    _selectedCategory = widget.expense.category;
+    _selectedSplitMethod = widget.expense.splitMethod;
+    _notesController.text = widget.expense.notes ?? '';
+    _existingReceiptUrl = widget.expense.receipt;
+    
+    // Pre-select responsible participants from splitDetails
+    _selectedResponsibleIds = widget.expense.splitDetails.keys.toSet();
     
     // Initialize split controllers for each participant
     for (final participant in _localParticipants) {
       _splitControllers[participant.id] = TextEditingController();
+    }
+    
+    // Pre-populate split values if not equal
+    if (_selectedSplitMethod != SplitMethod.equal) {
+      for (final entry in widget.expense.splitDetails.entries) {
+        final controller = _splitControllers[entry.key];
+        if (controller != null) {
+          switch (_selectedSplitMethod) {
+            case SplitMethod.percentage:
+              controller.text = (entry.value * 100).toStringAsFixed(1);
+              break;
+            case SplitMethod.shares:
+              // Calculate original shares from proportion
+              final totalShares = widget.expense.splitDetails.values.fold(0.0, (a, b) => a + b);
+              final individualShares = entry.value * totalShares;
+              controller.text = individualShares.toStringAsFixed(1);
+              break;
+            case SplitMethod.exactAmount:
+            case SplitMethod.equal:
+              break;
+          }
+        }
+      }
     }
     
     _calculateEqualSplits();
@@ -95,7 +133,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         setState(() {
           _localParticipants.add(participant);
           _splitControllers[participant.id] = TextEditingController();
-          _selectedResponsibleIds.add(participant.id); // Add to responsible by default
+          _selectedResponsibleIds.add(participant.id);
           if (_selectedParticipantId == null) {
             _selectedParticipantId = participant.id;
           }
@@ -124,7 +162,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
       if (image != null) {
         setState(() {
-          _selectedReceiptFile = File(image.path);
+          _newReceiptFile = File(image.path);
+          _removeExistingReceipt = false;
         });
       }
     } catch (e) {
@@ -134,6 +173,13 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         );
       }
     }
+  }
+
+  void _removeReceipt() {
+    setState(() {
+      _newReceiptFile = null;
+      _removeExistingReceipt = true;
+    });
   }
 
   @override
@@ -205,7 +251,6 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         break;
         
       case SplitMethod.exactAmount:
-        // Removed - not needed
         break;
     }
   }
@@ -248,7 +293,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
       'splitMethod': _selectedSplitMethod,
       'splitDetails': _calculatedSplits,
       'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-      'receiptFile': _selectedReceiptFile,
+      'newReceiptFile': _newReceiptFile,
+      'removeReceipt': _removeExistingReceipt,
     });
   }
 
@@ -262,7 +308,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             AppBar(
-              title: const Text('Add Expense'),
+              title: const Text('Edit Expense'),
               automaticallyImplyLeading: false,
               actions: [
                 IconButton(
@@ -279,7 +325,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Description (moved to first)
+                      // Description
                       TextFormField(
                         controller: _descriptionController,
                         decoration: const InputDecoration(
@@ -289,7 +335,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                         ),
                         textCapitalization: TextCapitalization.sentences,
                         maxLength: AppConstants.maxDescriptionLength,
-                        autofocus: true,
+                        autofocus: false,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Please enter expense name';
@@ -299,7 +345,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Amount (moved to second)
+                      // Amount
                       TextFormField(
                         controller: _amountController,
                         decoration: InputDecoration(
@@ -435,10 +481,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                             onPressed: () {
                               setState(() {
                                 if (_selectedResponsibleIds.length == _localParticipants.length) {
-                                  // Deselect all
                                   _selectedResponsibleIds.clear();
                                 } else {
-                                  // Select all
                                   _selectedResponsibleIds = _localParticipants.map((p) => p.id).toSet();
                                 }
                                 _calculateEqualSplits();
@@ -530,7 +574,6 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                               if (value == SplitMethod.equal) {
                                 _calculateEqualSplits();
                               } else {
-                                // Clear controllers only for selected responsible people
                                 for (final id in _selectedResponsibleIds) {
                                   _splitControllers[id]?.clear();
                                 }
@@ -594,7 +637,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
                       const SizedBox(height: 16),
 
-                      // Notes (Optional)
+                      // Notes
                       TextFormField(
                         controller: _notesController,
                         decoration: const InputDecoration(
@@ -610,7 +653,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
 
                       // Receipt Section
                       const Text(
-                        'Receipt (Optional)',
+                        'Receipt',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -649,7 +692,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _saveExpense,
-                      child: const Text('Add Expense'),
+                      child: const Text('Update Expense'),
                     ),
                   ),
                 ],
@@ -658,6 +701,123 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildReceiptSection() {
+    // Show new receipt if selected
+    if (_newReceiptFile != null) {
+      return Container(
+        height: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                _newReceiptFile!,
+                width: double.infinity,
+                height: 120,
+                fit: BoxFit.cover,
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    _newReceiptFile = null;
+                  });
+                },
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Show existing receipt if available and not removed
+    if (_existingReceiptUrl != null && !_removeExistingReceipt) {
+      return Container(
+        height: 120,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey[300]!),
+        ),
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: _existingReceiptUrl!,
+                width: double.infinity,
+                height: 120,
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[200],
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.error),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.delete, color: Colors.white),
+                onPressed: _removeReceipt,
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.red.withValues(alpha: 0.8),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Show upload options
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _pickReceiptImage(ImageSource.camera),
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('Camera'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () => _pickReceiptImage(ImageSource.gallery),
+                icon: const Icon(Icons.photo_library),
+                label: const Text('Gallery'),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Optional: Attach a photo of the receipt',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
     );
   }
 
@@ -739,78 +899,6 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           }).toList(),
         ],
       ),
-    );
-  }
-
-  Widget _buildReceiptSection() {
-    if (_selectedReceiptFile != null) {
-      return Container(
-        height: 120,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey[300]!),
-        ),
-        child: Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.file(
-                _selectedReceiptFile!,
-                width: double.infinity,
-                height: 120,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white),
-                onPressed: () {
-                  setState(() {
-                    _selectedReceiptFile = null;
-                  });
-                },
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black.withValues(alpha: 0.6),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _pickReceiptImage(ImageSource.camera),
-                icon: const Icon(Icons.camera_alt),
-                label: const Text('Camera'),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: () => _pickReceiptImage(ImageSource.gallery),
-                icon: const Icon(Icons.photo_library),
-                label: const Text('Gallery'),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Attach a photo of the receipt',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
     );
   }
 }

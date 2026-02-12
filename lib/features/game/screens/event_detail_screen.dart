@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:uuid/uuid.dart';
 import '../../../core/constants/currency.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../models/compat.dart';
 import '../../../services/event_share_service.dart';
+import '../../../services/storage_service.dart';
 import '../providers/game_provider.dart';
 import '../../players/providers/player_provider.dart';
 import '../widgets/add_expense_dialog.dart';
+import '../widgets/edit_expense_dialog.dart';
+import '../widgets/expense_card.dart';
+import '../../auth/providers/auth_provider.dart';
 
 class EventDetailScreen extends ConsumerStatefulWidget {
   final String eventId;
@@ -23,6 +28,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
   Event? _currentEvent;
   List<Expense> _expenses = [];
   bool _isLoading = true;
+  Set<String> _expandedExpenseIds = {};
 
   @override
   void initState() {
@@ -89,6 +95,20 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
 
     if (result != null && mounted) {
       try {
+        // Upload receipt if provided
+        String? receiptUrl;
+        if (result['receiptFile'] != null) {
+          final authService = ref.read(authServiceProvider);
+          final userId = authService.currentUserId ?? 'guest';
+          final expenseId = const Uuid().v4();
+          
+          receiptUrl = await ref.read(storageServiceProvider).uploadReceiptImage(
+            result['receiptFile'],
+            userId,
+            expenseId,
+          );
+        }
+        
         await ref.read(gameProvider.notifier).addExpense(
           eventId: _currentEvent!.id,
           paidByParticipantId: result['paidByParticipantId'],
@@ -98,6 +118,7 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
           splitMethod: result['splitMethod'],
           splitDetails: result['splitDetails'],
           notes: result['notes'],
+          receipt: receiptUrl,
         );
         
         await _loadEventData();
@@ -112,6 +133,93 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Error adding expense: $e'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _showEditExpenseDialog(Expense expense) async {
+    if (_currentEvent == null) return;
+
+    // Load all players
+    await ref.read(playerProvider.notifier).loadPlayers();
+    final playersAsync = ref.read(playerProvider);
+    
+    final allPlayers = playersAsync.when(
+      data: (players) => players,
+      loading: () => <Participant>[],
+      error: (_, __) => <Participant>[],
+    );
+
+    if (!mounted) return;
+
+    final currency = AppCurrencies.fromCode(_currentEvent!.currency);
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => EditExpenseDialog(
+        expense: expense,
+        participants: allPlayers,
+        currency: currency,
+        onAddParticipant: (name) async {
+          final participant = await ref.read(playerProvider.notifier).addPlayer(name: name);
+          if (participant != null) {
+            await ref.read(playerProvider.notifier).loadPlayers();
+          }
+          return participant;
+        },
+      ),
+    );
+
+    if (result != null && mounted) {
+      try {
+        // Handle receipt upload/deletion
+        String? receiptUrl = expense.receipt;
+        if (result['newReceiptFile'] != null) {
+          // Delete old receipt if exists
+          if (receiptUrl != null) {
+            await ref.read(storageServiceProvider).deleteReceiptImage(receiptUrl);
+          }
+          // Upload new receipt
+          final authService = ref.read(authServiceProvider);
+          final userId = authService.currentUserId ?? 'guest';
+          receiptUrl = await ref.read(storageServiceProvider).uploadReceiptImage(
+            result['newReceiptFile'],
+            userId,
+            expense.id,
+          );
+        } else if (result['removeReceipt'] == true && receiptUrl != null) {
+          await ref.read(storageServiceProvider).deleteReceiptImage(receiptUrl);
+          receiptUrl = null;
+        }
+        
+        // Update expense
+        await ref.read(gameProvider.notifier).updateExpenseWithParams(
+          expenseId: expense.id,
+          paidByParticipantId: result['paidByParticipantId'],
+          amount: result['amount'],
+          description: result['description'],
+          category: result['category'],
+          splitMethod: result['splitMethod'],
+          splitDetails: result['splitDetails'],
+          notes: result['notes'],
+          receipt: receiptUrl,
+        );
+        
+        await _loadEventData();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Expense updated successfully')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error updating expense: $e'),
               backgroundColor: AppTheme.errorColor,
             ),
           );
@@ -148,6 +256,11 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
 
     if (confirmed == true && mounted) {
       try {
+        // Delete receipt from storage if exists
+        if (expense.receipt != null) {
+          await ref.read(storageServiceProvider).deleteReceiptImage(expense.receipt!);
+        }
+        
         await ref.read(gameProvider.notifier).deleteBuyIn(expense.id);
         await _loadEventData();
         
@@ -447,61 +560,23 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                           itemCount: _expenses.length,
                           itemBuilder: (context, index) {
                             final expense = _expenses[index];
-                            final paidBy = allPlayers.firstWhere(
-                              (p) => p.id == expense.paidByParticipantId,
-                              orElse: () => Participant(
-                                id: expense.paidByParticipantId,
-                                userId: 'unknown',
-                                name: 'Unknown',
-                                createdAt: DateTime.now(),
-                              ),
-                            );
                             
-                            // Count people involved
-                            final peopleInvolved = expense.splitDetails.length;
-
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
-                                  child: const Icon(
-                                    Icons.receipt,
-                                    color: AppTheme.primaryColor,
-                                  ),
-                                ),
-                                title: Text(
-                                  expense.description,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const SizedBox(height: 4),
-                                    Text('Paid by ${paidBy.name}'),
-                                    if (peopleInvolved > 0)
-                                      Text('Split among $peopleInvolved ${peopleInvolved == 1 ? 'person' : 'people'}'),
-                                    Text(
-                                      Formatters.formatRelativeTime(expense.timestamp),
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade600,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                trailing: Text(
-                                  Formatters.formatCurrency(expense.amount, currency),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryColor,
-                                  ),
-                                ),
-                                onLongPress: () => _deleteExpense(expense),
-                              ),
+                            return ExpenseCard(
+                              expense: expense,
+                              currency: currency,
+                              allParticipants: allPlayers,
+                              isExpanded: _expandedExpenseIds.contains(expense.id),
+                              onToggleExpand: () {
+                                setState(() {
+                                  if (_expandedExpenseIds.contains(expense.id)) {
+                                    _expandedExpenseIds.remove(expense.id);
+                                  } else {
+                                    _expandedExpenseIds.add(expense.id);
+                                  }
+                                });
+                              },
+                              onEdit: () => _showEditExpenseDialog(expense),
+                              onDelete: () => _deleteExpense(expense),
                             );
                           },
                         );

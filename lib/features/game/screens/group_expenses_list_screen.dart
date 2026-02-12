@@ -25,7 +25,7 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
   @override
   void initState() {
     super.initState();
-    _loadActiveGroups();
+    Future.microtask(() => _loadActiveGroups());
   }
 
   Future<void> _loadActiveGroups() async {
@@ -97,31 +97,85 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.group_work_outlined,
-            size: 120,
-            color: Colors.grey[300],
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'No Active Events',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: Colors.grey[600],
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.receipt_long_outlined,
+              size: 100,
+              color: Colors.grey[300],
             ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Create your first group event to start\ntracking shared expenses with friends',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[500],
+            const SizedBox(height: 24),
+            Text(
+              'Welcome to SplitExpenses!',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: Colors.grey[800],
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Text(
+              'Split bills and track shared expenses effortlessly',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  _buildFeatureRow(Icons.event, 'Create events for trips, dinners, or group activities'),
+                  const SizedBox(height: 12),
+                  _buildFeatureRow(Icons.receipt, 'Add expenses and choose how to split them'),
+                  const SizedBox(height: 12),
+                  _buildFeatureRow(Icons.calculate, 'Auto-calculate who owes what'),
+                  const SizedBox(height: 12),
+                  _buildFeatureRow(Icons.share, 'Share with friends to track together'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            Text(
+              'Tap the button below to create your first event',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.grey[500],
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildFeatureRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: AppTheme.primaryColor,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[700],
+            ),
+          ),
+        ),
+      ],
     );
   }
 

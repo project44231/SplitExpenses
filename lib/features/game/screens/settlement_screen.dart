@@ -258,9 +258,9 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Mark as Settled'),
+        title: const Text('Archive Event'),
         content: const Text(
-          'This will move the group expense to history. Are you sure?',
+          'This will archive the event and move it to history. Are you sure?',
         ),
         actions: [
           TextButton(
@@ -272,7 +272,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
             ),
-            child: const Text('Mark as Settled'),
+            child: const Text('Archive'),
           ),
         ],
       ),
@@ -727,14 +727,14 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                   if (hasExpenses) ...[
                     ElevatedButton.icon(
                       onPressed: _markAsSettled,
-                      icon: const Icon(Icons.check_circle),
+                      icon: const Icon(Icons.archive),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       label: const Text(
-                        'Mark as Settled',
+                        'Archive',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
