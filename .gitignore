@@ -48,10 +48,12 @@ app.*.map.json
 
 # Firebase config files (regenerate per environment)
 # Uncomment these if you want to exclude Firebase config from version control
-# lib/firebase_options.dart
-# ios/Runner/GoogleService-Info.plist
-# ios/firebase_app_id_file.json
-# android/app/google-services.json
+lib/firebase_options.dart
+lib/firebase/firebase_options.dart
+ios/Runner/GoogleService-Info.plist
+ios/firebase_app_id_file.json
+android/app/google-services.json
+web/share/app.js
 
 # Environment variables
 .env
