@@ -54,6 +54,7 @@ ios/Runner/GoogleService-Info.plist
 ios/firebase_app_id_file.json
 android/app/google-services.json
 web/share/app.js
+web/firebase-config.js
 
 # Environment variables & Secrets
 .env

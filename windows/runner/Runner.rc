@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.gametracker" "\0"
-            VALUE "FileDescription", "poker_tracker" "\0"
+            VALUE "CompanyName", "com.splitexpenses" "\0"
+            VALUE "FileDescription", "SplitExpenses" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "poker_tracker" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.gametracker. All rights reserved." "\0"
-            VALUE "OriginalFilename", "poker_tracker.exe" "\0"
-            VALUE "ProductName", "poker_tracker" "\0"
+            VALUE "InternalName", "split_expenses" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.splitexpenses. All rights reserved." "\0"
+            VALUE "OriginalFilename", "split_expenses.exe" "\0"
+            VALUE "ProductName", "SplitExpenses" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

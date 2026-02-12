@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Event - SplitExpenses</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .event-info {
+            padding: 30px;
+        }
+
+        .event-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .event-description {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title svg {
+            margin-right: 8px;
+        }
+
+        .expense-list {
+            list-style: none;
+        }
+
+        .expense-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .expense-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .expense-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .expense-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .expense-details {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            opacity: 0.8;
+            font-size: 13px;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>🧾 SplitExpenses</h1>
+                <p><span class="live-indicator"></span>Live Event View</p>
+            </div>
+
+            <div id="content" class="event-info">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading event details...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Powered by SplitExpenses • <a href="/" style="color: white;">Get the App</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase Config -->
+    <script src="/firebase-config.js"></script>
+    
+    <script>
+        // Parse URL to get eventId and shareToken
+        const urlPath = window.location.pathname;
+        const pathParts = urlPath.split('/').filter(p => p);
+        
+        // Expected format: /share/:eventId/:shareToken
+        const eventId = pathParts[1];
+        const shareToken = pathParts[2];
+
+        if (!eventId || !shareToken) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <h3>Invalid Share Link</h3>
+                    <p>This link appears to be invalid or incomplete.</p>
+                </div>
+            `;
+        } else {
+            loadEventData(eventId, shareToken);
+        }
+
+        async function loadEventData(eventId, shareToken) {
+            try {
+                // Firebase configuration - will be loaded from firebase-config.js
+                if (!firebase.apps.length) {
+                    // Initialize Firebase (config loaded from firebase-config.js)
+                    const firebaseConfig = window.firebaseConfig || {
+                        // Fallback placeholder - should be loaded from firebase-config.js
+                        apiKey: "AIzaSyCAJkc_EpuYHdchL62HxzYI06CQyZCqrhk",
+                        projectId: "splitexpenses-4c618",
+                        authDomain: "splitexpenses-4c618.firebaseapp.com",
+                        storageBucket: "splitexpenses-4c618.firebasestorage.app",
+                    };
+                    firebase.initializeApp(firebaseConfig);
+                }
+
+                const db = firebase.firestore();
+
+                // Fetch event
+                const eventDoc = await db.collection('events').doc(eventId).get();
+                
+                if (!eventDoc.exists) {
+                    throw new Error('Event not found');
+                }
+
+                const event = eventDoc.data();
+                
+                // Verify share token
+                if (event.shareToken !== shareToken) {
+                    throw new Error('Invalid share token');
+                }
+
+                // Fetch expenses for this event
+                const expensesSnapshot = await db.collection('expenses')
+                    .where('eventId', '==', eventId)
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                const expenses = expensesSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                // Fetch participants
+                const participantIds = [...new Set([
+                    ...event.participantIds || [],
+                    ...expenses.map(e => e.paidByParticipantId),
+                    ...expenses.flatMap(e => Object.keys(e.splitDetails || {}))
+                ])];
+
+                const participantDocs = await Promise.all(
+                    participantIds.map(id => db.collection('participants').doc(id).get())
+                );
+                
+                const participants = {};
+                participantDocs.forEach(doc => {
+                    if (doc.exists) {
+                        participants[doc.id] = doc.data();
+                    }
+                });
+
+                // Render the event
+                renderEvent(event, expenses, participants);
+
+                // Set up real-time listener for updates
+                db.collection('expenses')
+                    .where('eventId', '==', eventId)
+                    .onSnapshot(snapshot => {
+                        const updatedExpenses = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        renderEvent(event, updatedExpenses, participants);
+                    });
+
+            } catch (error) {
+                console.error('Error loading event:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <h3>Error Loading Event</h3>
+                        <p>${error.message || 'Unable to load event details. Please check the link and try again.'}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderEvent(event, expenses, participants) {
+            const totalAmount = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+            const currency = getCurrencySymbol(event.currency || 'USD');
+            
+            const html = `
+                <div class="event-title">${event.name || 'Unnamed Event'}</div>
+                ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
+                
+                <div class="summary-stats">
+                    <div class="stat-box">
+                        <div class="stat-value">${expenses.length}</div>
+                        <div class="stat-label">Expenses</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${currency}${totalAmount.toFixed(2)}</div>
+                        <div class="stat-label">Total Amount</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value">${Object.keys(participants).length}</div>
+                        <div class="stat-label">Participants</div>
+                    </div>
+                </div>
+
+                <div class="section-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm0 4c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm6 12H6v-1.4c0-2 4-3.1 6-3.1s6 1.1 6 3.1V19z"/>
+                    </svg>
+                    Expenses
+                </div>
+
+                ${expenses.length === 0 
+                    ? '<div class="empty-state">No expenses yet</div>' 
+                    : `<ul class="expense-list">
+                        ${expenses.map(expense => {
+                            const paidBy = participants[expense.paidByParticipantId];
+                            const paidByName = paidBy?.name || 'Unknown';
+                            const timestamp = new Date(expense.timestamp.seconds * 1000);
+                            const timeAgo = getTimeAgo(timestamp);
+                            const peopleCount = Object.keys(expense.splitDetails || {}).length;
+                            
+                            return `
+                                <li class="expense-item">
+                                    <div class="expense-header">
+                                        <div class="expense-name">${expense.description || 'Unnamed expense'}</div>
+                                        <div class="expense-amount">${currency}${expense.amount.toFixed(2)}</div>
+                                    </div>
+                                    <div class="expense-details">
+                                        <div>💳 Paid by ${paidByName}</div>
+                                        ${peopleCount > 0 ? `<div>👥 Split among ${peopleCount} ${peopleCount === 1 ? 'person' : 'people'}</div>` : ''}
+                                        <div>🕐 ${timeAgo}</div>
+                                        ${expense.notes ? `<div>📝 ${expense.notes}</div>` : ''}
+                                    </div>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>`
+                }
+            `;
+            
+            document.getElementById('content').innerHTML = html;
+        }
+
+        function getCurrencySymbol(code) {
+            const symbols = {
+                'USD': '$',
+                'EUR': '€',
+                'GBP': '£',
+                'INR': '₹',
+                'JPY': '¥',
+                'AUD': 'A$',
+                'CAD': 'C$',
+            };
+            return symbols[code] || code + ' ';
+        }
+
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            const intervals = {
+                year: 31536000,
+                month: 2592000,
+                week: 604800,
+                day: 86400,
+                hour: 3600,
+                minute: 60
+            };
+            
+            for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+                const interval = Math.floor(seconds / secondsInUnit);
+                if (interval >= 1) {
+                    return `${interval} ${unit}${interval === 1 ? '' : 's'} ago`;
+                }
+            }
+            
+            return 'just now';
+        }
+    </script>
+</body>
+</html>

@@ -11,12 +11,14 @@ class AddExpenseDialog extends StatefulWidget {
   final List<Participant> participants;
   final Currency currency;
   final String? preselectedParticipantId;
+  final Future<Participant?> Function(String name)? onAddParticipant;
 
   const AddExpenseDialog({
     super.key,
     required this.participants,
     required this.currency,
     this.preselectedParticipantId,
+    this.onAddParticipant,
   });
 
   @override
@@ -30,23 +32,79 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   final TextEditingController _notesController = TextEditingController();
   
   String? _selectedParticipantId;
-  ExpenseCategory _selectedCategory = ExpenseCategory.other;
   SplitMethod _selectedSplitMethod = SplitMethod.equal;
   Map<String, TextEditingController> _splitControllers = {};
   Map<String, double> _calculatedSplits = {};
+  List<Participant> _localParticipants = [];
+  Set<String> _selectedResponsibleIds = {};
 
   @override
   void initState() {
     super.initState();
+    _localParticipants = List.from(widget.participants);
     _selectedParticipantId = widget.preselectedParticipantId ?? 
-        (widget.participants.isNotEmpty ? widget.participants.first.id : null);
+        (_localParticipants.isNotEmpty ? _localParticipants.first.id : null);
     
     // Initialize split controllers for each participant
-    for (final participant in widget.participants) {
+    for (final participant in _localParticipants) {
       _splitControllers[participant.id] = TextEditingController();
     }
     
     _calculateEqualSplits();
+  }
+
+  Future<void> _showAddParticipantDialog() async {
+    if (widget.onAddParticipant == null) return;
+
+    final nameController = TextEditingController();
+    
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add New Person'),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(
+            labelText: 'Name',
+            hintText: 'Enter person name',
+          ),
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && nameController.text.isNotEmpty) {
+      final participant = await widget.onAddParticipant!(nameController.text);
+      
+        if (participant != null && mounted) {
+          setState(() {
+            _localParticipants.add(participant);
+            _splitControllers[participant.id] = TextEditingController();
+            _selectedResponsibleIds.add(participant.id); // Add to responsible by default
+            if (_selectedParticipantId == null) {
+              _selectedParticipantId = participant.id;
+            }
+            _calculateEqualSplits();
+          });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${participant.name} added')),
+        );
+      }
+    }
+    
+    nameController.dispose();
   }
 
   @override
@@ -64,14 +122,14 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     if (_selectedSplitMethod != SplitMethod.equal) return;
     
     final amount = double.tryParse(_amountController.text) ?? 0;
-    if (amount <= 0 || widget.participants.isEmpty) {
+    if (amount <= 0 || _selectedResponsibleIds.isEmpty) {
       _calculatedSplits = {};
       return;
     }
     
-    final share = 1.0 / widget.participants.length;
+    final share = 1.0 / _selectedResponsibleIds.length;
     _calculatedSplits = {
-      for (final p in widget.participants) p.id: share
+      for (final id in _selectedResponsibleIds) id: share
     };
   }
 
@@ -91,9 +149,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         double totalPercentage = 0;
         final percentages = <String, double>{};
         
-        for (final participant in widget.participants) {
-          final value = double.tryParse(_splitControllers[participant.id]!.text) ?? 0;
-          percentages[participant.id] = value;
+        for (final id in _selectedResponsibleIds) {
+          final value = double.tryParse(_splitControllers[id]!.text) ?? 0;
+          percentages[id] = value;
           totalPercentage += value;
         }
         
@@ -102,28 +160,13 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
         }
         break;
         
-      case SplitMethod.exactAmount:
-        double totalAmount = 0;
-        final amounts = <String, double>{};
-        
-        for (final participant in widget.participants) {
-          final value = double.tryParse(_splitControllers[participant.id]!.text) ?? 0;
-          amounts[participant.id] = value;
-          totalAmount += value;
-        }
-        
-        if ((totalAmount - amount).abs() < 0.01) {
-          _calculatedSplits = amounts.map((id, amt) => MapEntry(id, amt / amount));
-        }
-        break;
-        
       case SplitMethod.shares:
         double totalShares = 0;
         final shares = <String, double>{};
         
-        for (final participant in widget.participants) {
-          final value = double.tryParse(_splitControllers[participant.id]!.text) ?? 0;
-          shares[participant.id] = value;
+        for (final id in _selectedResponsibleIds) {
+          final value = double.tryParse(_splitControllers[id]!.text) ?? 0;
+          shares[id] = value;
           totalShares += value;
         }
         
@@ -131,34 +174,11 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
           _calculatedSplits = shares.map((id, share) => MapEntry(id, share / totalShares));
         }
         break;
+        
+      case SplitMethod.exactAmount:
+        // Removed - not needed
+        break;
     }
-  }
-
-  IconData _getCategoryIcon(ExpenseCategory category) {
-    switch (category) {
-      case ExpenseCategory.food:
-        return Icons.restaurant;
-      case ExpenseCategory.transport:
-        return Icons.directions_car;
-      case ExpenseCategory.accommodation:
-        return Icons.hotel;
-      case ExpenseCategory.utilities:
-        return Icons.bolt;
-      case ExpenseCategory.groceries:
-        return Icons.shopping_cart;
-      case ExpenseCategory.entertainment:
-        return Icons.movie;
-      case ExpenseCategory.shopping:
-        return Icons.shopping_bag;
-      case ExpenseCategory.healthcare:
-        return Icons.local_hospital;
-      case ExpenseCategory.other:
-        return Icons.more_horiz;
-    }
-  }
-
-  String _getCategoryLabel(ExpenseCategory category) {
-    return category.name[0].toUpperCase() + category.name.substring(1);
   }
 
   void _saveExpense() {
@@ -169,6 +189,13 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     if (_selectedParticipantId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select who paid')),
+      );
+      return;
+    }
+
+    if (_selectedResponsibleIds.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one person responsible')),
       );
       return;
     }
@@ -188,7 +215,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
       'amount': amount,
       'description': _descriptionController.text.trim(),
       'paidByParticipantId': _selectedParticipantId!,
-      'category': _selectedCategory,
+      'category': ExpenseCategory.other, // Default category
       'splitMethod': _selectedSplitMethod,
       'splitDetails': _calculatedSplits,
       'notes': _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
@@ -222,7 +249,27 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Amount
+                      // Description (moved to first)
+                      TextFormField(
+                        controller: _descriptionController,
+                        decoration: const InputDecoration(
+                          labelText: 'Expense Name',
+                          border: OutlineInputBorder(),
+                          hintText: 'e.g., Dinner at restaurant',
+                        ),
+                        textCapitalization: TextCapitalization.sentences,
+                        maxLength: AppConstants.maxDescriptionLength,
+                        autofocus: true,
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter expense name';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Amount (moved to second)
                       TextFormField(
                         controller: _amountController,
                         decoration: InputDecoration(
@@ -256,91 +303,146 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Description
-                      TextFormField(
-                        controller: _descriptionController,
-                        decoration: const InputDecoration(
-                          labelText: 'Description',
-                          border: OutlineInputBorder(),
-                          hintText: 'e.g., Dinner at restaurant',
-                        ),
-                        textCapitalization: TextCapitalization.sentences,
-                        maxLength: AppConstants.maxDescriptionLength,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Please enter description';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Category
-                      DropdownButtonFormField<ExpenseCategory>(
-                        value: _selectedCategory,
-                        decoration: const InputDecoration(
-                          labelText: 'Category',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: ExpenseCategory.values.map((category) {
-                          return DropdownMenuItem(
-                            value: category,
-                            child: Row(
-                              children: [
-                                Icon(_getCategoryIcon(category), size: 20),
-                                const SizedBox(width: 12),
-                                Text(_getCategoryLabel(category)),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedCategory = value);
-                          }
-                        },
-                      ),
-                      const SizedBox(height: 16),
-
                       // Paid By
-                      DropdownButtonFormField<String>(
-                        value: _selectedParticipantId,
-                        decoration: const InputDecoration(
-                          labelText: 'Paid By',
-                          border: OutlineInputBorder(),
-                        ),
-                        items: widget.participants.map((participant) {
-                          return DropdownMenuItem(
-                            value: participant.id,
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 12,
-                                  backgroundColor: AppTheme.primaryColor,
-                                  child: Text(
-                                    participant.name[0].toUpperCase(),
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.white,
-                                    ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: _selectedParticipantId,
+                              decoration: const InputDecoration(
+                                labelText: 'Paid By',
+                                border: OutlineInputBorder(),
+                              ),
+                              items: _localParticipants.map((participant) {
+                                return DropdownMenuItem(
+                                  value: participant.id,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 12,
+                                        backgroundColor: AppTheme.primaryColor,
+                                        child: Text(
+                                          participant.name[0].toUpperCase(),
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Text(
+                                        participant.name,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Text(participant.name),
-                              ],
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                setState(() => _selectedParticipantId = value);
+                              },
+                              validator: (value) {
+                                if (value == null) {
+                                  return 'Please select who paid';
+                                }
+                                return null;
+                              },
                             ),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() => _selectedParticipantId = value);
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Please select who paid';
-                          }
-                          return null;
-                        },
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            onPressed: _showAddParticipantDialog,
+                            icon: const Icon(Icons.person_add),
+                            tooltip: 'Add New Person',
+                            style: IconButton.styleFrom(
+                              backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+                            ),
+                          ),
+                        ],
                       ),
+                      const SizedBox(height: 16),
+
+                      // People Responsible
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'People Responsible',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                if (_selectedResponsibleIds.length == _localParticipants.length) {
+                                  // Deselect all
+                                  _selectedResponsibleIds.clear();
+                                } else {
+                                  // Select all
+                                  _selectedResponsibleIds = _localParticipants.map((p) => p.id).toSet();
+                                }
+                                _calculateEqualSplits();
+                              });
+                            },
+                            icon: Icon(
+                              _selectedResponsibleIds.length == _localParticipants.length
+                                  ? Icons.clear_all
+                                  : Icons.done_all,
+                              size: 18,
+                            ),
+                            label: Text(
+                              _selectedResponsibleIds.length == _localParticipants.length
+                                  ? 'Clear All'
+                                  : 'Add All',
+                            ),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: _localParticipants.map((participant) {
+                            final isSelected = _selectedResponsibleIds.contains(participant.id);
+                            return CheckboxListTile(
+                              value: isSelected,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == true) {
+                                    _selectedResponsibleIds.add(participant.id);
+                                  } else {
+                                    _selectedResponsibleIds.remove(participant.id);
+                                  }
+                                  _calculateEqualSplits();
+                                });
+                              },
+                              title: Text(participant.name),
+                              dense: true,
+                              controlAffinity: ListTileControlAffinity.leading,
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      if (_selectedResponsibleIds.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Please select at least one person',
+                            style: TextStyle(
+                              color: AppTheme.errorColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 16),
 
                       // Split Method
@@ -360,10 +462,6 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                             child: Text('By Percentage'),
                           ),
                           DropdownMenuItem(
-                            value: SplitMethod.exactAmount,
-                            child: Text('Exact Amounts'),
-                          ),
-                          DropdownMenuItem(
                             value: SplitMethod.shares,
                             child: Text('Custom Shares'),
                           ),
@@ -375,8 +473,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                               if (value == SplitMethod.equal) {
                                 _calculateEqualSplits();
                               } else {
-                                for (final controller in _splitControllers.values) {
-                                  controller.clear();
+                                // Clear controllers only for selected responsible people
+                                for (final id in _selectedResponsibleIds) {
+                                  _splitControllers[id]?.clear();
                                 }
                                 _calculatedSplits = {};
                               }
@@ -396,7 +495,8 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        ...widget.participants.map((participant) {
+                        ..._selectedResponsibleIds.map((id) {
+                          final participant = _localParticipants.firstWhere((p) => p.id == id);
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 12),
                             child: Row(
@@ -410,7 +510,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
                                 ),
                                 Expanded(
                                   child: TextFormField(
-                                    controller: _splitControllers[participant.id],
+                                    controller: _splitControllers[id],
                                     decoration: InputDecoration(
                                       border: const OutlineInputBorder(),
                                       suffixText: _getSplitSuffix(),
@@ -494,12 +594,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   String _getSplitInstructions() {
     switch (_selectedSplitMethod) {
       case SplitMethod.percentage:
-        return 'Enter percentage for each participant (total must equal 100%):';
-      case SplitMethod.exactAmount:
-        final amount = double.tryParse(_amountController.text) ?? 0;
-        return 'Enter exact amount for each participant (total must equal ${widget.currency.symbol}${amount.toStringAsFixed(2)}):';
+        return 'Enter percentage for each person (total must equal 100%):';
       case SplitMethod.shares:
-        return 'Enter share ratio for each participant (e.g., 1, 2, 3):';
+        return 'Enter share ratio for each person (e.g., 1, 2, 3):';
       default:
         return '';
     }
@@ -509,8 +606,6 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
     switch (_selectedSplitMethod) {
       case SplitMethod.percentage:
         return '%';
-      case SplitMethod.exactAmount:
-        return widget.currency.symbol;
       case SplitMethod.shares:
         return 'shares';
       default:
@@ -545,8 +640,9 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
             ],
           ),
           const SizedBox(height: 8),
-          ...widget.participants.map((participant) {
-            final share = _calculatedSplits[participant.id] ?? 0;
+          ..._selectedResponsibleIds.map((id) {
+            final participant = _localParticipants.firstWhere((p) => p.id == id);
+            final share = _calculatedSplits[id] ?? 0;
             final participantAmount = amount * share;
             
             if (participantAmount == 0) return const SizedBox.shrink();

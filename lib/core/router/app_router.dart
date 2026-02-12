@@ -5,8 +5,7 @@ import '../../features/auth/screens/splash_screen.dart';
 import '../../features/game/screens/home_screen.dart';
 import '../../features/game/screens/group_expenses_list_screen.dart';
 import '../../features/game/screens/new_game_screen.dart';
-import '../../features/game/screens/active_game_screen.dart';
-// import '../../features/game/screens/cash_out_screen.dart'; // Cash-outs not used in expense model
+import '../../features/game/screens/event_detail_screen.dart';
 import '../../features/game/screens/settlement_screen.dart';
 import '../../features/history/screens/history_screen.dart';
 import '../../features/history/screens/game_details_screen.dart';
@@ -55,7 +54,7 @@ class AppRouter {
         path: '${AppConstants.groupExpenseDetailRoute}/:groupId',
         builder: (context, state) {
           final groupId = state.pathParameters['groupId']!;
-          return ActiveGameScreen(gameId: groupId);
+          return EventDetailScreen(eventId: groupId);
         },
       ),
 
@@ -65,23 +64,33 @@ class AppRouter {
         builder: (context, state) => const NewGameScreen(),
       ),
       GoRoute(
-        path: '/event',
-        builder: (context, state) => const ActiveGameScreen(gameId: 'current'),
+        path: '/event/:eventId',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId'] ?? 'current';
+          return EventDetailScreen(eventId: eventId);
+        },
       ),
       GoRoute(
         path: '${AppConstants.activeEventRoute}/:eventId',
         builder: (context, state) {
           final eventId = state.pathParameters['eventId']!;
-          return ActiveGameScreen(gameId: eventId);
+          return EventDetailScreen(eventId: eventId);
         },
       ),
 
-      // Settlement
+      // Settlement / Cash-out
       GoRoute(
         path: '${AppConstants.settlementRoute}/:eventId',
         builder: (context, state) {
           final eventId = state.pathParameters['eventId']!;
-          return SettlementScreen(gameId: eventId); // Will update parameter name
+          return SettlementScreen(gameId: eventId);
+        },
+      ),
+      GoRoute(
+        path: '/cash-out/:eventId',
+        builder: (context, state) {
+          final eventId = state.pathParameters['eventId']!;
+          return SettlementScreen(gameId: eventId);
         },
       ),
 

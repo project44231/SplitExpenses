@@ -5,7 +5,7 @@ import '../models/event.dart';
 
 class EventShareService {
   // Firebase Hosting domain - update this with your actual domain
-  static const String _webAppDomain = 'splitexpenses.web.app';
+  static const String _webAppDomain = 'splitexpenses-4c618.web.app';
 
   /// Generate a unique share token for an event
   String generateShareToken() {

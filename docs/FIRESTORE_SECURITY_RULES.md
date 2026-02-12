@@ -62,9 +62,9 @@ Games with a `shareToken` field are publicly readable for live game sharing. The
 ```
 
 **Player Contacts:**
-Authenticated users have persistent player contacts. Guest players are temporary and can be cleaned up.
+Authenticated users have persistent participant contacts. Guest participants are temporary and can be cleaned up.
 
-### Buy-ins, Cash-outs, Settlements
+### Expenses and Settlements
 
 ```
 ✅ Read: Owner OR Guest OR Game has shareToken
@@ -73,7 +73,7 @@ Authenticated users have persistent player contacts. Guest players are temporary
 ```
 
 **Live Sharing:**
-Buy-ins are readable if the associated game has a valid shareToken, enabling real-time updates in the web viewer.
+Expenses are readable if the associated event has a valid shareToken, enabling real-time updates in the web viewer.
 
 ### Expenses & Reconciliations
 
@@ -168,11 +168,11 @@ firebase emulators:exec --only firestore "npm test"
 **Solution:**
 - Regenerate share link from the app
 - Verify `shareToken` field exists in Firestore
-- Check URL format: `/share/{gameId}/{shareToken}`
+- Check URL format: `/share/{eventId}/{shareToken}`
 
-### Issue: Can't update buy-ins
+### Issue: Can't update expenses
 
-**Cause:** User doesn't own the game.
+**Cause:** User doesn't own the event.
 
 **Solution:**
 - Verify game ownership
@@ -182,10 +182,9 @@ firebase emulators:exec --only firestore "npm test"
 
 The `firestore.indexes.json` file defines composite indexes for:
 
-- **Games:** Query by `userId`, `status`, and `endTime` (for history)
-- **Buy-ins:** Query by `gameId` and `timestamp` (for ordering)
-- **Cash-outs:** Query by `gameId` and `timestamp` (for ordering)
-- **Settlements:** Query by `gameId` and `timestamp` (for ordering)
+- **Events:** Query by `userId`, `status`, and `endTime` (for history)
+- **Expenses:** Query by `eventId` and `timestamp` (for ordering)
+- **Settlements:** Query by `eventId` and `timestamp` (for ordering)
 - **Players:** Query by `userId`, `isFavorite`, and `name` (for contacts)
 
 These indexes are automatically created when deployed.
@@ -202,8 +201,8 @@ These indexes are automatically created when deployed.
 ### Guest Data Cleanup
 
 Consider implementing a Cloud Function to:
-- Delete games older than 7 days (guest only)
-- Remove orphaned players and buy-ins
+- Delete events older than 7 days (guest only)
+- Remove orphaned participants and expenses
 - Archive instead of delete if needed
 
 ## Resources

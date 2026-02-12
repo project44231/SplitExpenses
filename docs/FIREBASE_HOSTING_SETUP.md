@@ -30,7 +30,7 @@ firebase deploy --only hosting
 
 This command will:
 - Upload the `web/share/` folder contents to Firebase Hosting
-- Make the web viewer accessible at: `https://splitpot.web.app/share/{gameId}/{shareToken}`
+- Make the web viewer accessible at: `https://splitexpenses-4c618.web.app/share/{eventId}/{shareToken}`
 
 ### 3. Test the Deployment
 
@@ -45,7 +45,7 @@ After deployment, you can test by:
 ### URL Structure
 
 ```
-https://splitpot.web.app/share/{gameId}/{shareToken}
+https://splitexpenses-4c618.web.app/share/{eventId}/{shareToken}
 ```
 
 - `gameId`: The unique ID of the active game
@@ -54,8 +54,8 @@ https://splitpot.web.app/share/{gameId}/{shareToken}
 ### Real-Time Updates
 
 The web viewer uses Firestore's `onSnapshot` to listen for:
-- Game data changes (duration, player count)
-- Buy-in updates (new buy-ins, modifications)
+- Event data changes (duration, participant count)
+- Expense updates (new expenses, modifications)
 
 Updates appear instantly on all connected devices.
 

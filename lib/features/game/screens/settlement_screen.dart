@@ -95,23 +95,26 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         paidTotals[expense.paidByParticipantId] = 
             (paidTotals[expense.paidByParticipantId] ?? 0) + expense.amount;
 
-        // Split the expense among participants
-        if (expense.splitMethod == SplitMethod.equal) {
-          final sharePerPerson = expense.amount / game.playerIds.length;
-          for (final playerId in game.playerIds) {
-            owedTotals[playerId] = (owedTotals[playerId] ?? 0) + sharePerPerson;
+        // Use splitDetails to determine who owes what
+        // splitDetails contains the share for each participant (as a fraction of total amount)
+        expense.splitDetails.forEach((participantId, shareRatio) {
+          final amountOwed = expense.amount * shareRatio;
+          owedTotals[participantId] = (owedTotals[participantId] ?? 0) + amountOwed;
+          
+          // Ensure this participant is in the game's player list
+          if (!paidTotals.containsKey(participantId)) {
+            paidTotals[participantId] = 0;
           }
-        } else {
-          // For other split methods, use splitDetails
-          expense.splitDetails.forEach((participantId, share) {
-            owedTotals[participantId] = (owedTotals[participantId] ?? 0) + share;
-          });
-        }
+          if (!owedTotals.containsKey(participantId)) {
+            owedTotals[participantId] = 0;
+          }
+        });
       }
 
-      // Calculate net balance (positive means others owe them, negative means they owe others)
+      // Calculate net balance for all participants (positive means others owe them, negative means they owe others)
       final netBalance = <String, double>{};
-      for (final playerId in game.playerIds) {
+      final allParticipantIds = {...paidTotals.keys, ...owedTotals.keys};
+      for (final playerId in allParticipantIds) {
         netBalance[playerId] = (paidTotals[playerId] ?? 0) - (owedTotals[playerId] ?? 0);
       }
 
@@ -131,8 +134,9 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         mismatchPercent = totalPaid > 0 ? (mismatchAmount / totalPaid) * 100 : 0;
         isValid = mismatchPercent < 1; // Less than 1% is acceptable
         
-        // Calculate transactions
-        final playerResults = game.playerIds.map((playerId) {
+        // Calculate transactions for all participants
+        final allParticipantIds = {...paidTotals.keys, ...owedTotals.keys};
+        final playerResults = allParticipantIds.map((playerId) {
           final participantExpenses = expenses.where((e) => 
             e.paidByParticipantId == playerId || 
             e.splitDetails.containsKey(playerId)

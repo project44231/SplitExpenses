@@ -1,14 +1,5 @@
 {
   "projects": {
     "default": "splitexpenses-4c618"
-  },
-  "targets": {
-    "gametracker-a834b": {
-      "hosting": {
-        "splitpot": [
-          "splitpot"
-        ]
-      }
-    }
   }
 }

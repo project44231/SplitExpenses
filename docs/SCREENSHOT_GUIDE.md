@@ -38,13 +38,13 @@ This guide helps you capture high-quality screenshots for Google Play Store and 
 
 Capture screenshots showing the app's core journey:
 
-### 1. Active Game Screen - Players List
-**Shows:** Player cards with buy-ins, quick add buttons, timer
-**Key Elements:** Active game in progress with 3-4 players
+### 1. Active Event Screen - Expenses List
+**Shows:** Expense cards with amounts, who paid, participants
+**Key Elements:** Active event in progress with multiple expenses
 
-### 2. Add Buy-In Dialog
-**Shows:** Quick amount buttons, custom input, player selection
-**Key Elements:** User-friendly buy-in entry
+### 2. Add Expense Dialog
+**Shows:** Expense name, amount input, participant selection
+**Key Elements:** User-friendly expense entry
 
 ### 3. Expanded Player Card
 **Shows:** Detailed transaction history with timestamps
@@ -62,9 +62,9 @@ Capture screenshots showing the app's core journey:
 **Shows:** Player performance stats
 **Key Elements:** Comprehensive statistics
 
-### 7. Settings / Quick Amounts
-**Shows:** Customizable quick buy-in amounts
-**Key Elements:** Flexibility for different stakes
+### 7. Settlement Screen
+**Shows:** Optimized settlement transactions
+**Key Elements:** Clear who owes whom and how much
 
 ### 8. Live Sharing (Optional)
 **Shows:** Web viewer or share functionality
@@ -202,12 +202,12 @@ flutter run
 Before capturing, set up realistic demo data:
 
 ```dart
-// Create sample game with players
-- Game name: "Friday Night Poker"
+// Create sample event with expenses
+- Event name: "Weekend Trip"
 - Date: Recent date
-- Players: 4-5 players with realistic names
-- Buy-ins: Various amounts ($20, $50, $100)
-- Timer: Show active game (e.g., "1h 23m")
+- Participants: 4-5 people with realistic names
+- Expenses: Various amounts ($20, $50, $100)
+- Description: Dinner, gas, hotel, etc.
 ```
 
 ### 2. Use Light Mode
@@ -318,9 +318,9 @@ sips -z 2340 1080 input.png --out output.png
 
 Include:
 - App icon
-- App name: "Game buy-in tracker"
-- Tagline: "Track. Settle. Play." or "Home Poker Games Made Simple"
-- Background: Use app colors (#1E88E5 blue)
+- App name: "SplitExpenses"
+- Tagline: "Track. Split. Settle." or "Group Expenses Made Simple"
+- Background: Use app colors (primary color)
 - Optional: Screenshots or mockups
 
 ### Design Tools
@@ -338,8 +338,8 @@ Include:
 ### Template Idea
 
 ```
-[App Icon]  POKER TRACKER
-            Track. Settle. Play.
+[App Icon]  SPLITEXPENSES
+            Track. Split. Settle.
             
 [Screenshot preview on right side]
 ```

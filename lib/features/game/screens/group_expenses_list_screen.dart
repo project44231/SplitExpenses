@@ -73,7 +73,7 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Group Expenses'),
+        title: const Text('Events'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -90,7 +90,7 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createNewGroup,
         icon: const Icon(Icons.add),
-        label: const Text('Create Group'),
+        label: const Text('Create Event'),
       ),
     );
   }
@@ -107,26 +107,17 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
           ),
           const SizedBox(height: 24),
           Text(
-            'No Active Group Expenses',
+            'No Active Events',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               color: Colors.grey[600],
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            'Create your first group expense to start\ntracking shared expenses with friends',
+            'Create your first group event to start\ntracking shared expenses with friends',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.grey[500],
-            ),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton.icon(
-            onPressed: _createNewGroup,
-            icon: const Icon(Icons.add),
-            label: const Text('Create Group Expense'),
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             ),
           ),
         ],

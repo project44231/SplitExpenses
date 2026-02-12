@@ -42,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.group_work),
-            label: 'Group Expenses',
+            label: 'Events',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.feedback),
