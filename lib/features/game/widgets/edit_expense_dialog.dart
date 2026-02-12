@@ -148,7 +148,10 @@ class _EditExpenseDialogState extends State<EditExpenseDialog> {
       }
     }
     
-    nameController.dispose();
+    // Dispose after a small delay to ensure dialog is fully closed
+    Future.delayed(const Duration(milliseconds: 100), () {
+      nameController.dispose();
+    });
   }
 
   Future<void> _pickReceiptImage(ImageSource source) async {
@@ -477,31 +480,46 @@ class _EditExpenseDialogState extends State<EditExpenseDialog> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          TextButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                if (_selectedResponsibleIds.length == _localParticipants.length) {
-                                  _selectedResponsibleIds.clear();
-                                } else {
-                                  _selectedResponsibleIds = _localParticipants.map((p) => p.id).toSet();
-                                }
-                                _calculateEqualSplits();
-                              });
-                            },
-                            icon: Icon(
-                              _selectedResponsibleIds.length == _localParticipants.length
-                                  ? Icons.clear_all
-                                  : Icons.done_all,
-                              size: 18,
-                            ),
-                            label: Text(
-                              _selectedResponsibleIds.length == _localParticipants.length
-                                  ? 'Clear All'
-                                  : 'Add All',
-                            ),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextButton.icon(
+                                onPressed: () {
+                                  setState(() {
+                                    if (_selectedResponsibleIds.length == _localParticipants.length) {
+                                      _selectedResponsibleIds.clear();
+                                    } else {
+                                      _selectedResponsibleIds = _localParticipants.map((p) => p.id).toSet();
+                                    }
+                                    _calculateEqualSplits();
+                                  });
+                                },
+                                icon: Icon(
+                                  _selectedResponsibleIds.length == _localParticipants.length
+                                      ? Icons.clear_all
+                                      : Icons.done_all,
+                                  size: 18,
+                                ),
+                                label: Text(
+                                  _selectedResponsibleIds.length == _localParticipants.length
+                                      ? 'Clear All'
+                                      : 'Add All',
+                                ),
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: _showAddParticipantDialog,
+                                icon: const Icon(Icons.person_add),
+                                tooltip: 'Add New Person',
+                                iconSize: 20,
+                                style: IconButton.styleFrom(
+                                  backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
+                                  padding: const EdgeInsets.all(8),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

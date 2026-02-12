@@ -174,10 +174,14 @@ class _ContactFeedbackScreenState extends ConsumerState<ContactFeedbackScreen> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Icon(
-              Icons.feedback_outlined,
-              size: 48,
-              color: AppTheme.primaryColor,
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'images/app_icon.png',
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+              ),
             ),
             const SizedBox(height: 12),
             Text(

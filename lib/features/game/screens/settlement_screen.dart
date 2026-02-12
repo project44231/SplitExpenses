@@ -76,15 +76,26 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         error: (_, __) => <Player>[],
       );
 
+      // Collect all participant IDs from expenses
+      final allParticipantIdsFromExpenses = <String>{};
+      for (final expense in expenses) {
+        allParticipantIdsFromExpenses.add(expense.paidByParticipantId);
+        allParticipantIdsFromExpenses.addAll(expense.splitDetails.keys);
+      }
+      
+      // Also include game players
+      allParticipantIdsFromExpenses.addAll(game.playerIds);
+      
+      // Get players that are actually involved in expenses
       final gamePlayers = allPlayers
-          .where((p) => game.playerIds.contains(p.id))
+          .where((p) => allParticipantIdsFromExpenses.contains(p.id))
           .toList();
 
       // Calculate totals for each participant
       final paidTotals = <String, double>{};
       final owedTotals = <String, double>{};
       
-      for (final playerId in game.playerIds) {
+      for (final playerId in allParticipantIdsFromExpenses) {
         paidTotals[playerId] = 0;
         owedTotals[playerId] = 0;
       }
@@ -100,14 +111,6 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         expense.splitDetails.forEach((participantId, shareRatio) {
           final amountOwed = expense.amount * shareRatio;
           owedTotals[participantId] = (owedTotals[participantId] ?? 0) + amountOwed;
-          
-          // Ensure this participant is in the game's player list
-          if (!paidTotals.containsKey(participantId)) {
-            paidTotals[participantId] = 0;
-          }
-          if (!owedTotals.containsKey(participantId)) {
-            owedTotals[participantId] = 0;
-          }
         });
       }
 
@@ -699,8 +702,24 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
               ),
               const SizedBox(height: 8),
               ..._transactions.map((transaction) {
-                final fromPlayer = _players.cast<Participant>().firstWhere((p) => p.id == transaction.fromParticipantId);
-                final toPlayer = _players.cast<Participant>().firstWhere((p) => p.id == transaction.toParticipantId);
+                final fromPlayer = _players.cast<Participant>().firstWhere(
+                  (p) => p.id == transaction.fromParticipantId,
+                  orElse: () => Participant(
+                    id: transaction.fromParticipantId,
+                    userId: 'unknown',
+                    name: 'Unknown',
+                    createdAt: DateTime.now(),
+                  ),
+                );
+                final toPlayer = _players.cast<Participant>().firstWhere(
+                  (p) => p.id == transaction.toParticipantId,
+                  orElse: () => Participant(
+                    id: transaction.toParticipantId,
+                    userId: 'unknown',
+                    name: 'Unknown',
+                    createdAt: DateTime.now(),
+                  ),
+                );
 
                 return SettlementCard(
                   transaction: transaction,

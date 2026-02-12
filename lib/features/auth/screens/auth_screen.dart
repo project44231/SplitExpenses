@@ -45,7 +45,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Track poker games, manage buy-ins,\nand settle up instantly',
+                'Split expenses with friends,\ntrack shared bills, and settle up easily',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: AppTheme.lightTextSecondary,
@@ -175,7 +175,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
               // Info text
               Text(
-                'Guest mode: Limited features.\nSign in to sync across devices and share results.',
+                'Guest mode: Limited features.\nSign in to sync across devices and share events with friends.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: AppTheme.lightTextSecondary,

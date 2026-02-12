@@ -86,11 +86,17 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 20),
-                // Event Icon
-                Icon(
-                  Icons.event,
-                  size: 80,
-                  color: AppTheme.primaryColor.withValues(alpha: 0.8),
+                // App Icon
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      'images/app_icon.png',
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 

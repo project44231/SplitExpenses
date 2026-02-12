@@ -97,7 +97,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'Track Your Game',
+              'Split Expenses with Friends',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Colors.white70,
                   ),

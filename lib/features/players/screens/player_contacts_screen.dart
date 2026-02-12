@@ -123,7 +123,7 @@ class _PlayerContactsScreenState extends ConsumerState<PlayerContactsScreen> {
             Icon(Icons.search_off, size: 80, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
-              'No players found',
+              'No participants found',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey.shade600,
@@ -140,7 +140,15 @@ class _PlayerContactsScreenState extends ConsumerState<PlayerContactsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people, size: 80, color: Colors.grey.shade400),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                'images/app_icon.png',
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+              ),
+            ),
             const SizedBox(height: 24),
             Text(
               'No Contacts Yet',
@@ -152,7 +160,7 @@ class _PlayerContactsScreenState extends ConsumerState<PlayerContactsScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Add players to quickly include them in future games',
+              'Add participants to quickly include them in future events',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,

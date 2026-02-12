@@ -43,7 +43,7 @@ class ExpenseCard extends StatelessWidget {
     final peopleInvolved = expense.splitDetails.length;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: onToggleExpand,
         borderRadius: BorderRadius.circular(12),
@@ -55,18 +55,19 @@ class ExpenseCard extends StatelessWidget {
             children: [
               // Main content (always visible)
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 child: Row(
                   children: [
                     // Category icon
                     CircleAvatar(
+                      radius: 18,
                       backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.1),
                       child: Text(
                         expense.category.icon,
-                        style: const TextStyle(fontSize: 20),
+                        style: const TextStyle(fontSize: 18),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 10),
                     // Description and details
                     Expanded(
                       child: Column(
@@ -76,35 +77,54 @@ class ExpenseCard extends StatelessWidget {
                             expense.description,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 15,
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           Text(
                             'Paid by ${paidBy.name}',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 13,
                               color: Colors.grey[700],
                             ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          if (peopleInvolved > 0)
-                            Text(
-                              'Split among $peopleInvolved ${peopleInvolved == 1 ? 'person' : 'people'}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey[600],
+                          Row(
+                            children: [
+                              if (peopleInvolved > 0)
+                                Flexible(
+                                  child: Text(
+                                    '$peopleInvolved ${peopleInvolved == 1 ? 'person' : 'people'}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey[600],
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              if (peopleInvolved > 0) 
+                                Text(' • ', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                              Flexible(
+                                child: Text(
+                                  Formatters.formatRelativeTime(expense.timestamp),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[600],
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
-                            ),
-                          Text(
-                            Formatters.formatRelativeTime(expense.timestamp),
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
+                            ],
                           ),
                         ],
                       ),
                     ),
+                    const SizedBox(width: 8),
                     // Amount
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -112,18 +132,17 @@ class ExpenseCard extends StatelessWidget {
                         Text(
                           Formatters.formatCurrency(expense.amount, currency),
                           style: const TextStyle(
-                            fontSize: 16,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primaryColor,
                           ),
                         ),
-                        const SizedBox(height: 4),
                         Icon(
                           isExpanded
                               ? Icons.keyboard_arrow_up
                               : Icons.keyboard_arrow_down,
                           color: Colors.grey[600],
-                          size: 20,
+                          size: 18,
                         ),
                       ],
                     ),
@@ -135,60 +154,60 @@ class ExpenseCard extends StatelessWidget {
               if (isExpanded) ...[
                 const Divider(height: 1),
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Category
                       _buildSectionHeader('Category'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Row(
                         children: [
                           Text(
                             expense.category.icon,
-                            style: const TextStyle(fontSize: 20),
+                            style: const TextStyle(fontSize: 18),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: 6),
                           Text(
                             expense.category.displayName,
-                            style: const TextStyle(fontSize: 14),
+                            style: const TextStyle(fontSize: 13),
                           ),
                         ],
                       ),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       
                       // Split breakdown
                       _buildSectionHeader('Split Details'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildSplitBreakdown(),
                       
                       // Notes
                       if (expense.notes != null && expense.notes!.isNotEmpty) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         _buildSectionHeader('Notes'),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 6),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             color: Colors.grey[100],
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
                             expense.notes!,
-                            style: const TextStyle(fontSize: 14),
+                            style: const TextStyle(fontSize: 13),
                           ),
                         ),
                       ],
                       
                       // Receipt
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       _buildSectionHeader('Receipt'),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       _buildReceiptSection(context),
                       
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 12),
                       
                       // Action buttons
                       Row(
@@ -196,23 +215,23 @@ class ExpenseCard extends StatelessWidget {
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: onEdit,
-                              icon: const Icon(Icons.edit, size: 18),
-                              label: const Text('Edit'),
+                              icon: const Icon(Icons.edit, size: 16),
+                              label: const Text('Edit', style: TextStyle(fontSize: 13)),
                               style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: OutlinedButton.icon(
                               onPressed: onDelete,
-                              icon: const Icon(Icons.delete, size: 18),
-                              label: const Text('Delete'),
+                              icon: const Icon(Icons.delete, size: 16),
+                              label: const Text('Delete', style: TextStyle(fontSize: 13)),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppTheme.errorColor,
                                 side: BorderSide(color: AppTheme.errorColor),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
                               ),
                             ),
                           ),
@@ -233,7 +252,7 @@ class ExpenseCard extends StatelessWidget {
     return Text(
       title,
       style: const TextStyle(
-        fontSize: 12,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
         color: Colors.grey,
         letterSpacing: 0.5,
@@ -246,7 +265,7 @@ class ExpenseCard extends StatelessWidget {
       return Text(
         'No split details available',
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 12,
           color: Colors.grey[600],
           fontStyle: FontStyle.italic,
         ),
@@ -256,7 +275,7 @@ class ExpenseCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Column(
         children: expense.splitDetails.entries.map((entry) {
@@ -284,7 +303,7 @@ class ExpenseCard extends StatelessWidget {
           }
 
           return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
@@ -300,42 +319,45 @@ class ExpenseCard extends StatelessWidget {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        radius: 14,
+                        radius: 12,
                         backgroundColor: AppTheme.primaryColor,
                         child: Text(
                           participant.name[0].toUpperCase(),
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 11,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           participant.name,
-                          style: const TextStyle(fontSize: 14),
+                          style: const TextStyle(fontSize: 13),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(width: 8),
                 Row(
                   children: [
                     Text(
                       Formatters.formatCurrency(amount, currency),
                       style: const TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (shareText.isNotEmpty) ...[
-                      const SizedBox(width: 4),
+                      const SizedBox(width: 3),
                       Text(
                         shareText,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11,
                           color: Colors.grey[600],
                         ),
                       ),
@@ -354,20 +376,20 @@ class ExpenseCard extends StatelessWidget {
     if (expense.receipt == null || expense.receipt!.isEmpty) {
       return Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
           border: Border.all(color: Colors.grey[300]!),
         ),
         child: Row(
           children: [
-            Icon(Icons.receipt_outlined, color: Colors.grey[400], size: 24),
-            const SizedBox(width: 12),
+            Icon(Icons.receipt_outlined, color: Colors.grey[400], size: 20),
+            const SizedBox(width: 8),
             Text(
               'No receipt attached',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 12,
                 color: Colors.grey[600],
                 fontStyle: FontStyle.italic,
               ),
@@ -380,24 +402,24 @@ class ExpenseCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => _showFullScreenImage(context, expense.receipt!),
       child: Container(
-        height: 100,
+        height: 80,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
           border: Border.all(color: Colors.grey[300]!),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
           child: Stack(
             children: [
               CachedNetworkImage(
                 imageUrl: expense.receipt!,
                 width: double.infinity,
-                height: 100,
+                height: 80,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
                   color: Colors.grey[200],
                   child: const Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
                 ),
                 errorWidget: (context, url, error) => Container(
@@ -405,35 +427,35 @@ class ExpenseCard extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.error_outline, color: Colors.grey[400]),
-                      const SizedBox(height: 4),
+                      Icon(Icons.error_outline, color: Colors.grey[400], size: 20),
+                      const SizedBox(height: 2),
                       Text(
                         'Failed to load',
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(fontSize: 11, color: Colors.grey[600]),
                       ),
                     ],
                   ),
                 ),
               ),
               Positioned(
-                bottom: 8,
-                right: 8,
+                bottom: 6,
+                right: 6,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(3),
                   ),
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.zoom_in, color: Colors.white, size: 16),
-                      SizedBox(width: 4),
+                      Icon(Icons.zoom_in, color: Colors.white, size: 14),
+                      SizedBox(width: 3),
                       Text(
                         'Tap to view',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 12,
+                          fontSize: 11,
                         ),
                       ),
                     ],

@@ -207,10 +207,14 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.history,
-                  size: 80,
-                  color: Colors.grey.shade400,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    'images/app_icon.png',
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -223,7 +227,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Track your game history, player statistics, and leaderboards by signing in with your Google account.',
+                  'Track your event history, expense statistics, and participant records by signing in with your Google account.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -347,14 +351,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.history,
-                size: 80,
-                color: Colors.grey.shade400,
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'images/app_icon.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
               ),
               const SizedBox(height: 24),
               Text(
-                'No Game History Yet',
+                'No Event History Yet',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -363,7 +371,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
               ),
               const SizedBox(height: 12),
               Text(
-                'Your completed games will appear here',
+                'Your archived events will appear here',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey.shade600,
@@ -389,7 +397,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
               ),
               const SizedBox(height: 24),
               Text(
-                'No Games Match Filters',
+                'No Events Match Filters',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
