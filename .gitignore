@@ -55,19 +55,115 @@ ios/firebase_app_id_file.json
 android/app/google-services.json
 web/share/app.js
 
-# Environment variables
+# Environment variables & Secrets
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
+.env.staging
+.env.test
+*.env
+secrets.yaml
+secrets.json
+config.local.*
+
+# API Keys & Sensitive Data
+**/api_keys.*
+**/api-keys.*
+**/apikeys.*
+**/*_token*
+**/*_secret*
+**/*_key*
+**/credentials.*
+
+# Cloud Provider Credentials
+.aws/
+**/.aws/
+**/gcloud/
+**/service-account*.json
+**/serviceAccount*.json
+**/*-firebase-adminsdk-*.json
+.azure/
+
+# SSH Keys & Certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+
+# OAuth & Authentication
+**/oauth_token*
+**/access_token*
+**/refresh_token*
 
 # Local database files
 *.hive
 *.hive.lock
 *.g.dart.track
 *.freezed.dart.track
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
 
 # Android signing
 /android/key.properties
 /android/app/upload-keystore.jks
 *.jks
 *.keystore
+
+# Test coverage
+coverage/
+*.lcov
+test/.test_coverage.dart
+.test_coverage.dart
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+*.config.dart
+*.drift.dart
+**/generated/
+**/l10n/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Backup files
+*.bak
+*.backup
+*.tmp
+*.temp
+*~
+
+# Logs & debugging
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+flutter_*.log
