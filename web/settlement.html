@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settlement Summary - SplitExpenses</title>
+    <link rel="icon" type="image/png" href="icons/Icon-192.png">
     <style>
         * {
             margin: 0;
@@ -13,7 +14,7 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #42A5F5 0%, #1976D2 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -23,116 +24,175 @@
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(30, 136, 229, 0.3);
             overflow: hidden;
         }
         
         .header {
-            background: linear-gradient(135deg, #00897B 0%, #00695C 100%);
+            background: linear-gradient(135deg, #1E88E5 0%, #1976D2 100%);
             color: white;
-            padding: 30px;
+            padding: 40px 30px;
             text-align: center;
+            position: relative;
+        }
+        
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120"><path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="rgba(255,255,255,0.1)"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            opacity: 0.5;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 1;
         }
         
         .header h1 {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .header .date {
-            opacity: 0.9;
-            font-size: 14px;
+            opacity: 0.95;
+            font-size: 15px;
+            font-weight: 500;
         }
         
         .content {
-            padding: 30px;
+            padding: 35px 30px;
         }
         
         .section {
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
         
         .section-title {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
-            color: #333;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #00897B;
+            color: #212121;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #1E88E5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .participant-card {
-            background: #f5f5f5;
+            background: #FAFAFA;
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-left: 4px solid #00897B;
+            padding: 18px;
+            margin-bottom: 14px;
+            border-left: 4px solid #1E88E5;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .participant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 136, 229, 0.15);
         }
         
         .participant-card.positive {
-            border-left-color: #4CAF50;
-            background: #f1f8f4;
+            border-left-color: #42A5F5;
+            background: linear-gradient(135deg, #E3F2FD 0%, #FAFAFA 100%);
         }
         
         .participant-card.negative {
-            border-left-color: #f44336;
-            background: #fef1f0;
+            border-left-color: #E53935;
+            background: linear-gradient(135deg, #FFEBEE 0%, #FAFAFA 100%);
         }
         
         .participant-name {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            color: #212121;
         }
         
         .participant-details {
             display: flex;
             justify-content: space-between;
             font-size: 14px;
-            color: #666;
+            color: #757575;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .participant-details span {
+            background: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 500;
         }
         
         .balance {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            margin-top: 8px;
+            margin-top: 10px;
         }
         
         .balance.positive {
-            color: #4CAF50;
+            color: #42A5F5;
         }
         
         .balance.negative {
-            color: #f44336;
+            color: #E53935;
         }
         
         .transaction-card {
             background: white;
-            border: 2px solid #e0e0e0;
+            border: 2px solid #E3F2FD;
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            padding: 18px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            transition: all 0.2s;
+        }
+        
+        .transaction-card:hover {
+            border-color: #1E88E5;
+            box-shadow: 0 4px 12px rgba(30, 136, 229, 0.15);
+            transform: translateX(4px);
         }
         
         .transaction-arrow {
-            font-size: 24px;
-            color: #00897B;
+            font-size: 28px;
+            color: #1E88E5;
             margin: 0 16px;
+            font-weight: bold;
         }
         
         .transaction-amount {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 700;
-            color: #00897B;
+            color: #1E88E5;
+            background: #E3F2FD;
+            padding: 8px 16px;
+            border-radius: 8px;
         }
         
         .person-name {
             font-size: 16px;
             font-weight: 600;
+            color: #212121;
         }
         
         .loading {
@@ -141,8 +201,8 @@
         }
         
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #00897B;
+            border: 4px solid #E3F2FD;
+            border-top: 4px solid #1E88E5;
             border-radius: 50%;
             width: 50px;
             height: 50px;
@@ -158,25 +218,45 @@
         .error {
             text-align: center;
             padding: 60px 20px;
-            color: #f44336;
+            color: #E53935;
+        }
+        
+        .error h2 {
+            font-size: 48px;
+            margin-bottom: 16px;
         }
         
         .footer {
             text-align: center;
-            padding: 20px;
-            color: #999;
+            padding: 24px;
+            color: #757575;
             font-size: 14px;
-            border-top: 1px solid #e0e0e0;
+            border-top: 1px solid #E0E0E0;
+            background: #FAFAFA;
         }
         
         .footer a {
-            color: #00897B;
+            color: #1E88E5;
             text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        
+        .footer a:hover {
+            color: #1976D2;
         }
         
         @media (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+            
             .container {
                 border-radius: 0;
+            }
+            
+            .header {
+                padding: 30px 20px;
             }
             
             .header h1 {
@@ -184,7 +264,23 @@
             }
             
             .content {
-                padding: 20px;
+                padding: 24px 16px;
+            }
+            
+            .transaction-card {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            
+            .transaction-arrow {
+                transform: rotate(90deg);
+                margin: 8px 0;
+            }
+            
+            .participant-details {
+                flex-direction: column;
+                gap: 6px;
             }
         }
     </style>
@@ -192,8 +288,11 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 id="eventName">Settlement Summary</h1>
-            <div class="date" id="eventDate">Loading...</div>
+            <div class="header-content">
+                <img src="icons/Icon-192.png" alt="SplitExpenses" class="app-icon">
+                <h1 id="eventName">Settlement Summary</h1>
+                <div class="date" id="eventDate">Loading...</div>
+            </div>
         </div>
         
         <div class="content" id="content">

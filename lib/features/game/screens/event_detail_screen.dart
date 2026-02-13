@@ -75,17 +75,33 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
       error: (_, __) => <Participant>[],
     );
 
+    // Filter to only show participants that are part of this event
+    final eventParticipants = allPlayers
+        .where((player) => _currentEvent!.participantIds.contains(player.id))
+        .toList();
+
     if (!mounted) return;
 
     final currency = AppCurrencies.fromCode(_currentEvent!.currency);
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => AddExpenseDialog(
-        participants: allPlayers,
+        participants: eventParticipants,
         currency: currency,
         onAddParticipant: (name) async {
           final participant = await ref.read(playerProvider.notifier).addPlayer(name: name);
           if (participant != null) {
+            // Add the new participant to the event's participant list
+            if (!_currentEvent!.participantIds.contains(participant.id)) {
+              final updatedEvent = _currentEvent!.copyWith(
+                participantIds: [..._currentEvent!.participantIds, participant.id],
+                updatedAt: DateTime.now(),
+              );
+              await ref.read(gameProvider.notifier).updateEvent(updatedEvent);
+              setState(() {
+                _currentEvent = updatedEvent;
+              });
+            }
             await ref.read(playerProvider.notifier).loadPlayers();
           }
           return participant;
@@ -154,6 +170,11 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
       error: (_, __) => <Participant>[],
     );
 
+    // Filter to only show participants that are part of this event
+    final eventParticipants = allPlayers
+        .where((player) => _currentEvent!.participantIds.contains(player.id))
+        .toList();
+
     if (!mounted) return;
 
     final currency = AppCurrencies.fromCode(_currentEvent!.currency);
@@ -161,11 +182,22 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
       context: context,
       builder: (context) => EditExpenseDialog(
         expense: expense,
-        participants: allPlayers,
+        participants: eventParticipants,
         currency: currency,
         onAddParticipant: (name) async {
           final participant = await ref.read(playerProvider.notifier).addPlayer(name: name);
           if (participant != null) {
+            // Add the new participant to the event's participant list
+            if (!_currentEvent!.participantIds.contains(participant.id)) {
+              final updatedEvent = _currentEvent!.copyWith(
+                participantIds: [..._currentEvent!.participantIds, participant.id],
+                updatedAt: DateTime.now(),
+              );
+              await ref.read(gameProvider.notifier).updateEvent(updatedEvent);
+              setState(() {
+                _currentEvent = updatedEvent;
+              });
+            }
             await ref.read(playerProvider.notifier).loadPlayers();
           }
           return participant;
@@ -400,8 +432,25 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'images/app_icon.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(),
+            ],
+          ),
+        ),
       );
     }
 
@@ -410,12 +459,32 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.pop(),
+            onPressed: () => context.go('/home'),
             tooltip: 'Back to Events',
           ),
           title: const Text('Error'),
         ),
-        body: const Center(child: Text('Failed to load event')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'images/app_icon.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Failed to load event',
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -427,10 +496,30 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/home'),
           tooltip: 'Back to Events',
         ),
-        title: Text(_currentEvent!.name ?? 'Event'),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.asset(
+                'images/app_icon.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                _currentEvent!.name ?? 'Event',
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settlement Summary - SplitExpenses</title>
+    <link rel="icon" type="image/png" href="icons/Icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #42A5F5 0%, #1976D2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(30, 136, 229, 0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1E88E5 0%, #1976D2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .header .date {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #1E88E5;
+        }
+        
+        .participant-card {
+            background: #f5f5f5;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #1E88E5;
+        }
+        
+        .participant-card.positive {
+            border-left-color: #4CAF50;
+            background: #f1f8f4;
+        }
+        
+        .participant-card.negative {
+            border-left-color: #f44336;
+            background: #fef1f0;
+        }
+        
+        .participant-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .participant-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .balance {
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+        
+        .balance.positive {
+            color: #4CAF50;
+        }
+        
+        .balance.negative {
+            color: #f44336;
+        }
+        
+        .transaction-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .transaction-arrow {
+            font-size: 24px;
+            color: #1E88E5;
+            margin: 0 16px;
+        }
+        
+        .transaction-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1E88E5;
+        }
+        
+        .person-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1E88E5;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            text-align: center;
+            padding: 60px 20px;
+            color: #f44336;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 14px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .footer a {
+            color: #1E88E5;
+            text-decoration: none;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="icons/Icon-192.png" alt="SplitExpenses" class="app-icon">
+            <h1 id="eventName">Settlement Summary</h1>
+            <div class="date" id="eventDate">Loading...</div>
+        </div>
+        
+        <div class="content" id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading settlement details...</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            Powered by <a href="#">SplitExpenses</a>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2a7UhFqOaR1dow4AvVDjvMT9b7T5_6lk",
+            authDomain: "splitexpenses-4c618.firebaseapp.com",
+            projectId: "splitexpenses-4c618",
+            storageBucket: "splitexpenses-4c618.firebasestorage.app",
+            messagingSenderId: "719860996232",
+            appId: "1:719860996232:ios:8eb876c6b85a0db71ba73d"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Get settlement ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const shareId = urlParams.get('id') || window.location.pathname.split('/').pop();
+        
+        // Load settlement data
+        async function loadSettlement() {
+            try {
+                const doc = await db.collection('shared_settlements').doc(shareId).get();
+                
+                if (!doc.exists) {
+                    showError('Settlement not found');
+                    return;
+                }
+                
+                const data = doc.data();
+                displaySettlement(data);
+                
+            } catch (error) {
+                console.error('Error loading settlement:', error);
+                showError('Failed to load settlement');
+            }
+        }
+        
+        function displaySettlement(data) {
+            // Update header
+            document.getElementById('eventName').textContent = data.eventName || 'Settlement Summary';
+            const eventDate = new Date(data.eventDate);
+            document.getElementById('eventDate').textContent = eventDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            
+            // Build content
+            let html = '';
+            
+            // Transactions Section
+            if (data.transactions && data.transactions.length > 0) {
+                html += '<div class="section">';
+                html += '<div class="section-title">💸 Payments to Make</div>';
+                
+                data.transactions.forEach(tx => {
+                    html += `
+                        <div class="transaction-card">
+                            <div>
+                                <div class="person-name">${tx.from}</div>
+                            </div>
+                            <div class="transaction-arrow">→</div>
+                            <div>
+                                <div class="person-name">${tx.to}</div>
+                            </div>
+                            <div class="transaction-amount">
+                                ${data.currency.symbol}${tx.amount.toFixed(2)}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+            
+            // Balance Summary Section
+            if (data.participantResults && data.participantResults.length > 0) {
+                html += '<div class="section">';
+                html += '<div class="section-title">📊 Balance Summary</div>';
+                
+                data.participantResults.forEach(pr => {
+                    const balance = pr.balance || 0;
+                    const balanceClass = balance > 0 ? 'positive' : balance < 0 ? 'negative' : '';
+                    
+                    html += `
+                        <div class="participant-card ${balanceClass}">
+                            <div class="participant-name">${pr.name}</div>
+                            <div class="participant-details">
+                                <span>Paid: ${data.currency.symbol}${pr.totalPaid.toFixed(2)}</span>
+                                <span>Owes: ${data.currency.symbol}${pr.totalOwed.toFixed(2)}</span>
+                                <span>Expenses: ${pr.expenseCount}</span>
+                            </div>
+                            <div class="balance ${balanceClass}">
+                                ${balance >= 0 ? '+' : ''}${data.currency.symbol}${Math.abs(balance).toFixed(2)}
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+            
+            document.getElementById('content').innerHTML = html;
+        }
+        
+        function showError(message) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <h2>⚠️</h2>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+        
+        // Load on page load
+        loadSettlement();
+    </script>
+</body>
+</html>

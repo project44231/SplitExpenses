@@ -1,10 +1,20 @@
 {
   "hosting": {
-    "public": "public",
+    "public": "web",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/settlement/**",
+        "destination": "/settlement.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
     ]
   },
   "firestore": {

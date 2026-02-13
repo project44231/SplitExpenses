@@ -406,8 +406,25 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'images/app_icon.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(),
+            ],
+          ),
+        ),
       );
     }
 
@@ -418,7 +435,17 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'images/app_icon.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
               Text(_errorMessage!),
               const SizedBox(height: 16),
@@ -435,7 +462,27 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     if (_game == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Error')),
-        body: const Center(child: Text('Game not found')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'images/app_icon.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Game not found',
+                style: TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -454,8 +501,26 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Settlement'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go(AppConstants.homeRoute),
+        ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: Image.asset(
+                'images/app_icon.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text('Settlement'),
+          ],
+        ),
         actions: [
           if (hasExpenses)
             IconButton(

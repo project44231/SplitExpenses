@@ -77,6 +77,9 @@ class AuthService {
     } else {
       // Sign out from Firebase
       await _firebaseAuth?.signOut();
+      
+      // Clear all local data for authenticated users
+      await _localStorage.clearAll();
     }
   }
 

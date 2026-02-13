@@ -135,6 +135,16 @@ class _ContactFeedbackScreenState extends ConsumerState<ContactFeedbackScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'images/app_icon.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
         title: const Text('Contact & Feedback'),
         centerTitle: true,
       ),

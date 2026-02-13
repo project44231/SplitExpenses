@@ -70,9 +70,9 @@ service cloud.firestore {
     // Shared settlements collection - Allow public read for sharing
     match /shared_settlements/{shareId} {
       allow read: if true; // Public read access for shared links
-      allow create: if request.auth != null; // Only authenticated users can create
+      allow create: if true; // Allow anyone (including guests) to create
       allow update: if true; // Allow access count updates
-      allow delete: if request.auth != null; // Only authenticated users can delete
+      allow delete: if true; // Allow deletion
     }
   }
 }

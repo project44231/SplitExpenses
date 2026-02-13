@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -123,41 +124,43 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Apple Sign In Button (per App Store guidelines, must be equally prominent as Google)
-              ElevatedButton.icon(
-                onPressed: () async {
-                  try {
-                    await ref.read(authNotifierProvider.notifier).signInWithApple();
-                    if (context.mounted) {
-                      context.go(AppConstants.homeRoute);
+              // Apple Sign In Button (iOS only)
+              if (Platform.isIOS) ...[
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    try {
+                      await ref.read(authNotifierProvider.notifier).signInWithApple();
+                      if (context.mounted) {
+                        context.go(AppConstants.homeRoute);
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Sign in failed: ${e.toString()}'),
+                            backgroundColor: AppTheme.errorColor,
+                            duration: const Duration(seconds: 4),
+                          ),
+                        );
+                      }
                     }
-                  } catch (e) {
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Sign in failed: ${e.toString()}'),
-                          backgroundColor: AppTheme.errorColor,
-                          duration: const Duration(seconds: 4),
-                        ),
-                      );
-                    }
-                  }
-                },
-                icon: const Icon(Icons.apple, size: 28, color: Colors.white),
-                label: const Text(
-                  'Sign in with Apple',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                  },
+                  icon: const Icon(Icons.apple, size: 28, color: Colors.white),
+                  label: const Text(
+                    'Sign in with Apple',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(height: 12),
+              ],
 
               // Google Sign In Button
               OutlinedButton.icon(

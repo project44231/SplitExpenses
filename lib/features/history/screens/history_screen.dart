@@ -264,9 +264,24 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
     // Authenticated user view
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'images/app_icon.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
         title: const Text('History'),
         backgroundColor: AppTheme.primaryColor,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadHistory,
+            tooltip: 'Refresh',
+          ),
           Stack(
             children: [
               IconButton(

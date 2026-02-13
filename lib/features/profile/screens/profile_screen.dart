@@ -180,6 +180,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     // Authenticated user view
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'images/app_icon.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
         title: const Text('Profile'),
         backgroundColor: AppTheme.primaryColor,
       ),
@@ -520,7 +530,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
+        content: const Text('Are you sure you want to sign out? All local data will be cleared.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -539,9 +549,42 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
 
     if (confirm == true && mounted) {
-      await ref.read(authServiceProvider).signOut();
-      if (mounted) {
-        context.go('/auth');
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+      
+      try {
+        // Sign out (this will clear all local data)
+        await ref.read(authServiceProvider).signOut();
+        
+        // Clear auth state
+        ref.invalidate(authNotifierProvider);
+        
+        if (mounted) {
+          // Close loading dialog
+          Navigator.of(context).pop();
+          
+          // Navigate to auth screen, replacing the entire navigation stack
+          context.go(AppConstants.authRoute);
+        }
+      } catch (e) {
+        if (mounted) {
+          // Close loading dialog
+          Navigator.of(context).pop();
+          
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Sign out failed: $e'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
       }
     }
   }

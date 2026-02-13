@@ -68,10 +68,71 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
     context.push('${AppConstants.groupExpenseDetailRoute}/${group.id}');
   }
 
+  Future<void> _archiveEvent(Event event) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Archive Event?'),
+        content: Text(
+          'Are you sure you want to archive "${event.name ?? 'this event'}"?\n\n'
+          'It will be moved to history and marked as settled.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+            ),
+            child: const Text('Archive'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await ref.read(gameProvider.notifier).endGame(event.id);
+        await _loadActiveGroups();
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${event.name ?? "Event"} archived successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error archiving event: $e'),
+              backgroundColor: AppTheme.errorColor,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'images/app_icon.png',
+              fit: BoxFit.contain,
+            ),
+          ),
+        ),
         title: const Text('Events'),
         actions: [
           IconButton(
@@ -89,7 +150,7 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _createNewGroup,
         icon: const Icon(Icons.add),
-        label: const Text('Create Event'),
+        label: const Text('Create Group Event'),
       ),
     );
   }
@@ -203,19 +264,19 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
     final participantCount = group.participantIds.length;
     
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.grey[300]!,
-          width: 1.5,
+          color: Colors.grey[200]!,
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -223,157 +284,122 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _openGroupDetail(group),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
-            padding: const EdgeInsets.all(18),
-            child: Column(
+            padding: const EdgeInsets.all(12),
+            child: Row(
               children: [
-                // Header
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                // Left: Event Icon
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        AppTheme.primaryColor,
+                        AppTheme.primaryColor.withValues(alpha: 0.7),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.receipt_long,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                
+                const SizedBox(width: 12),
+                
+                // Middle: Event Details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        group.name ?? 'Unnamed Event',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Row(
                         children: [
-                          Text(
-                            group.name ?? 'Unnamed Event',
-                            style: const TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.5,
-                              height: 1.2,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
+                          Icon(
+                            Icons.people,
+                            size: 12,
+                            color: Colors.grey[500],
                           ),
-                          if (group.description != null && group.description!.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              group.description!,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[600],
-                                height: 1.3,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                          const SizedBox(width: 4),
+                          Text(
+                            '$participantCount',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
                             ),
-                          ],
+                          ),
+                          const SizedBox(width: 10),
+                          Icon(
+                            Icons.receipt,
+                            size: 12,
+                            color: Colors.grey[500],
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$expenseCount',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ],
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(width: 8),
+                
+                // Right: Amount & Actions
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      Formatters.formatCurrency(totalExpenses, currency),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                         color: AppTheme.primaryColor,
                       ),
                     ),
-                  ],
-                ),
-                
-                const SizedBox(height: 16),
-                
-                // Total Amount - Prominent Display
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.primaryColor.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'TOTAL EXPENSES',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withValues(alpha: 0.8),
-                          letterSpacing: 1.2,
+                    const SizedBox(height: 2),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Archive button
+                        InkWell(
+                          onTap: () => _archiveEvent(group),
+                          borderRadius: BorderRadius.circular(6),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.archive_outlined,
+                              size: 18,
+                              color: Colors.grey[600],
+                            ),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        Formatters.formatCurrency(totalExpenses, currency),
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          letterSpacing: -1,
-                          height: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 14),
-                
-                // Stats Row
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildStatItem(
-                        Icons.people_outline,
-                        '$participantCount',
-                        participantCount == 1 ? 'Person' : 'People',
-                        Colors.blue,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatItem(
-                        Icons.receipt_long_outlined,
-                        '$expenseCount',
-                        expenseCount == 1 ? 'Expense' : 'Expenses',
-                        Colors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 10),
-                
-                // Footer with timestamp
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.access_time,
-                      size: 13,
-                      color: Colors.grey[500],
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      'Updated ${Formatters.formatRelativeTime(group.updatedAt ?? group.createdAt)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -381,55 +407,6 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
             ),
           ),
         ),
-      ),
-    );
-  }
-  
-  Widget _buildStatItem(IconData icon, String value, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.4),
-          width: 1.5,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 18,
-            color: color,
-          ),
-          const SizedBox(width: 8),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                  height: 1,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey[700],
-                  fontWeight: FontWeight.w500,
-                  height: 1,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
