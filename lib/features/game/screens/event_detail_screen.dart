@@ -407,7 +407,14 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
 
     if (_currentEvent == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Error')),
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+            tooltip: 'Back to Events',
+          ),
+          title: const Text('Error'),
+        ),
         body: const Center(child: Text('Failed to load event')),
       );
     }
@@ -418,13 +425,13 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          tooltip: 'Back to Events',
+        ),
         title: Text(_currentEvent!.name ?? 'Event'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.share),
-            onPressed: _shareEvent,
-            tooltip: 'Share with Friends',
-          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadEventData,
@@ -494,6 +501,23 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                       ],
                     ),
                   ],
+                ),
+                const SizedBox(height: 16),
+                // Share Button
+                OutlinedButton.icon(
+                  onPressed: _shareEvent,
+                  icon: const Icon(Icons.share, size: 20, color: Colors.white),
+                  label: const Text(
+                    'Share with Friends',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.white70, width: 1.5),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
               ],
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
@@ -9,6 +10,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../models/settlement.dart';
 import '../../../models/compat.dart';
 import '../../../services/settlement_service.dart';
+import '../../../services/settlement_share_service.dart';
 import '../providers/game_provider.dart';
 import '../../players/providers/player_provider.dart';
 // import '../widgets/cash_out_dialog.dart'; // Removed - not used in expense model
@@ -199,14 +201,84 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
     }
   }
 
-  // Cash-out dialog not used in expense model
-  // Settlement is automatically calculated from expenses
-  Future<void> _showCashOutDialog() async {
-    // No-op - not used in expense tracking model
-    return;
+  Future<void> _shareSettlement() async {
+    if (_game == null || _transactions.isEmpty) return;
+
+    // Show loading
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Generating shareable link...'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
+
+    try {
+      final currency = AppCurrencies.fromCode(_game!.currency);
+      final playerMap = <String, String>{for (var p in _players) p.id: p.name};
+      
+      final playerResults = _players.map<ParticipantResult>((player) {
+        final participantExpenses = _expenses.where((e) => 
+          e.paidByParticipantId == player.id || 
+          e.splitDetails.containsKey(player.id)
+        ).length;
+        return ParticipantResult(
+          participantId: player.id,
+          totalPaid: _paidTotals[player.id] ?? 0,
+          totalOwed: _owedTotals[player.id] ?? 0,
+          expenseCount: participantExpenses,
+        );
+      }).toList();
+
+      // Create shareable web link
+      final shareService = SettlementShareService();
+      final shareUrl = await shareService.createShareableLink(
+        eventName: _game!.name ?? 'Event',
+        eventDate: _game!.startTime,
+        participantResults: playerResults,
+        transactions: _transactions,
+        participantNames: playerMap,
+        currency: currency,
+      );
+
+      // Share the link
+      await Share.share(
+        'View the settlement for "${_game!.name ?? "Event"}":\n\n$shareUrl',
+        subject: 'Settlement - ${_game!.name ?? "Event"}',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Link created! Tap to copy'),
+            action: SnackBarAction(
+              label: 'Copy',
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: shareUrl));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Link copied!')),
+                );
+              },
+            ),
+            duration: const Duration(seconds: 4),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create link: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _shareSettlement() {
+  Future<void> _saveSettlement() async {
     if (_game == null || _transactions.isEmpty) return;
 
     final currency = AppCurrencies.fromCode(_game!.currency);
@@ -235,7 +307,31 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
       participantNames: playerMap,
     );
 
-    Share.share(summary, subject: 'Event Settlement - SplitExpenses');
+    try {
+      // Use Share to save/export the file
+      await Share.share(
+        summary,
+        subject: 'Settlement Summary - ${_game!.name ?? "Event"}',
+      );
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Settlement summary ready to save'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   void _showSettlementHistory(Currency currency) {
@@ -361,18 +457,12 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         automaticallyImplyLeading: false,
         title: const Text('Settlement'),
         actions: [
-          if (hasExpenses) ...[
+          if (hasExpenses)
             IconButton(
               icon: const Icon(Icons.history),
               onPressed: () => _showSettlementHistory(currency),
               tooltip: 'Settlement History',
             ),
-            IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: _shareSettlement,
-              tooltip: 'Share Settlement',
-            ),
-          ],
         ],
       ),
       body: SingleChildScrollView(
@@ -599,7 +689,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
               const Padding(
                 padding: EdgeInsets.fromLTRB(16, 24, 16, 12),
                 child: Text(
-                  'Player Results',
+                  'Balance Summary',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -744,6 +834,36 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                       child: const Text('Back to Game'),
                     ),
                   if (hasExpenses) ...[
+                    // Share and Save buttons
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _shareSettlement,
+                            icon: const Icon(Icons.share, size: 18),
+                            label: const Text('Share'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: BorderSide(color: AppTheme.primaryColor, width: 1.5),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _saveSettlement,
+                            icon: const Icon(Icons.download, size: 18),
+                            label: const Text('Save'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: BorderSide(color: Colors.green, width: 1.5),
+                              foregroundColor: Colors.green,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
                     ElevatedButton.icon(
                       onPressed: _markAsSettled,
                       icon: const Icon(Icons.archive),
@@ -753,7 +873,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       label: const Text(
-                        'Archive',
+                        'Archive Event',
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),

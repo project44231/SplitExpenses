@@ -46,8 +46,7 @@ class _AddExpenseDialogState extends State<AddExpenseDialog> {
   void initState() {
     super.initState();
     _localParticipants = List.from(widget.participants);
-    _selectedParticipantId = widget.preselectedParticipantId ?? 
-        (_localParticipants.isNotEmpty ? _localParticipants.first.id : null);
+    _selectedParticipantId = widget.preselectedParticipantId; // Empty by default
     
     // Initialize split controllers for each participant
     for (final participant in _localParticipants) {

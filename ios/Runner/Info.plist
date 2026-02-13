@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Game buy-in tracker</string>
+	<string>SplitExpenses</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -57,8 +57,8 @@
 		</dict>
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Access photos to set player profile pictures</string>
+	<string>Access photos to attach expense receipts</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Take photos for player profile pictures</string>
+	<string>Take photos of expense receipts</string>
 </dict>
 </plist>

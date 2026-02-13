@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../../models/app_user.dart';
 import '../../../services/local_storage_service.dart';
 import '../../../core/constants/app_constants.dart';
@@ -212,9 +216,107 @@ class AuthService {
   }
 
   /// Sign in with Apple
-  /// TODO: Implement when Apple Sign In is set up
   Future<AppUser?> signInWithApple() async {
-    throw UnimplementedError('Apple Sign In not implemented yet');
+    if (_firebaseAuth == null) {
+      throw Exception('Firebase not initialized');
+    }
+
+    try {
+      // Generate nonce for security
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      // Request Apple ID credential
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      // Create OAuth credential for Firebase
+      final oauthCredential = firebase_auth.OAuthProvider("apple.com").credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+
+      // Sign in to Firebase with Apple credential
+      final userCredential = await _firebaseAuth.signInWithCredential(oauthCredential);
+
+      if (userCredential.user == null) return null;
+
+      // Update display name if provided (Apple only provides this on first sign-in)
+      if (appleCredential.givenName != null || appleCredential.familyName != null) {
+        final displayName = '${appleCredential.givenName ?? ''} ${appleCredential.familyName ?? ''}'.trim();
+        if (displayName.isNotEmpty && userCredential.user!.displayName == null) {
+          await userCredential.user!.updateDisplayName(displayName);
+        }
+      }
+
+      // Clear guest mode flag if it was set
+      await _localStorage.remove(AppConstants.isGuestModeKey);
+
+      // Return AppUser
+      return AppUser(
+        id: userCredential.user!.uid,
+        email: userCredential.user!.email ?? appleCredential.email ?? '',
+        displayName: userCredential.user!.displayName,
+        photoUrl: userCredential.user!.photoURL,
+        isGuest: false,
+        createdAt: userCredential.user!.metadata.creationTime ?? DateTime.now(),
+        lastLoginAt: DateTime.now(),
+      );
+    } on firebase_auth.FirebaseAuthException catch (e) {
+      // Handle Firebase-specific errors
+      switch (e.code) {
+        case 'account-exists-with-different-credential':
+          throw Exception('An account already exists with a different sign-in method.');
+        case 'invalid-credential':
+          throw Exception('Invalid credential. Please try again.');
+        case 'operation-not-allowed':
+          throw Exception('Apple Sign-In is not enabled. Please contact support.');
+        case 'user-disabled':
+          throw Exception('This account has been disabled.');
+        case 'user-not-found':
+          throw Exception('No user found.');
+        default:
+          throw Exception('Authentication failed: ${e.message}');
+      }
+    } on SignInWithAppleAuthorizationException catch (e) {
+      // Handle Apple-specific errors
+      switch (e.code) {
+        case AuthorizationErrorCode.canceled:
+          throw Exception('Sign in canceled');
+        case AuthorizationErrorCode.failed:
+          throw Exception('Sign in failed. Please try again.');
+        case AuthorizationErrorCode.invalidResponse:
+          throw Exception('Invalid response from Apple. Please try again.');
+        case AuthorizationErrorCode.notHandled:
+          throw Exception('Sign in not handled. Please try again.');
+        case AuthorizationErrorCode.unknown:
+          throw Exception('Unknown error occurred. Please try again.');
+        default:
+          throw Exception('Apple Sign-In failed: ${e.message}');
+      }
+    } catch (e) {
+      // Handle other errors
+      throw Exception('Failed to sign in with Apple: $e');
+    }
+  }
+
+  /// Generate a cryptographically secure random nonce
+  String _generateNonce([int length = 32]) {
+    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
+  }
+
+  /// Returns the sha256 hash of [input] in hex notation
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   /// Check if user is authenticated (either guest or Firebase)

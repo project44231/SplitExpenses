@@ -123,6 +123,42 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Apple Sign In Button (per App Store guidelines, must be equally prominent as Google)
+              ElevatedButton.icon(
+                onPressed: () async {
+                  try {
+                    await ref.read(authNotifierProvider.notifier).signInWithApple();
+                    if (context.mounted) {
+                      context.go(AppConstants.homeRoute);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Sign in failed: ${e.toString()}'),
+                          backgroundColor: AppTheme.errorColor,
+                          duration: const Duration(seconds: 4),
+                        ),
+                      );
+                    }
+                  }
+                },
+                icon: const Icon(Icons.apple, size: 28, color: Colors.white),
+                label: const Text(
+                  'Sign in with Apple',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+
               // Google Sign In Button
               OutlinedButton.icon(
                 onPressed: () async {
@@ -144,34 +180,20 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   }
                 },
                 icon: const Icon(Icons.g_mobiledata, size: 32, color: AppTheme.primaryColor),
-                label: const Text('Sign in with Google'),
+                label: const Text(
+                  'Sign in with Google',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   foregroundColor: AppTheme.primaryColor,
-                  side: const BorderSide(color: AppTheme.primaryColor),
+                  side: const BorderSide(color: AppTheme.primaryColor, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
               ),
               const SizedBox(height: 32),
-
-              // Apple Sign In - Hidden for now
-              // OutlinedButton.icon(
-              //   onPressed: null, // TODO: Implement Apple Sign In
-              //   icon: Icon(Icons.apple, size: 28, color: Colors.grey.shade400),
-              //   label: const Text('Sign in with Apple'),
-              //   style: OutlinedButton.styleFrom(
-              //     padding: const EdgeInsets.symmetric(vertical: 16),
-              //   ),
-              // ),
-
-              // Email Sign In - Hidden for now
-              // OutlinedButton.icon(
-              //   onPressed: null, // TODO: Implement Email Sign In
-              //   icon: Icon(Icons.email, size: 24, color: Colors.grey.shade400),
-              //   label: const Text('Sign in with Email'),
-              //   style: OutlinedButton.styleFrom(
-              //     padding: const EdgeInsets.symmetric(vertical: 16),
-              //   ),
-              // ),
 
               // Info text
               Text(
