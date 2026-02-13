@@ -202,64 +202,36 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
     final expenseCount = _groupExpenseCounts[group.id] ?? 0;
     final participantCount = group.participantIds.length;
     
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: Colors.grey[200]!,
-          width: 1,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.grey[300]!,
+          width: 1.5,
         ),
-      ),
-      child: InkWell(
-        onTap: () => _openGroupDetail(group),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Colors.white,
-                AppTheme.primaryColor.withValues(alpha: 0.02),
-              ],
-            ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _openGroupDetail(group),
+          borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with title and icon
+                // Header
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppTheme.primaryColor,
-                            AppTheme.primaryColor.withValues(alpha: 0.7),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.event_note,
-                        color: Colors.white,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -267,40 +239,45 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
                           Text(
                             group.name ?? 'Unnamed Event',
                             style: const TextStyle(
-                              fontSize: 17,
+                              fontSize: 19,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: -0.3,
+                              letterSpacing: -0.5,
+                              height: 1.2,
                             ),
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                           if (group.description != null && group.description!.isNotEmpty) ...[
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 4),
                             Text(
                               group.description!,
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 14,
                                 color: Colors.grey[600],
-                                height: 1.2,
+                                height: 1.3,
                               ),
-                              maxLines: 1,
+                              maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        shape: BoxShape.circle,
+                        color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                          width: 1.5,
+                        ),
                       ),
                       child: Icon(
                         Icons.arrow_forward_ios,
-                        size: 14,
-                        color: Colors.grey[600],
+                        size: 16,
+                        color: AppTheme.primaryColor,
                       ),
                     ),
                   ],
@@ -308,144 +285,94 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
                 
                 const SizedBox(height: 16),
                 
-                // Stats row with gradient background
+                // Total Amount - Prominent Display
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppTheme.primaryColor.withValues(alpha: 0.05),
-                        AppTheme.primaryColor.withValues(alpha: 0.08),
-                      ],
+                    color: AppTheme.primaryColor,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: AppTheme.primaryColor.withValues(alpha: 0.3),
+                      width: 2,
                     ),
-                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.people_outline,
-                                  size: 16,
-                                  color: Colors.grey[600],
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '$participantCount',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              participantCount == 1 ? 'Participant' : 'Participants',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        'TOTAL EXPENSES',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white.withValues(alpha: 0.8),
+                          letterSpacing: 1.2,
                         ),
                       ),
-                      Container(
-                        width: 1,
-                        height: 32,
-                        color: Colors.grey[300],
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(
-                                    Icons.receipt_outlined,
-                                    size: 16,
-                                    color: Colors.grey[600],
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    '$expenseCount',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.primaryColor,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                expenseCount == 1 ? 'Expense' : 'Expenses',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
+                      const SizedBox(height: 6),
+                      Text(
+                        Formatters.formatCurrency(totalExpenses, currency),
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          letterSpacing: -1,
+                          height: 1,
                         ),
                       ),
                     ],
                   ),
                 ),
                 
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
                 
-                // Total amount section
+                // Stats Row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Total Amount',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          Formatters.formatCurrency(totalExpenses, currency),
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green[700],
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(8),
+                    Expanded(
+                      child: _buildStatItem(
+                        Icons.people_outline,
+                        '$participantCount',
+                        participantCount == 1 ? 'Person' : 'People',
+                        Colors.blue,
                       ),
-                      child: Text(
-                        Formatters.formatRelativeTime(group.updatedAt ?? group.createdAt),
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey[700],
-                          fontWeight: FontWeight.w500,
-                        ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _buildStatItem(
+                        Icons.receipt_long_outlined,
+                        '$expenseCount',
+                        expenseCount == 1 ? 'Expense' : 'Expenses',
+                        Colors.orange,
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 10),
+                
+                // Footer with timestamp
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.access_time,
+                      size: 13,
+                      color: Colors.grey[500],
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Updated ${Formatters.formatRelativeTime(group.updatedAt ?? group.createdAt)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
@@ -454,6 +381,55 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
             ),
           ),
         ),
+      ),
+    );
+  }
+  
+  Widget _buildStatItem(IconData icon, String value, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: color,
+          ),
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  height: 1,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey[700],
+                  fontWeight: FontWeight.w500,
+                  height: 1,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
