@@ -159,7 +159,7 @@ class GameHistoryCard extends ConsumerWidget {
                 children: [
                   _buildStatChip(
                     icon: Icons.people,
-                    label: '${game.playerIds.length} players',
+                    label: '${game.playerIds.length} participants',
                     color: Colors.blue,
                   ),
                   const SizedBox(width: 8),
@@ -184,7 +184,7 @@ class GameHistoryCard extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Top Winner: ',
+                      'Should Receive: ',
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey.shade600,

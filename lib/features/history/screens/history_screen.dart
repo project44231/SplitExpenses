@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../models/compat.dart';
 import '../../auth/providers/auth_provider.dart';
@@ -455,7 +456,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
             cashOuts: cashOuts,
             onTap: () {
               // Navigate to game details
-              context.go('/game-details/${game.id}');
+              context.go('${AppConstants.eventDetailsRoute}/${game.id}');
             },
           );
         },

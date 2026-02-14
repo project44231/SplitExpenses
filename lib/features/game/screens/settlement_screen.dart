@@ -554,7 +554,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                       Column(
                         children: [
                           const Text(
-                            'Total Buy-In',
+                            'Total Paid',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
@@ -575,7 +575,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                         Column(
                           children: [
                             const Text(
-                              'Total Cash-Out',
+                              'Total Owed',
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 12,
@@ -709,7 +709,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                 ),
               ),
 
-            // No Cash-Outs State
+            // No Expenses State
             if (!hasExpenses)
               Padding(
                 padding: const EdgeInsets.all(32),
@@ -722,7 +722,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Enter Cash-Out Amounts',
+                      'No Expenses Yet',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -730,7 +730,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Record how much each player cashed out\nto calculate settlements',
+                      'Add expenses to see who owes what\nand calculate settlements',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 14,
@@ -739,7 +739,7 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Add expenses from the group detail screen',
+                      'Add expenses from the event detail screen',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey.shade600,

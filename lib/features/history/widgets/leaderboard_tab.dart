@@ -43,7 +43,7 @@ class LeaderboardTab extends ConsumerWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Complete some games to see player statistics',
+                'Complete some events to see participant statistics',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey.shade600,
@@ -177,9 +177,6 @@ class LeaderboardTab extends ConsumerWidget {
       );
     }
 
-    final winRate = stats.gamesPlayed > 0
-        ? (stats.wins / stats.gamesPlayed * 100).toStringAsFixed(1)
-        : '0.0';
     final avgProfit = stats.gamesPlayed > 0
         ? stats.totalProfit / stats.gamesPlayed
         : 0.0;
@@ -212,7 +209,7 @@ class LeaderboardTab extends ConsumerWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${stats.gamesPlayed} games • $winRate% win rate',
+                    '${stats.gamesPlayed} events participated',
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey.shade600,
@@ -230,7 +227,7 @@ class LeaderboardTab extends ConsumerWidget {
                       ),
                       const SizedBox(width: 16),
                       _buildMiniStat(
-                        'Avg/Game',
+                        'Avg/Event',
                         '${avgProfit >= 0 ? '+' : ''}${Formatters.formatCurrency(avgProfit, AppCurrencies.usd)}',
                         avgProfit >= 0 ? Colors.green.shade600 : Colors.red.shade600,
                       ),
@@ -275,7 +272,7 @@ class LeaderboardTab extends ConsumerWidget {
   }
 }
 
-/// Player statistics aggregated across games
+/// Participant statistics aggregated across events
 class PlayerStats {
   final String playerId;
   final String playerName;

@@ -116,7 +116,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading game: $e')),
+          SnackBar(content: Text('Error loading event: $e')),
         );
       }
     }
@@ -132,7 +132,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
             onPressed: () => context.go(AppConstants.homeRoute),
             tooltip: 'Back to Home',
           ),
-          title: const Text('Game Details'),
+          title: const Text('Event Details'),
           backgroundColor: AppTheme.primaryColor,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -147,10 +147,10 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
             onPressed: () => context.go(AppConstants.homeRoute),
             tooltip: 'Back to Home',
           ),
-          title: const Text('Game Details'),
+          title: const Text('Event Details'),
           backgroundColor: AppTheme.primaryColor,
         ),
-        body: const Center(child: Text('Game not found')),
+        body: const Center(child: Text('Event not found')),
       );
     }
 
@@ -161,7 +161,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
           onPressed: () => context.go(AppConstants.homeRoute),
           tooltip: 'Back to Home',
         ),
-        title: const Text('Game Details'),
+        title: const Text('Event Details'),
         backgroundColor: AppTheme.primaryColor,
         actions: [
           IconButton(
@@ -191,7 +191,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
           ),
           tabs: const [
             Tab(text: 'Overview'),
-            Tab(text: 'Players'),
+            Tab(text: 'Participants'),
             Tab(text: 'Settlements'),
           ],
         ),
@@ -210,7 +210,6 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
   Widget _buildOverviewTab() {
     final currency = AppCurrencies.fromCode(_game!.currency);
     final totalBuyIn = _buyInTotals.values.fold(0.0, (sum, val) => sum + val);
-    final totalCashOut = _cashOutTotals.values.fold(0.0, (sum, val) => sum + val);
     final duration = _game!.endTime != null
         ? _game!.endTime!.difference(_game!.startTime)
         : Duration.zero;
@@ -295,10 +294,9 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const Divider(),
-                _buildSummaryRow('Total Buy-In', Formatters.formatCurrency(totalBuyIn, currency)),
-                _buildSummaryRow('Total Cash-Out', Formatters.formatCurrency(totalCashOut, currency)),
-                _buildSummaryRow('Players', '${_players.length}'),
-                _buildSummaryRow('Total Buy-Ins', '${_buyIns.length}'),
+                _buildSummaryRow('Total Paid', Formatters.formatCurrency(totalBuyIn, currency)),
+                _buildSummaryRow('Participants', '${_players.length}'),
+                _buildSummaryRow('Total Expenses', '${_buyIns.length}'),
               ],
             ),
           ),
@@ -326,7 +324,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
                         ),
                         const SizedBox(width: 12),
                         const Text(
-                          'Game Notes',
+                          'Event Notes',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -407,7 +405,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Biggest Winner',
+                                'Should Receive',
                                 style: TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                               Text(
@@ -439,7 +437,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Biggest Loser',
+                                'Needs To Pay',
                                 style: TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                               Text(
@@ -554,7 +552,7 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
               ),
               const SizedBox(height: 8),
               Text(
-                'Settlement data not available for this game',
+                'Settlement data not available for this event',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
               ),
@@ -694,12 +692,12 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Game Notes'),
+        title: const Text('Edit Event Notes'),
         content: TextField(
           controller: controller,
           maxLines: 5,
           decoration: const InputDecoration(
-            hintText: 'Add notes about this game...',
+            hintText: 'Add notes about this event...',
             border: OutlineInputBorder(),
           ),
         ),
@@ -758,16 +756,16 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
 
     // Build summary text
     final buffer = StringBuffer();
-    buffer.writeln('🎰 Poker Game Summary');
+    buffer.writeln('📊 Event Summary');
     buffer.writeln('━━━━━━━━━━━━━━━━━');
     buffer.writeln('📅 Date: ${Formatters.formatDate(_game!.startTime)}');
     buffer.writeln('⏱️ Duration: ${Formatters.formatDuration(duration)}');
     buffer.writeln('');
     buffer.writeln('💰 Financial Summary');
-    buffer.writeln('Total Pot: ${Formatters.formatCurrency(totalBuyIn, currency)}');
-    buffer.writeln('Players: ${_players.length}');
+    buffer.writeln('Total Expenses: ${Formatters.formatCurrency(totalBuyIn, currency)}');
+    buffer.writeln('Participants: ${_players.length}');
     buffer.writeln('');
-    buffer.writeln('👥 Player Results');
+    buffer.writeln('👥 Participant Balances');
     buffer.writeln('━━━━━━━━━━━━━━━━━');
 
     // Sort players by profit
@@ -800,11 +798,11 @@ class _GameDetailsScreenState extends ConsumerState<GameDetailsScreen>
       }
     }
 
-    await Share.share(buffer.toString(), subject: 'Poker Game Summary');
+    await Share.share(buffer.toString(), subject: 'Event Summary');
   }
 }
 
-// Player Details Card Widget with Expandable Buy-in History
+// Participant Details Card Widget with Expandable Expense History
 class _PlayerDetailsCard extends StatefulWidget {
   final Player player;
   final double buyInTotal;
@@ -897,7 +895,7 @@ class _PlayerDetailsCardState extends State<_PlayerDetailsCard> {
                         Row(
                           children: [
                             Text(
-                              '${widget.buyInCount} buy-in${widget.buyInCount != 1 ? 's' : ''}',
+                              '${widget.buyInCount} expense${widget.buyInCount != 1 ? 's' : ''}',
                               style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                             ),
                             const SizedBox(width: 8),
@@ -963,12 +961,12 @@ class _PlayerDetailsCardState extends State<_PlayerDetailsCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                          Row(
                           children: [
                             Icon(Icons.history, size: 16, color: Colors.grey.shade700),
                             const SizedBox(width: 6),
                             Text(
-                              'Buy-In History',
+                              'Expense History',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -996,7 +994,7 @@ class _PlayerDetailsCardState extends State<_PlayerDetailsCard> {
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
-                                    'Buy-in #${index + 1}',
+                                    'Expense #${index + 1}',
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: Colors.grey.shade700,
@@ -1027,7 +1025,7 @@ class _PlayerDetailsCardState extends State<_PlayerDetailsCard> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Cash Out',
+                              'Net Balance',
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
@@ -1035,10 +1033,11 @@ class _PlayerDetailsCardState extends State<_PlayerDetailsCard> {
                               ),
                             ),
                             Text(
-                              Formatters.formatCurrency(widget.cashOutTotal, widget.currency),
-                              style: const TextStyle(
+                              '${widget.profit >= 0 ? '+' : ''}${Formatters.formatCurrency(widget.profit, widget.currency)}',
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
+                                color: widget.profit >= 0 ? AppTheme.successColor : AppTheme.errorColor,
                               ),
                             ),
                           ],
