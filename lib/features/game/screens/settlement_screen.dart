@@ -415,8 +415,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   'images/app_icon.png',
-                  width: 80,
-                  height: 80,
+                  width: 160,
+                  height: 160,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -439,8 +439,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   'images/app_icon.png',
-                  width: 80,
-                  height: 80,
+                  width: 160,
+                  height: 160,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -470,8 +470,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
                 borderRadius: BorderRadius.circular(16),
                 child: Image.asset(
                   'images/app_icon.png',
-                  width: 80,
-                  height: 80,
+                  width: 160,
+                  height: 160,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -512,8 +512,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
               borderRadius: BorderRadius.circular(6),
               child: Image.asset(
                 'images/app_icon.png',
-                width: 28,
-                height: 28,
+                width: 56,
+                height: 56,
                 fit: BoxFit.contain,
               ),
             ),

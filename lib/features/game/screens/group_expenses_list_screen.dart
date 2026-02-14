@@ -124,7 +124,7 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
     return Scaffold(
       appBar: AppBar(
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(4.0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
@@ -166,8 +166,8 @@ class _GroupExpensesListScreenState extends ConsumerState<GroupExpensesListScree
               borderRadius: BorderRadius.circular(20),
               child: Image.asset(
                 'images/app_icon.png',
-                width: 100,
-                height: 100,
+                width: 200,
+                height: 200,
                 fit: BoxFit.cover,
               ),
             ),
