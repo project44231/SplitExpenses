@@ -390,8 +390,8 @@ class _SettlementScreenState extends ConsumerState<SettlementScreen> {
         const SnackBar(content: Text('Group expense marked as settled!')),
       );
       
-      // Navigate back to group expenses list
-      context.go(AppConstants.groupExpensesRoute);
+      // Navigate back to home (Events tab with bottom bar)
+      context.go(AppConstants.homeRoute);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
